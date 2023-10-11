@@ -1,0 +1,30 @@
+{
+  "name": "rfstransfer_tests",
+  "version": "1.0.0",
+  "description": "rfs transfer module tests",
+  "main": "index.js",
+  "scripts": {
+    "report:open": "npx playwright show-report src/e2e/artifacts/report",
+    "report:send": "npx ts-node src/mailer/sendmail.ts"
+  },
+  "author": "Shelekh Mikhail",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@types/log4js": "^2.3.5",
+    "@types/node": "^20.8.4",
+    "@types/nodemailer": "^6.4.11",
+    "@types/pg": "^8.10.5",
+    "dotenv": "^16.3.1",
+    "log4js": "^6.9.1",
+    "node": "^20.7.0",
+    "node-2fa": "^2.0.3",
+    "nodemailer": "^6.9.6",
+    "pg": "^8.11.3",
+    "ts-node": "^10.9.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.38.1",
+    "typescript": "^5.2.2"
+  }
+}
