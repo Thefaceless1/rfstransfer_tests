@@ -4,7 +4,7 @@
   "description": "rfs transfer module tests",
   "main": "index.js",
   "scripts": {
-    "report:open": "npx playwright show-report src/e2e/artifacts/report",
+    "report:open": "npx playwright show-report src/artifacts/report",
     "report:send": "npx ts-node src/mailer/sendmail.ts"
   },
   "author": "Shelekh Mikhail",
