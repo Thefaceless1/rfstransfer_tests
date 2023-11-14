@@ -1,14 +1,14 @@
 import {test as base} from '@playwright/test';
-import {EmploymentContractPage} from "../pages/EmploymentContractPage";
+import {InstructionPage} from "../pages/InstructionPage";
 
 type Fixtures = {
-    employmentContract: EmploymentContractPage
+    instruction: InstructionPage
 }
 
 export const test = base.extend<Fixtures>({
-    employmentContract: async ({page},use) => {
-        const employmentContract = new EmploymentContractPage(page);
-        await use(employmentContract);
+    instruction: async ({page},use) => {
+        const instruction = new InstructionPage(page);
+        await use(instruction);
     }
 })
 

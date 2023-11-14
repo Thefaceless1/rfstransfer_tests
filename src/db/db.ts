@@ -1,6 +1,7 @@
-import {Client} from "pg";
+import pkg from 'pg';
+const { Client } = pkg;
 import {dbConfig} from "./db.config.js";
-
-export class Db {
-    private readonly client: Client = new Client(dbConfig)
+class DbHelper {
+    private readonly client: pkg.Client = new Client(dbConfig)
 }
+export const dbHelper = new DbHelper();

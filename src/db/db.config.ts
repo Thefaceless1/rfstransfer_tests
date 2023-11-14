@@ -1,4 +1,5 @@
 import {ClientConfig} from "pg";
+import 'dotenv/config'
 
 export const dbConfig: ClientConfig = {
     user: process.env.DB_USER,

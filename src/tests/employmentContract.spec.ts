@@ -1,13 +1,14 @@
 import {test} from "../helpers/fixtures";
-import {CreateInstructionPage} from "../pages/CreateInstructionPage";
 import {InstructionTypes} from "../helpers/enums/InstructionTypes";
 import * as Process from "process";
 import {InputData} from "../helpers/InputData";
 import config from "../../playwright.config";
+import {expect} from "@playwright/test";
+import 'dotenv/config'
 
-test.describe("Трудовые договора",() => {
+test.describe("Инструкция с типом 'Трудовой договор'",() => {
     test(`Дата запуска: ${InputData.currentDate}, Версия модуля: ${Process.env.APP_VERSION}`,
-        async ({employmentContract}) => {
+        async ({instruction}) => {
         test.info().annotations.push
         (
             {type: "Дата и время запуска",description: InputData.testAnnotationDate},
@@ -15,7 +16,12 @@ test.describe("Трудовые договора",() => {
             {type: "Адрес сервера",description: `${config.use?.baseURL}`}
         );
         await test.step("Создание инструкции с типом 'Трудовой договор'", async () => {
-            await employmentContract.createInstruction(InstructionTypes.newEmploymentContract);
+            await instruction.createInstruction(InstructionTypes.newEmploymentContract);
+            await expect(instruction.instructionName).toBeVisible();
+        })
+        await test.step("Добавление трудового договора в инструкцию",async () => {
+            await instruction.addContract();
+            await expect(instruction.createContractNumber).toBeVisible();
         })
     })
 })

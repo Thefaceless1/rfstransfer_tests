@@ -1,7 +1,7 @@
 import {MainPage} from "./MainPage";
 import {Locator, Page} from "@playwright/test";
 import {InstructionTypes} from "../helpers/enums/InstructionTypes";
-import {elements} from "../framework/elements/elements";
+import {Elements} from "../framework/elements/elements";
 
 export class CreateInstructionPage extends MainPage {
     constructor(page: Page) {
@@ -40,13 +40,13 @@ export class CreateInstructionPage extends MainPage {
         await this.page.goto("/");
         await this.createInstructionButton.click();
         await this.instructionType.click();
-        await elements.waitForVisible(this.selectedInstructionTypeValue(selectedType));
+        await Elements.waitForVisible(this.selectedInstructionTypeValue(selectedType));
         await this.selectedInstructionTypeValue(selectedType).click();
         await this.player.click();
-        await elements.waitForVisible(this.playerValues.first());
+        await Elements.waitForVisible(this.playerValues.first());
         await this.playerValues.first().click();
         await this.club.click();
-        await elements.waitForVisible(this.clubValues.first());
+        await Elements.waitForVisible(this.clubValues.first());
         await this.clubValues.first().click();
         await this.createButton.click();
     }

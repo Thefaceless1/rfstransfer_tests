@@ -1,17 +1,16 @@
 import {Locator} from "@playwright/test";
 
-class Elements {
+export class Elements {
     /**
      * Ожидание видимости элемента
      */
-    public async waitForVisible(element: Locator) {
+    public static async waitForVisible(element: Locator) {
         await element.waitFor({state: "visible"});
     }
     /**
      * Ожидание скрытия элемента
      */
-    public async waitForHidden(element: Locator) {
+    public static async waitForHidden(element: Locator) {
         await element.waitFor({state: "hidden"});
     }
 }
-export const elements = new Elements();
