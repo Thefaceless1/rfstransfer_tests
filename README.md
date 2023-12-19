@@ -1,1 +1,1 @@
-transfer module tests
+Auto tests for module 'Transfer'

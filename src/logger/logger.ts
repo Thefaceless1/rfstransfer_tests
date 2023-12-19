@@ -5,7 +5,7 @@ log4js.configure({
         console: { type: 'console' }
     },
     categories: {
-        default: { appenders: ['console'], level: 'info' },
+        default: { appenders: ['console'], level: 'info' }
     },
 });
 export const logger = log4js.getLogger();

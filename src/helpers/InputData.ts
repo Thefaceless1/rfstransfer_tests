@@ -2,6 +2,7 @@ import {randomInt} from "crypto";
 import * as fs from "fs";
 import path from "path";
 import { fileURLToPath} from "url";
+import {FileCountType} from "./types/FileCountType";
 
 export class InputData {
     /**
@@ -36,17 +37,18 @@ export class InputData {
     /**
      * Получение тестовых файлов из репозитория
      */
-    public static get getTestFiles(): string[] {
+    public static getTestFiles(fileCount: FileCountType): string[] | string {
         const __filename = fileURLToPath(import.meta.url);
         const __dirname = path.dirname(__filename);
         const testFilesPath: string = path.resolve(__dirname, "testfiles");
         const fileNames: string[] = fs.readdirSync(testFilesPath);
-        return fileNames.map(fileName => {
+        const files = fileNames.map(fileName => {
             const obj = {
                 dir: testFilesPath,
                 base: fileName
             }
             return path.format(obj);
         });
+        return (fileCount == "all") ? files : files[0];
     }
 }
