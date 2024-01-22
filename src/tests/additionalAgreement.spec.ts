@@ -34,12 +34,8 @@ test.describe("Инструкция с типом 'Дополнительное 
                 await expect(additionalAgreement.instructionState(InstructionStates.onRegistration)).toBeVisible();
             })
             await test.step("Отправка инструкции на доработку",async () => {
-                await additionalAgreement.updateInstructionState(InstructionStateIds.underRevision);
+                await additionalAgreement.updateInstructionState(InstructionStateIds.onCorrection);
                 await expect(additionalAgreement.instructionState(InstructionStates.underRevision)).toBeVisible();
-            })
-            await test.step("Отмена регистрации инструкции",async () => {
-                await additionalAgreement.updateInstructionState(InstructionStateIds.registerCancelled);
-                await expect(additionalAgreement.instructionState(InstructionStates.registerCancelled)).toBeVisible();
             })
             await test.step("Отклонение инструкции",async () => {
                 await additionalAgreement.updateInstructionState(InstructionStateIds.declined);

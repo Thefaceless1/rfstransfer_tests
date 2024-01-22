@@ -13,6 +13,7 @@ const config: PlaywrightTestConfig = {
   workers: 1,
   reporter: [['html', { outputFolder: 'src/artifacts/report',open: "never"}]],
   use: {
+    screenshot : "only-on-failure",
     baseURL: (process.env.BRANCH == "preprod") ? "https://rfs-transfer-test.fors.ru/" : "https://rfs-transfer-test.fors.ru/",
     headless: false,
     trace: 'on-first-retry',
@@ -53,7 +54,7 @@ const config: PlaywrightTestConfig = {
     //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     // },
   ],
-
+  outputDir: 'src/artifacts/screenshots'
   /* Run your local dev server before starting the tests */
   // webServer: {
   //   command: 'npm run start',

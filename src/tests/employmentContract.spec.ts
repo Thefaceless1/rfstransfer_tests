@@ -46,14 +46,10 @@ test.describe.only("Инструкция с типом 'Трудовой дог�
             await expect(employmentContract.instructionState(InstructionStates.onRegistration)).toBeVisible();
         })
         await test.step("Отправка инструкции на доработку",async () => {
-            await employmentContract.updateInstructionState(InstructionStateIds.underRevision);
+            await employmentContract.updateInstructionState(InstructionStateIds.onCorrection);
             await expect(employmentContract.instructionState(InstructionStates.underRevision)).toBeVisible();
         })
-        await test.step("Отмена регистрации инструкции",async () => {
-            await employmentContract.updateInstructionState(InstructionStateIds.registerCancelled);
-            await expect(employmentContract.instructionState(InstructionStates.registerCancelled)).toBeVisible();
-        })
-        await test.step("Отклонение инструкции",async () => {
+        await test.step("Отклонение регистрации инструкции",async () => {
             await employmentContract.updateInstructionState(InstructionStateIds.declined);
             await expect(employmentContract.instructionState(InstructionStates.declined)).toBeVisible();
         })

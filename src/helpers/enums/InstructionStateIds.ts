@@ -1,9 +1,8 @@
 export enum InstructionStateIds {
     draft = 1,
     onRegistration,
-    underRevision,
+    onCorrection,
     declined,
     cancelled,
-    registered,
-    registerCancelled
+    registered
 }

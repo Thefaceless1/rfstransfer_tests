@@ -43,7 +43,7 @@ export class CreateInstructionPage extends MainPage {
     /**
      * Наименование инструкции
      */
-    public readonly instructionName: Locator = this.page.locator("//div[contains(text(),'Инструкция') and not(contains(text(),'создана'))]")
+    public readonly instructionName: Locator = this.page.locator("//a[contains(text(),'Инструкция')]")
     /**
      * Выбранное значение выпадающего списка поля "Тип инструкции"
      */
