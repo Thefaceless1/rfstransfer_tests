@@ -1,8 +1,7 @@
-
 node_modules/
-/test-results/
-/src/artifacts/
 /playwright-report/
+/src/artifacts/report/
+/src/artifacts/screenshots/*/
 /playwright/.cache/
 .idea
 .env

@@ -14,52 +14,16 @@ const config: PlaywrightTestConfig = {
   reporter: [['html', { outputFolder: 'src/artifacts/report',open: "never"}]],
   use: {
     screenshot : "only-on-failure",
-    baseURL: (process.env.BRANCH == "preprod") ? "https://rfs-transfer-test.fors.ru/" : "https://rfs-transfer-test.fors.ru/",
-    headless: false,
-    trace: 'on-first-retry',
+    baseURL: (process.env.BRANCH == "preprod") ? "https://preprod-contract.platform.rfs.ru/" : "https://rfs-transfer-test.fors.ru/",
+    headless: true,
+    trace: 'off',
   },
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-    },
-    /*
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },*/
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
+    }
   ],
   outputDir: 'src/artifacts/screenshots'
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://127.0.0.1:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
 };
 export default config;

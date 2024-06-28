@@ -4,5 +4,6 @@ export enum InstructionStateIds {
     onCorrection,
     declined,
     cancelled,
-    registered
+    registered,
+    registerCancelled
 }

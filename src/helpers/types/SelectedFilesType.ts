@@ -1,0 +1,1 @@
+export type SelectedFilesType = "all" | "pdf" | "png" | "jpg";

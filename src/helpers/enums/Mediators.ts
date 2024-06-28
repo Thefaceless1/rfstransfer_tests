@@ -1,4 +1,5 @@
 export enum Mediators {
     player = "Футболист",
-    club = "Клуб"
+    newClub = "Новый клуб",
+    previousClub = "Предыдущий клуб"
 }
