@@ -40,7 +40,8 @@ class DbHelper {
                                    WHERE ext_personid=$1 
                                    AND ext_clubid=$2
                                    AND state_id IN (3,4,5)
-                                   AND labour_contract_id is null`;
+                                   AND labour_contract_id is null
+                                   ORDER BY (CASE state_id WHEN 3 THEN 0 ELSE 1 END), duration_begin_date DESC`;
         const values: string[] = [`${userId}`,`${clubId}`];
         const result = await client.query(queryText,values);
         if(result.rows.length == 0) throw new Error(`Отсутствует предыдущий договор для пользователя ${userId} и клуба ${clubId}`);

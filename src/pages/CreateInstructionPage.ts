@@ -4,6 +4,7 @@ import {InstructionTypes} from "../helpers/enums/InstructionTypes";
 import {Elements} from "../framework/elements/elements";
 import {CreateInstructionOptionsType} from "../helpers/types/CreateInstructionOptionsType";
 import {TransferAgreementSubTypes} from "../helpers/enums/TransferAgreementSubTypes";
+import {TransferAgreementRentSubTypes} from "../helpers/enums/TransferAgreementRentSubTypes";
 
 export class CreateInstructionPage extends MainPage {
     private readonly person: string = "Автотест Трансфер"
@@ -49,6 +50,14 @@ export class CreateInstructionPage extends MainPage {
      */
     private readonly employmentContractValue: Locator = this.page.locator("//div[contains(@class,'contract__single-value')]")
     /**
+     * Радиобаттон "Взять в аренду"
+     */
+    private readonly toRentRadio: Locator = this.page.locator("//span[text()='Взять в аренду']")
+    /**
+     * Радиобаттон "Продлить аренду"
+     */
+    private readonly prolongationRentRadio: Locator = this.page.locator("//span[text()='Продлить аренду']")
+    /**
      * Наименование инструкции
      */
     public readonly instructionName: Locator = this.page.locator("//a[contains(text(),'Инструкция')]")
@@ -71,7 +80,7 @@ export class CreateInstructionPage extends MainPage {
     /**
      * Радиобаттон поля "Является ли этот переход выкупом из аренды?"
      */
-    private isTsWithBuyout(isWithBuyout: boolean): Locator {
+    private isTsWithBuyoutRadio(isWithBuyout: boolean): Locator {
         return (isWithBuyout) ?
             this.page.locator(`//input[@name='isTsWithBuyoutQuestion']//following-sibling::span[text()='Да']`) :
             this.page.locator(`//input[@name='isTsWithBuyoutQuestion']//following-sibling::span[text()='Нет']`);
@@ -79,10 +88,26 @@ export class CreateInstructionPage extends MainPage {
     /**
      * Радиобаттон поля "Заключался ли новый трудовой договор с футболистом в связи с переходом на постоянной основе?"
      */
-    private isTsWithNewTd(isTsWithNewTd: boolean): Locator {
+    private isTsWithNewTdRadio(isTsWithNewTd: boolean): Locator {
         return (isTsWithNewTd) ?
             this.page.locator(`//input[@name='isTsWithNewTdQuestion']//following-sibling::span[text()='Да']`) :
             this.page.locator(`//input[@name='isTsWithNewTdQuestion']//following-sibling::span[text()='Нет']`);
+    }
+    /**
+     * Радиобаттон поля "Заключался ли новый трудовой договор с футболистом в связи с продлением аренды?"
+     */
+    private isTsWithNewTdForProlongationRentRadio(isTsWithNewTd: boolean): Locator {
+        return (isTsWithNewTd) ?
+            this.page.locator(`//input[@name='isTsRentProlongWithNewTdQuestion']//following-sibling::span[text()='Да']`) :
+            this.page.locator(`//input[@name='isTsRentProlongWithNewTdQuestion']//following-sibling::span[text()='Нет']`);
+    }
+    /**
+     * Радиобаттон поля "Был ли заключен новый трансферный контракт или продлен ранее заключенный?"
+     */
+    private isTsWithNewTkForProlongationRentRadio(isTsWithNewTd: boolean): Locator {
+        return (isTsWithNewTd) ?
+            this.page.locator(`//input[@name='isTsRentProlongWithNewTkQuestion']//following-sibling::span[text()='Заключен новый']`) :
+            this.page.locator(`//input[@name='isTsRentProlongWithNewTkQuestion']//following-sibling::span[text()='Продлен предыдущий']`);
     }
     /**
      * Создание инструкции с указанным типом
@@ -105,18 +130,31 @@ export class CreateInstructionPage extends MainPage {
             await this.srcClubInput.fill(String(this.srcClubId));
             await Elements.waitForVisible(this.srcClubValue);
             await this.srcClubValue.click();
-            if(createOptions.type == InstructionTypes.transferAgreement) {
+            if(createOptions.type == InstructionTypes.transferAgreement || createOptions.type == InstructionTypes.transferAgreementOnRentTerms) {
                 switch (createOptions.subType) {
                     case TransferAgreementSubTypes.withoutBuyoutFromRent:
-                        await this.isTsWithBuyout(false).click();
+                        await this.isTsWithBuyoutRadio(false).click();
                         break;
                     case TransferAgreementSubTypes.buyoutFromRentWithNewContract:
-                        await this.isTsWithBuyout(true).click();
-                        await this.isTsWithNewTd(true).click();
+                        await this.isTsWithBuyoutRadio(true).click();
+                        await this.isTsWithNewTdRadio(true).click();
                         break;
                     case TransferAgreementSubTypes.buyoutFromRentWithoutNewContract:
-                        await this.isTsWithBuyout(true).click();
-                        await this.isTsWithNewTd(false).click();
+                        await this.isTsWithBuyoutRadio(true).click();
+                        await this.isTsWithNewTdRadio(false).click();
+                        break;
+                    case TransferAgreementRentSubTypes.toRent:
+                        await this.toRentRadio.click();
+                        break;
+                    case TransferAgreementRentSubTypes.prolongationNewContractNewTransfer:
+                        await this.prolongationRentRadio.click();
+                        await this.isTsWithNewTdForProlongationRentRadio(true).click();
+                        await this.isTsWithNewTkForProlongationRentRadio(true).click();
+                        break;
+                    case TransferAgreementRentSubTypes.prolongationNewContract:
+                        await this.prolongationRentRadio.click();
+                        await this.isTsWithNewTdForProlongationRentRadio(true).click();
+                        await this.isTsWithNewTkForProlongationRentRadio(false).click();
                 }
             }
         }

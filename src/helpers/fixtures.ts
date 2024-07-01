@@ -22,7 +22,7 @@ export const test = base.extend<Fixtures>({
         const additionalAgreement = new InstructionPage(page);
         await dbHelper.deleteInstructions(additionalAgreement.personId);
         await additionalAgreement.authorization();
-        await additionalAgreement.addTestEmploymentContract({
+        await additionalAgreement.addTestInstruction({
             type: InstructionTypes.newEmploymentContract,
             clubId: additionalAgreement.srcClubId
         });
@@ -33,11 +33,11 @@ export const test = base.extend<Fixtures>({
         const transferAgreement = new InstructionPage(page);
         await dbHelper.deleteInstructions(transferAgreement.personId);
         await transferAgreement.authorization();
-        await transferAgreement.addTestEmploymentContract({
+        await transferAgreement.addTestInstruction({
             type: InstructionTypes.newEmploymentContract,
             clubId: transferAgreement.srcClubId
         });
-        await transferAgreement.addTestEmploymentContract({
+        await transferAgreement.addTestInstruction({
             type: InstructionTypes.newEmploymentContract,
             clubId: transferAgreement.clubId
         });
@@ -48,6 +48,14 @@ export const test = base.extend<Fixtures>({
         const transferAgreementRent = new InstructionPage(page);
         await dbHelper.deleteInstructions(transferAgreementRent.personId);
         await transferAgreementRent.authorization();
+        await transferAgreementRent.addTestInstruction({
+            type: InstructionTypes.newEmploymentContract,
+            clubId: transferAgreementRent.srcClubId
+        });
+        await transferAgreementRent.addTestInstruction({
+            type: InstructionTypes.newEmploymentContract,
+            clubId: transferAgreementRent.clubId
+        });
         await use(transferAgreementRent);
         await dbHelper.deleteInstructions(transferAgreementRent.personId);
     }

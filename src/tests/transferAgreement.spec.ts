@@ -8,9 +8,8 @@ import {TransferAgreementSubTypes} from "../helpers/enums/TransferAgreementSubTy
 import {PaymentTypes} from "../helpers/enums/PaymentTypes";
 import {InstructionStateIds} from "../helpers/enums/InstructionStateIds";
 import {InstructionStates} from "../helpers/enums/InstructionStates";
-import {InstructionSubTypes} from "../helpers/enums/InstructionSubTypes";
 
-test.describe("Переход на постоянной основе",() => {
+test.describe("Инструкция с типом 'Переход на постоянной основе'",() => {
     test(`Без выкупа из аренды. Дата запуска: ${InputData.currentDate}, Версия модуля: ${Process.env.APP_VERSION}`,
         async ({transferAgreement}) => {
             test.info().annotations.push
@@ -35,7 +34,7 @@ test.describe("Переход на постоянной основе",() => {
                 await expect(transferAgreement.numberValueByName(transferAgreement.additionalAgreementWithoutChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного соглашения",async () => {
-                await transferAgreement.addTransferAgreement(InstructionSubTypes.tsWithoutBuyout);
+                await transferAgreement.addTransferAgreement(TransferAgreementSubTypes.withoutBuyoutFromRent);
                 await expect(transferAgreement.numberValueByName(transferAgreement.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
@@ -62,7 +61,7 @@ test.describe("Переход на постоянной основе",() => {
             await test.step("Регистрация инструкции",async () => {
                 await transferAgreement.updateInstructionState(InstructionStateIds.registered);
                 await expect(transferAgreement.instructionState(InstructionStates.registered)).toBeVisible();
-                expect(await transferAgreement.checkPrevContractsDateChanges(InstructionSubTypes.tsWithoutBuyout)).toBeTruthy()
+                expect(await transferAgreement.checkPrevContractsDateChanges(TransferAgreementSubTypes.withoutBuyoutFromRent)).toBeTruthy()
             })
         })
     test(`Выкуп из аренды с расторжением. Дата запуска: ${InputData.currentDate}, Версия модуля: ${Process.env.APP_VERSION}`,
@@ -89,7 +88,7 @@ test.describe("Переход на постоянной основе",() => {
                 await expect(transferAgreement.numberValueByName(transferAgreement.additionalAgreementWithoutChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного соглашения",async () => {
-                await transferAgreement.addTransferAgreement(InstructionSubTypes.tsWithBuyoutAndTermination);
+                await transferAgreement.addTransferAgreement(TransferAgreementSubTypes.buyoutFromRentWithNewContract);
                 await expect(transferAgreement.numberValueByName(transferAgreement.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
@@ -116,7 +115,7 @@ test.describe("Переход на постоянной основе",() => {
             await test.step("Регистрация инструкции",async () => {
                 await transferAgreement.updateInstructionState(InstructionStateIds.registered);
                 await expect(transferAgreement.instructionState(InstructionStates.registered)).toBeVisible();
-                expect(await transferAgreement.checkPrevContractsDateChanges(InstructionSubTypes.tsWithBuyoutAndTermination)).toBeTruthy()
+                expect(await transferAgreement.checkPrevContractsDateChanges(TransferAgreementSubTypes.buyoutFromRentWithNewContract)).toBeTruthy()
             })
         })
     test(`Выкуп из аренды без расторжения. Дата запуска: ${InputData.currentDate}, Версия модуля: ${Process.env.APP_VERSION}`,
@@ -142,7 +141,7 @@ test.describe("Переход на постоянной основе",() => {
                 await expect(transferAgreement.numberValueByName(transferAgreement.additionalAgreementWithChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного соглашения",async () => {
-                await transferAgreement.addTransferAgreement(InstructionSubTypes.tsWithBuyoutWithoutTermination);
+                await transferAgreement.addTransferAgreement(TransferAgreementSubTypes.buyoutFromRentWithoutNewContract);
                 await expect(transferAgreement.numberValueByName(transferAgreement.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
@@ -169,7 +168,7 @@ test.describe("Переход на постоянной основе",() => {
             await test.step("Регистрация инструкции",async () => {
                 await transferAgreement.updateInstructionState(InstructionStateIds.registered);
                 await expect(transferAgreement.instructionState(InstructionStates.registered)).toBeVisible();
-                expect(await transferAgreement.checkPrevContractsDateChanges(InstructionSubTypes.tsWithBuyoutWithoutTermination)).toBeTruthy()
+                expect(await transferAgreement.checkPrevContractsDateChanges(TransferAgreementSubTypes.buyoutFromRentWithoutNewContract)).toBeTruthy()
             })
         })
 })
