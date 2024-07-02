@@ -1,22 +1,8 @@
 import pkg from 'pg';
 const { Client } = pkg;
 import {dbConfig} from "./db.config.js";
-import {InstructionStateIds} from "../helpers/enums/InstructionStateIds";
 class DbHelper {
     constructor() {
-    }
-    /**
-     * Получение инструкций выбранного пользователя
-     */
-    private async getUserInstructions(personId: number) {
-        const client: pkg.Client = new Client(dbConfig);
-        await client.connect();
-        const queryText: string = `SELECT * FROM rfstran.instructions 
-                                   WHERE ext_personid=$1`;
-        const values: string[] = [`${personId}`];
-        const result =await client.query(queryText,values);
-        if(result.rows.length == 0) throw new Error("Не найдены инструкции для пользователя с указанным ID");
-        return result.rows;
     }
     /**
      * Удаление инструкций для выбранного пользователя

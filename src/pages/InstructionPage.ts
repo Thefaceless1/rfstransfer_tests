@@ -15,6 +15,7 @@ import {TransferAgreementSubTypes} from "../helpers/enums/TransferAgreementSubTy
 import {TransferAgreementRentSubTypes} from "../helpers/enums/TransferAgreementRentSubTypes";
 import {TransferContractType} from "../helpers/enums/TransferContractType";
 import {InstructionTypes} from "../helpers/enums/InstructionTypes";
+import {SelectedFilesType} from "../helpers/types/SelectedFilesType";
 
 export class InstructionPage extends CreateInstructionPage {
     public prevContractStopDateValue: string= ''
@@ -240,6 +241,13 @@ export class InstructionPage extends CreateInstructionPage {
         return this.page.locator("//*[@col-id='type']//*//span",{hasText: paymentType});
     }
     /**
+     * Иконка файла выбранного формата
+     */
+    public fileIcon(format: SelectedFilesType): Locator {
+        const formatWithRegister: string = format[0].toUpperCase()+format.slice(1).toLowerCase();
+        return this.page.locator(`//*[contains(@class,'items-start')]//*[contains(@class,'FileIcon${formatWithRegister}')]`);
+    }
+    /**
      * Радиобаттон "Проходил ли футболист спортивную подготовку в другой НА?"
      */
     private isOtherMemberAssociationRadio(isOtherMemberAssociation: boolean): Locator {
@@ -348,8 +356,8 @@ export class InstructionPage extends CreateInstructionPage {
      */
     public async addAdditionalAgreement(isWithChangeDates: boolean, conclusionDate: string): Promise<void> {
         if(isWithChangeDates) {
-            if(await this.addAdditionalAgreementButton.isVisible() && !await this.withDeadlinesChangeDS.isVisible())
-                await this.addAdditionalAgreementButton.click();
+            if(await this.addAdditionalAgreementButton.first().isVisible() && !await this.withDeadlinesChangeDS.isVisible())
+                await this.addAdditionalAgreementButton.first().click();
             await this.withDeadlinesChangeDS.click();
             await DateInput.fillDateInput(this.dateEndByDS,InputData.futureDate(this.contractDurationDays+this.extendContractCountDays));
             const dateEndByDsValue: string | null = await this.dateEndByDS.getAttribute("value");
@@ -392,9 +400,7 @@ export class InstructionPage extends CreateInstructionPage {
     /**
      * Добавление трансферного соглашения
      */
-    public async addTransferAgreement(
-        transferAgreementSubType: TransferAgreementSubTypes | TransferAgreementRentSubTypes,
-        transferContractType?: TransferContractType): Promise<void> {
+    public async addTransferAgreement(transferContractType?: TransferContractType): Promise<void> {
         await this.addButton.click();
         switch (transferContractType) {
             case TransferContractType.withTermination:
@@ -405,16 +411,16 @@ export class InstructionPage extends CreateInstructionPage {
         }
         await this.transferNumber.fill(this.createdTransferAgreementNumber);
         await DateInput.fillDateInput(this.signingDate,InputData.currentDate);
-        if (transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithNewContract || transferContractType) {
+        if(await this.reason.isVisible()) {
             await this.reason.click();
             await this.reasonValues.first().click();
         }
-        if (transferContractType == TransferContractType.withSuspension) {
+        if(transferContractType == TransferContractType.withSuspension) {
             const prevContractRestartDateValue: string | null = await this.prevContractRestartDate.getAttribute("value");
             if (prevContractRestartDateValue) this.prevContractRestartDateValue = prevContractRestartDateValue;
         }
         const prevContractStopDateValue: string | null = await this.prevContractStopDate.getAttribute("value");
-        if (prevContractStopDateValue) this.prevContractStopDateValue = prevContractStopDateValue;
+        if(prevContractStopDateValue) this.prevContractStopDateValue = prevContractStopDateValue;
         await this.addContractDocuments();
         await this.addMediators();
         await this.onwardButton.click();
@@ -438,9 +444,14 @@ export class InstructionPage extends CreateInstructionPage {
         const documentFields = await this.documents.all();
         for(const documentField of documentFields) {
             const index = documentFields.indexOf(documentField);
-            (index == 0) ?
-                await documentField.setInputFiles(InputData.getTestFiles("pdf")) :
-                await documentField.setInputFiles(InputData.getTestFiles("all"));
+            if(index == 0) {
+                await documentField.setInputFiles(InputData.getTestFiles("pdf"));
+                await Elements.waitForVisible(this.fileIcon("pdf"));
+            }
+            else {
+                await documentField.setInputFiles(InputData.getTestFiles("jpg"));
+                await Elements.waitForVisible(this.fileIcon("jpg"));
+            }
         }
     }
     /**
@@ -480,11 +491,13 @@ export class InstructionPage extends CreateInstructionPage {
     private async addCommentAndDocsToAction(expectedInstructionState: InstructionStates): Promise<void> {
         if(expectedInstructionState == InstructionStates.registered) {
             await this.commentForRegistrationTitle.click();
-            await this.documents.setInputFiles(InputData.getTestFiles("all"));
+            await this.documents.setInputFiles(InputData.getTestFiles("png"));
+            await Elements.waitForVisible(this.fileIcon("png"));
             await this.commentForRegister.fill(this.registerComment);
         }
         else {
-            await this.documents.last().setInputFiles(InputData.getTestFiles("all"));
+            await this.documents.last().setInputFiles(InputData.getTestFiles("png"));
+            await Elements.waitForVisible(this.fileIcon("png"));
             if(expectedInstructionState == InstructionStates.onCorrection) await this.comment.fill(this.correctionReason);
         }
         if(expectedInstructionState != InstructionStates.registered) await this.sendButton.click();
@@ -532,7 +545,7 @@ export class InstructionPage extends CreateInstructionPage {
             await this.addContract(this.prevContractPrevClubStartDate,this.prevContractPrevClubEndDate);
         await Elements.waitForVisible(this.numberValueByName(this.createdContractNumber));
         if(createOptions.type == InstructionTypes.transferAgreementOnRentTerms) {
-            await this.addTransferAgreement(TransferAgreementRentSubTypes.toRent,TransferContractType.withSuspension);
+            await this.addTransferAgreement(TransferContractType.withSuspension);
             await this.isInstructionWithPayments(false).click();
         }
         await this.updateInstructionState(InstructionStateIds.registered);
@@ -550,77 +563,73 @@ export class InstructionPage extends CreateInstructionPage {
         const prevContractPrevClubEndDate: string = prevContractPrevClub[0]["actual_end_date"].toLocaleDateString();
         const prevContractNewClubEndDate: string = prevContractNewClub[0]["actual_end_date"].toLocaleDateString();
         if(transferAgreementSubType == TransferAgreementSubTypes.withoutBuyoutFromRent) {
-            logger.info(`
-                 ${TransferAgreementSubTypes.withoutBuyoutFromRent}:
-                 Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, введено: ${this.prevContractStopDateValue}
-                `);
+            logger.info(`Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, введено: ${this.prevContractStopDateValue}`);
             return prevContractPrevClubStopDate == this.prevContractStopDateValue;
         }
-        else if(transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithNewContract) {
+        else if(transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithNewContract ||
+                transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithNewContract) {
             logger.info(`
-                 ${TransferAgreementSubTypes.buyoutFromRentWithNewContract}:
                  Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, указано: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: actual_end_date: ${prevContractPrevClubEndDate}, указано: ${this.prevContractStopDateValue}
                  Пред. договор с нов. клубом: actual_end_date: ${prevContractNewClubEndDate}, указано: ${this.newContractStartDate}
                 `);
-            return (
-                prevContractPrevClubStopDate == this.prevContractStopDateValue &&
-                prevContractPrevClubEndDate == this.prevContractStopDateValue &&
-                prevContractNewClubEndDate == this.newContractStartDate
-            )
+            return (prevContractPrevClubStopDate == this.prevContractStopDateValue &&
+                    prevContractPrevClubEndDate == this.prevContractStopDateValue &&
+                    prevContractNewClubEndDate == this.newContractStartDate)
         }
         else if(transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithoutNewContract) {
             logger.info(`
-                 ${TransferAgreementSubTypes.buyoutFromRentWithoutNewContract}:
                  Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, указано: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: actual_end_date: ${prevContractPrevClubEndDate}, указано: ${this.prevContractStopDateValue}
                  Пред. договор с нов. клубом: actual_end_date: ${prevContractNewClubEndDate}, указано: ${this.additionalAgreementDateEndByDs}
                 `);
-            return (
-                prevContractPrevClubStopDate == this.prevContractStopDateValue &&
-                prevContractPrevClubEndDate == this.prevContractStopDateValue &&
-                prevContractNewClubEndDate == this.additionalAgreementDateEndByDs
-            )
+            return (prevContractPrevClubStopDate == this.prevContractStopDateValue &&
+                    prevContractPrevClubEndDate == this.prevContractStopDateValue &&
+                    prevContractNewClubEndDate == this.additionalAgreementDateEndByDs)
         }
         else if(transferAgreementSubType == TransferAgreementRentSubTypes.toRent && transferContractType == TransferContractType.withTermination) {
             logger.info(`
-                 ${TransferAgreementRentSubTypes.toRent} и ${transferContractType}:
                  Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, введено: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: end_date: ${prevContractPrevClubEndDate}, введено: ${this.prevContractStopDateValue}
                 `);
-            return (
-                prevContractPrevClubStopDate == this.prevContractStopDateValue &&
-                prevContractPrevClubEndDate == this.prevContractStopDateValue
-            )
+            return (prevContractPrevClubStopDate == this.prevContractStopDateValue &&
+                    prevContractPrevClubEndDate == this.prevContractStopDateValue)
         }
         else if(transferAgreementSubType == TransferAgreementRentSubTypes.toRent && transferContractType == TransferContractType.withSuspension) {
             const prevContractPrevClubRestartDate: string = prevContractPrevClub[0]["restart_date"].toLocaleDateString();
             logger.info(`
-                 ${TransferAgreementRentSubTypes.toRent} и ${transferContractType}:
                  Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, введено: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: restart_date: ${prevContractPrevClubRestartDate}, введено: ${this.prevContractRestartDateValue}
                 `);
-            return (
-                prevContractPrevClubStopDate == this.prevContractStopDateValue &&
-                prevContractPrevClubRestartDate == this.prevContractRestartDateValue
-            )
+            return (prevContractPrevClubStopDate == this.prevContractStopDateValue &&
+                    prevContractPrevClubRestartDate == this.prevContractRestartDateValue)
         }
-        else if(
-            (transferAgreementSubType == TransferAgreementRentSubTypes.prolongationNewContractNewTransfer ||
-             transferAgreementSubType ==  TransferAgreementRentSubTypes.prolongationNewContract) &&
-            transferContractType == TransferContractType.withSuspension) {
+        else if((transferAgreementSubType == TransferAgreementRentSubTypes.prolongationNewContractNewTransfer ||
+                 transferAgreementSubType ==  TransferAgreementRentSubTypes.prolongationNewContract) &&
+                transferContractType == TransferContractType.withSuspension) {
             const prevContractPrevClubRestartDate: string = prevContractPrevClub[0]["restart_date"].toLocaleDateString();
             logger.info(`
-                 ${TransferAgreementRentSubTypes.toRent} и ${transferContractType}:
                  Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, введено: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: restart_date: ${prevContractPrevClubRestartDate}, введено: ${this.prevContractRestartDateValue}
                  Пред. договор с нов. клубом: actual_end_date: ${prevContractNewClubEndDate}, введено: ${this.newContractStartDate}
                 `);
-            return (
-                prevContractPrevClubStopDate == this.prevContractStopDateValue &&
-                prevContractPrevClubRestartDate == this.prevContractRestartDateValue &&
-                prevContractNewClubEndDate == this.newContractStartDate
-            )
+            return (prevContractPrevClubStopDate == this.prevContractStopDateValue &&
+                    prevContractPrevClubRestartDate == this.prevContractRestartDateValue &&
+                    prevContractNewClubEndDate == this.newContractStartDate)
+        }
+        else if(transferAgreementSubType == TransferAgreementRentSubTypes.prolongationNewTransfer ||
+                transferAgreementSubType == TransferAgreementRentSubTypes.prolongationWithoutNewContracts) {
+            const prevContractPrevClubRestartDate: string = prevContractPrevClub[0]["restart_date"].toLocaleDateString();
+            return (prevContractPrevClubStopDate == this.prevContractStopDateValue &&
+                    prevContractPrevClubRestartDate == this.prevContractRestartDateValue &&
+                    prevContractNewClubEndDate == this.additionalAgreementDateEndByDs)
+        }
+        else if(transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract) {
+            const prevContractPrevClubEndDatePlusOneDay: string = InputData.futureDate(1,prevContractPrevClubEndDate);
+            const prevContractNewClubRestartDate: string = prevContractNewClub[0]["restart_date"].toLocaleDateString();
+            return (prevContractPrevClubStopDate == this.prevContractStopDateValue &&
+                    prevContractPrevClubEndDate == this.prevContractStopDateValue &&
+                    prevContractNewClubRestartDate == prevContractPrevClubEndDatePlusOneDay)
         }
         else throw new Error("Неверно указаны параметры метода")
     }

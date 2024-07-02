@@ -34,7 +34,7 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(transferAgreement.numberValueByName(transferAgreement.additionalAgreementWithoutChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного соглашения",async () => {
-                await transferAgreement.addTransferAgreement(TransferAgreementSubTypes.withoutBuyoutFromRent);
+                await transferAgreement.addTransferAgreement();
                 await expect(transferAgreement.numberValueByName(transferAgreement.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
@@ -88,7 +88,7 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(transferAgreement.numberValueByName(transferAgreement.additionalAgreementWithoutChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного соглашения",async () => {
-                await transferAgreement.addTransferAgreement(TransferAgreementSubTypes.buyoutFromRentWithNewContract);
+                await transferAgreement.addTransferAgreement();
                 await expect(transferAgreement.numberValueByName(transferAgreement.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
@@ -141,7 +141,7 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(transferAgreement.numberValueByName(transferAgreement.additionalAgreementWithChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного соглашения",async () => {
-                await transferAgreement.addTransferAgreement(TransferAgreementSubTypes.buyoutFromRentWithoutNewContract);
+                await transferAgreement.addTransferAgreement();
                 await expect(transferAgreement.numberValueByName(transferAgreement.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {

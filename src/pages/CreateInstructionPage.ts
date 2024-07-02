@@ -58,6 +58,10 @@ export class CreateInstructionPage extends MainPage {
      */
     private readonly prolongationRentRadio: Locator = this.page.locator("//span[text()='Продлить аренду']")
     /**
+     * Радиобаттон "Досрочно завершить аренду"
+     */
+    private readonly earlyFinishRentRadio: Locator = this.page.locator("//span[text()='Досрочно завершить аренду']")
+    /**
      * Наименование инструкции
      */
     public readonly instructionName: Locator = this.page.locator("//a[contains(text(),'Инструкция')]")
@@ -110,6 +114,14 @@ export class CreateInstructionPage extends MainPage {
             this.page.locator(`//input[@name='isTsRentProlongWithNewTkQuestion']//following-sibling::span[text()='Продлен предыдущий']`);
     }
     /**
+     * Радиобаттон поля "Завершение аренды с заключением нового трудового договора или возобновлением действующего?"
+     */
+    private isTsRentFinishWithNewTdRadio(isTsWithNewTd: boolean): Locator {
+        return (isTsWithNewTd) ?
+            this.page.locator(`//input[@name='isTsRentFinishWithNewTdQuestion']//following-sibling::span[text()='Заключение нового трудового договора']`) :
+            this.page.locator(`//input[@name='isTsRentFinishWithNewTdQuestion']//following-sibling::span[text()='Возобновление трудового договора']`);
+    }
+    /**
      * Создание инструкции с указанным типом
      */
     public async createInstruction(createOptions: CreateInstructionOptionsType): Promise<void> {
@@ -155,6 +167,24 @@ export class CreateInstructionPage extends MainPage {
                         await this.prolongationRentRadio.click();
                         await this.isTsWithNewTdForProlongationRentRadio(true).click();
                         await this.isTsWithNewTkForProlongationRentRadio(false).click();
+                        break;
+                    case TransferAgreementRentSubTypes.prolongationNewTransfer:
+                        await this.prolongationRentRadio.click();
+                        await this.isTsWithNewTdForProlongationRentRadio(false).click();
+                        await this.isTsWithNewTkForProlongationRentRadio(true).click();
+                        break;
+                    case TransferAgreementRentSubTypes.prolongationWithoutNewContracts:
+                        await this.prolongationRentRadio.click();
+                        await this.isTsWithNewTdForProlongationRentRadio(false).click();
+                        await this.isTsWithNewTkForProlongationRentRadio(false).click();
+                        break;
+                    case TransferAgreementRentSubTypes.earlyFinishRentWithNewContract:
+                        await this.earlyFinishRentRadio.click();
+                        await this.isTsRentFinishWithNewTdRadio(true).click();
+                        break;
+                    case TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract:
+                        await this.earlyFinishRentRadio.click();
+                        await this.isTsRentFinishWithNewTdRadio(false).click();
                 }
             }
         }
