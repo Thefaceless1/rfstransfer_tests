@@ -5,11 +5,16 @@ import {Elements} from "../framework/elements/elements";
 import {CreateInstructionOptionsType} from "../helpers/types/CreateInstructionOptionsType";
 import {TransferAgreementSubTypes} from "../helpers/enums/TransferAgreementSubTypes";
 import {TransferAgreementRentSubTypes} from "../helpers/enums/TransferAgreementRentSubTypes";
+import {IntTransferSubTypes} from "../helpers/enums/IntTransferSubTypes";
+import {PlayerStates} from "../helpers/enums/PlayerStates";
+import {RegistrationTypes} from "../helpers/enums/RegistrationTypes";
+import {randomInt} from "crypto";
 
 export class CreateInstructionPage extends MainPage {
     private readonly person: string = "Автотест Трансфер"
     public readonly clubId: number = 279720
     public readonly srcClubId: number = 282970
+    public readonly earlyFinishSrcClubId: number = 280610
     constructor(page: Page) {
         super(page);
     }
@@ -33,10 +38,6 @@ export class CreateInstructionPage extends MainPage {
      * Поле "Клуб, в который переходит футболист"
      */
     private readonly club: Locator = this.page.locator("//*[contains(@class,'club__dropdown-indicator')]")
-    /**
-     * Значение выпадающего списка поля "Клуб, из которого переходит футболист"
-     */
-    private readonly srcClubValue: Locator = this.page.locator(`//*[contains(@class,'srcClub__option')]//div//div[contains(text(),'${this.srcClubId}')]`)
     /**
      * Поле "Клуб, из которого переходит футболист"
      */
@@ -66,6 +67,14 @@ export class CreateInstructionPage extends MainPage {
      */
     public readonly instructionName: Locator = this.page.locator("//a[contains(text(),'Инструкция')]")
     /**
+     * Радиобаттон "Привлечь футболиста"
+     */
+    public readonly acceptPlayerRadio: Locator = this.page.locator("//span[text()='Привлечь футболиста']")
+    /**
+     * Радиобаттон "Отдать футболиста"
+     */
+    public readonly giveAwayPlayerRadio: Locator = this.page.locator("//span[text()='Отдать футболиста']")
+    /**
      * Значение футболиста в выпадающем списке
      */
     private readonly personValue: Locator = this.page.locator(`//*[text()='${this.person}']`)
@@ -80,6 +89,12 @@ export class CreateInstructionPage extends MainPage {
      */
     private clubValue(clubId: number): Locator {
         return this.page.locator(`//*[contains(@class,'club__option')]//div//div[contains(text(),'${clubId}')]`);
+    }
+    /**
+     * Значение выпадающего списка поля "Клуб, в который переходит футболист"
+     */
+    private srcClubValue(clubId: number): Locator {
+        return this.page.locator(`//*[contains(@class,'srcClub__option')]//div//div[contains(text(),'${clubId}')]`);
     }
     /**
      * Радиобаттон поля "Является ли этот переход выкупом из аренды?"
@@ -122,6 +137,31 @@ export class CreateInstructionPage extends MainPage {
             this.page.locator(`//input[@name='isTsRentFinishWithNewTdQuestion']//following-sibling::span[text()='Возобновление трудового договора']`);
     }
     /**
+     * Радиобаттон "Статус футболиста в новом клубе"
+     */
+    private newClubPlayerStateRadio(playerState: PlayerStates): Locator {
+        return (playerState == PlayerStates.professional) ?
+            this.page.locator("//input[@name='isProfessionalOption']//following-sibling::span[text()='Профессионал']") :
+            this.page.locator("//input[@name='isProfessionalOption']//following-sibling::span[text()='Любитель']");
+    }
+    /**
+     * Радиобаттон "Тип регистрации"
+     */
+    protected registrationType(regType: RegistrationTypes): Locator {
+        return (regType == RegistrationTypes.temporary) ?
+            this.page.locator("//span[text()='Временная']//preceding-sibling::input[@name='isTemporaryOption']") :
+            this.page.locator("//span[text()='Постоянная']//preceding-sibling::input[@name='isTemporaryOption']");
+    }
+    /**
+     * Выбор случайного типа регистрации для трансферного контракта
+     */
+    private async setRandomRegistrationType(): Promise<void> {
+        const randomNumber: number = randomInt(0,2);
+        (randomNumber == 0) ?
+            await this.registrationType(RegistrationTypes.temporary).click() :
+            await this.registrationType(RegistrationTypes.permanent).click();
+    }
+    /**
      * Создание инструкции с указанным типом
      */
     public async createInstruction(createOptions: CreateInstructionOptionsType): Promise<void> {
@@ -135,14 +175,24 @@ export class CreateInstructionPage extends MainPage {
         await Elements.waitForVisible(this.personValue);
         await this.personValue.click();
         await this.club.click();
-        if(createOptions.type == InstructionTypes.transferAgreement || createOptions.type == InstructionTypes.transferAgreementOnRentTerms) {
-            await this.clubInput.fill(String(this.clubId))
-            await this.clubValue(this.clubId).click();
-            await this.srcClub.click();
-            await this.srcClubInput.fill(String(this.srcClubId));
-            await Elements.waitForVisible(this.srcClubValue);
-            await this.srcClubValue.click();
-            if(createOptions.type == InstructionTypes.transferAgreement || createOptions.type == InstructionTypes.transferAgreementOnRentTerms) {
+        if(createOptions.type == InstructionTypes.transferAgreement ||
+           createOptions.type == InstructionTypes.transferAgreementOnRentTerms ||
+           createOptions.type == InstructionTypes.internationalTransfer) {
+            if(createOptions.clubId == this.earlyFinishSrcClubId) {
+                await this.clubInput.fill(String(this.srcClubId))
+                await this.clubValue(this.srcClubId).click();
+                await this.srcClub.click();
+                await this.srcClubInput.fill(String(this.earlyFinishSrcClubId));
+                await this.srcClubValue(this.earlyFinishSrcClubId).click();
+            }
+            else {
+                await this.clubInput.fill(String(this.clubId))
+                await this.clubValue(this.clubId).click();
+                await this.srcClub.click();
+                await this.srcClubInput.fill(String(this.srcClubId));
+                await this.srcClubValue(this.srcClubId).click();
+            }
+            if(createOptions.type == InstructionTypes.transferAgreement) {
                 switch (createOptions.subType) {
                     case TransferAgreementSubTypes.withoutBuyoutFromRent:
                         await this.isTsWithBuyoutRadio(false).click();
@@ -154,7 +204,10 @@ export class CreateInstructionPage extends MainPage {
                     case TransferAgreementSubTypes.buyoutFromRentWithoutNewContract:
                         await this.isTsWithBuyoutRadio(true).click();
                         await this.isTsWithNewTdRadio(false).click();
-                        break;
+                }
+            }
+            if(createOptions.type == InstructionTypes.transferAgreementOnRentTerms) {
+                switch (createOptions.subType) {
                     case TransferAgreementRentSubTypes.toRent:
                         await this.toRentRadio.click();
                         break;
@@ -187,17 +240,31 @@ export class CreateInstructionPage extends MainPage {
                         await this.isTsRentFinishWithNewTdRadio(false).click();
                 }
             }
+            if(createOptions.type == InstructionTypes.internationalTransfer) {
+                switch(createOptions.subType) {
+                    case IntTransferSubTypes.acceptAmateurPlayer:
+                        await this.acceptPlayerRadio.click();
+                        await this.newClubPlayerStateRadio(PlayerStates.amateur).click();
+                        break;
+                    case IntTransferSubTypes.acceptProfessionalPlayer:
+                        await this.acceptPlayerRadio.click();
+                        await this.newClubPlayerStateRadio(PlayerStates.professional).click();
+                        await this.setRandomRegistrationType();
+                        break;
+                    case IntTransferSubTypes.giveAwayAmateurPlayer:
+                        await this.giveAwayPlayerRadio.click();
+                        await this.newClubPlayerStateRadio(PlayerStates.amateur).click();
+                        break;
+                    case IntTransferSubTypes.giveAwayProfessionalPlayer:
+                        await this.giveAwayPlayerRadio.click();
+                        await this.newClubPlayerStateRadio(PlayerStates.professional).click();
+                        await this.setRandomRegistrationType();
+                }
+            }
         }
         else {
             await this.clubInput.fill(String(createOptions.clubId));
-            switch (createOptions.clubId) {
-                case this.clubId:
-                    await this.clubValue(this.clubId).click();
-                    break;
-                case this.srcClubId:
-                    await this.clubValue(this.srcClubId).click();
-                    break;
-            }
+            await this.clubValue(createOptions.clubId!).click();
         }
         if(createOptions.type == InstructionTypes.additionalAgreement) await Elements.waitForVisible(this.employmentContractValue);
         await this.createButton.click();

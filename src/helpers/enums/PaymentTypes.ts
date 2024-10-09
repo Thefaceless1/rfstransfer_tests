@@ -1,6 +1,6 @@
 export enum PaymentTypes {
     fixedPayment = "Фиксированная плата",
-    ransomPayment = "Плата за выпуск (выкуп)",
+    ransomPayment = "Выплата за расторжение (выкуп)",
     conditionalPayment = "Условная плата",
     resalePayment = "Плата за перепродажу"
 }

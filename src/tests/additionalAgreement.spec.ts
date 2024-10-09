@@ -5,11 +5,10 @@ import config from "../../playwright.config";
 import 'dotenv/config'
 import {InstructionTypes} from "../helpers/enums/InstructionTypes";
 import {expect} from "@playwright/test";
-import {InstructionStateIds} from "../helpers/enums/InstructionStateIds";
 import {InstructionStates} from "../helpers/enums/InstructionStates";
 
 test.describe("Инструкция с типом 'Изменение трудового договора'",() => {
-    test(`Дата запуска: ${InputData.currentDate}, Версия модуля: ${Process.env.APP_VERSION}`,
+    test(`Версия модуля: ${Process.env.APP_VERSION}`,
         async ({additionalAgreement}) => {
             test.info().annotations.push
             (
@@ -32,24 +31,11 @@ test.describe("Инструкция с типом 'Изменение трудо
                 await additionalAgreement.addAdditionalAgreement(false,additionalAgreement.prevContractPrevClubStartDate);
                 await expect(additionalAgreement.numberValueByName(additionalAgreement.additionalAgreementWithoutChangeDate)).toBeVisible();
             })
-            await test.step("Отправка инструкции на регистрацию",async () => {
-                await additionalAgreement.updateInstructionState(InstructionStateIds.onRegistration);
-                await expect(additionalAgreement.instructionState(InstructionStates.onRegistration)).toBeVisible();
+            await test.step("Регистрация инструкции",async () => {
+                await additionalAgreement.registrationInstruction();
+                await expect(additionalAgreement.instructionState(InstructionStates.registered)).toBeVisible();
                 await expect(additionalAgreement.regBeginDate).toHaveValue(additionalAgreement.prevContractPrevClubStartDate);
                 await expect(additionalAgreement.regEndDate).toHaveValue(additionalAgreement.additionalAgreementDateEndByDs);
-            })
-            await test.step("Назначение себя ответственным на инструкцию",async () => {
-                await additionalAgreement.nominationYourselfForInstruction();
-                expect(await additionalAgreement.currentUser.innerText()).toBe(await additionalAgreement.nominatedUser.innerText());
-            })
-            await test.step("Отправка инструкции на доработку",async () => {
-                await additionalAgreement.updateInstructionState(InstructionStateIds.onCorrection);
-                await expect(additionalAgreement.instructionState(InstructionStates.onCorrection)).toBeVisible();
-                await expect(additionalAgreement.correctionReasonValue).toBeVisible();
-            })
-            await test.step("Регистрация инструкции",async () => {
-                await additionalAgreement.updateInstructionState(InstructionStateIds.registered);
-                await expect(additionalAgreement.instructionState(InstructionStates.registered)).toBeVisible();
                 await expect(additionalAgreement.registerCommentValue).toBeVisible();
             })
         })

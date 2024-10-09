@@ -5,7 +5,7 @@ import {logger} from "../logger/logger";
 import twoFactor from "node-2fa";
 
 export class AuthorizationPage extends BasePage {
-    public readonly personId: number = 17569661
+    public readonly personId: number = 17611861
     private loginAttempts: number = 3
     constructor(page: Page) {
         super(page);

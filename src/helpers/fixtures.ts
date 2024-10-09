@@ -2,12 +2,18 @@ import {test as base} from '@playwright/test';
 import {InstructionPage} from "../pages/InstructionPage";
 import {dbHelper} from "../db/DbHelper";
 import {InstructionTypes} from "./enums/InstructionTypes";
+import {TransferAgreementRentSubTypes} from "./enums/TransferAgreementRentSubTypes";
 
 type Fixtures = {
     employmentContract: InstructionPage,
     additionalAgreement: InstructionPage,
-    transferAgreement: InstructionPage,
-    transferAgreementRent: InstructionPage
+    transfer: InstructionPage,
+    transferLeaseBuyout: InstructionPage,
+    transferRent: InstructionPage,
+    transferRentProlongation: InstructionPage,
+    transferRentEarlyFinish: InstructionPage,
+    intTransfer: InstructionPage
+    intTransferGiveAwayProfessional: InstructionPage
 }
 
 export const test = base.extend<Fixtures>({
@@ -29,35 +35,108 @@ export const test = base.extend<Fixtures>({
         await use(additionalAgreement);
         await dbHelper.deleteInstructions(additionalAgreement.personId);
     },
-    transferAgreement: async ({page},use) => {
-        const transferAgreement = new InstructionPage(page);
-        await dbHelper.deleteInstructions(transferAgreement.personId);
-        await transferAgreement.authorization();
-        await transferAgreement.addTestInstruction({
+    transfer: async ({page},use) => {
+        const transfer = new InstructionPage(page);
+        await dbHelper.deleteInstructions(transfer.personId);
+        await transfer.authorization();
+        await transfer.addTestInstruction({
             type: InstructionTypes.newEmploymentContract,
-            clubId: transferAgreement.srcClubId
+            clubId: transfer.srcClubId
         });
-        await transferAgreement.addTestInstruction({
-            type: InstructionTypes.newEmploymentContract,
-            clubId: transferAgreement.clubId
-        });
-        await use(transferAgreement);
-        await dbHelper.deleteInstructions(transferAgreement.personId);
+        await use(transfer);
+        await dbHelper.deleteInstructions(transfer.personId);
     },
-    transferAgreementRent: async ({page},use) => {
-        const transferAgreementRent = new InstructionPage(page);
-        await dbHelper.deleteInstructions(transferAgreementRent.personId);
-        await transferAgreementRent.authorization();
-        await transferAgreementRent.addTestInstruction({
+    transferLeaseBuyout: async ({page},use) => {
+        const transferLeaseBuyout = new InstructionPage(page);
+        await dbHelper.deleteInstructions(transferLeaseBuyout.personId);
+        await transferLeaseBuyout.authorization();
+        await transferLeaseBuyout.addTestInstruction({
             type: InstructionTypes.newEmploymentContract,
-            clubId: transferAgreementRent.srcClubId
+            clubId: transferLeaseBuyout.srcClubId
         });
-        await transferAgreementRent.addTestInstruction({
+        await transferLeaseBuyout.addTestInstruction({
+            type: InstructionTypes.transferAgreementOnRentTerms,
+            subType: TransferAgreementRentSubTypes.toRent,
+            clubId: transferLeaseBuyout.clubId
+        });
+        await use(transferLeaseBuyout);
+        await dbHelper.deleteInstructions(transferLeaseBuyout.personId);
+    },
+    transferRent: async ({page},use) => {
+        const transferRent = new InstructionPage(page);
+        await dbHelper.deleteInstructions(transferRent.personId);
+        await transferRent.authorization();
+        await transferRent.addTestInstruction({
             type: InstructionTypes.newEmploymentContract,
-            clubId: transferAgreementRent.clubId
+            clubId: transferRent.srcClubId
         });
-        await use(transferAgreementRent);
-        await dbHelper.deleteInstructions(transferAgreementRent.personId);
+        await use(transferRent);
+        await dbHelper.deleteInstructions(transferRent.personId);
+    },
+    transferRentProlongation: async ({page},use)=> {
+        const transferRentProlongation = new InstructionPage(page);
+        await dbHelper.deleteInstructions(transferRentProlongation.personId);
+        await transferRentProlongation.authorization();
+        await transferRentProlongation.addTestInstruction({
+            type: InstructionTypes.newEmploymentContract,
+            clubId: transferRentProlongation.srcClubId
+        });
+        await transferRentProlongation.addTestInstruction({
+            type: InstructionTypes.transferAgreementOnRentTerms,
+            subType: TransferAgreementRentSubTypes.toRent,
+            clubId: transferRentProlongation.clubId
+        });
+        await use(transferRentProlongation);
+        await dbHelper.deleteInstructions(transferRentProlongation.personId);
+    },
+    transferRentEarlyFinish: async ({page},use)=> {
+        const transferRentEarlyFinish = new InstructionPage(page);
+        await dbHelper.deleteInstructions(transferRentEarlyFinish.personId);
+        await transferRentEarlyFinish.authorization();
+        await transferRentEarlyFinish.addTestInstruction({
+            type: InstructionTypes.newEmploymentContract,
+            clubId: transferRentEarlyFinish.earlyFinishSrcClubId
+        });
+        await transferRentEarlyFinish.addTestInstruction({
+            type: InstructionTypes.transferAgreementOnRentTerms,
+            subType: TransferAgreementRentSubTypes.toRent,
+            clubId: transferRentEarlyFinish.earlyFinishSrcClubId,
+            isInstructionForEarlyFinish: true
+        });
+        await transferRentEarlyFinish.addTestInstruction({
+            type: InstructionTypes.newEmploymentContract,
+            clubId: transferRentEarlyFinish.srcClubId
+        });
+        await transferRentEarlyFinish.addTestInstruction({
+            type: InstructionTypes.transferAgreementOnRentTerms,
+            subType: TransferAgreementRentSubTypes.toRent,
+            clubId: transferRentEarlyFinish.clubId
+        });
+        await use(transferRentEarlyFinish);
+        await dbHelper.deleteInstructions(transferRentEarlyFinish.personId);
+    },
+    intTransfer: async ({page},use) => {
+        const intTransferAccept = new InstructionPage(page);
+        await dbHelper.deleteInstructions(intTransferAccept.personId);
+        await intTransferAccept.authorization();
+        await use(intTransferAccept);
+        await dbHelper.deleteInstructions(intTransferAccept.personId);
+    },
+    intTransferGiveAwayProfessional: async ({page},use) => {
+        const intTransferGiveAwayProfessional = new InstructionPage(page);
+        await dbHelper.deleteInstructions(intTransferGiveAwayProfessional.personId);
+        await intTransferGiveAwayProfessional.authorization();
+        await intTransferGiveAwayProfessional.addTestInstruction({
+            type: InstructionTypes.newEmploymentContract,
+            clubId: intTransferGiveAwayProfessional.srcClubId
+        });
+        await intTransferGiveAwayProfessional.addTestInstruction({
+            type: InstructionTypes.transferAgreementOnRentTerms,
+            subType: TransferAgreementRentSubTypes.toRent,
+            clubId: intTransferGiveAwayProfessional.clubId
+        });
+        await use(intTransferGiveAwayProfessional);
+        await dbHelper.deleteInstructions(intTransferGiveAwayProfessional.personId);
     }
 })
 

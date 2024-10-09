@@ -5,11 +5,10 @@ import {InputData} from "../helpers/InputData";
 import config from "../../playwright.config";
 import {expect} from "@playwright/test";
 import 'dotenv/config'
-import {InstructionStateIds} from "../helpers/enums/InstructionStateIds";
 import {InstructionStates} from "../helpers/enums/InstructionStates";
 
 test.describe("Инструкция с типом 'Трудовой договор'",() => {
-    test(`Дата запуска: ${InputData.currentDate}, Версия модуля: ${Process.env.APP_VERSION}`,
+    test(`Версия модуля: ${Process.env.APP_VERSION}`,
         async ({employmentContract}) => {
         test.info().annotations.push
         (
@@ -32,29 +31,12 @@ test.describe("Инструкция с типом 'Трудовой догово
             await employmentContract.addAdditionalAgreement(false,employmentContract.prevContractPrevClubStartDate);
             await expect(employmentContract.numberValueByName(employmentContract.additionalAgreementWithoutChangeDate)).toBeVisible();
         })
-        await test.step("Удаление дополнительного соглашения",async () => {
-            await employmentContract.deleteAdditionalAgreement();
-            await expect(employmentContract.numberValueByName(employmentContract.additionalAgreementWithoutChangeDate)).not.toBeVisible();
-        })
-        await test.step("Отправка инструкции на регистрацию",async () => {
-            await employmentContract.updateInstructionState(InstructionStateIds.onRegistration);
-            await expect(employmentContract.instructionState(InstructionStates.onRegistration)).toBeVisible();
-            await expect(employmentContract.regBeginDate).toHaveValue(employmentContract.prevContractPrevClubStartDate);
-            await expect(employmentContract.regEndDate).toHaveValue(String(employmentContract.prevContractPrevClubEndDate));
-        })
-        await test.step("Назначение себя ответственным на инструкцию",async () => {
-            await employmentContract.nominationYourselfForInstruction();
-            expect(await employmentContract.currentUser.innerText()).toBe(await employmentContract.nominatedUser.innerText());
-        })
-        await test.step("Отправка инструкции на доработку",async () => {
-            await employmentContract.updateInstructionState(InstructionStateIds.onCorrection);
-            await expect(employmentContract.instructionState(InstructionStates.onCorrection)).toBeVisible();
-            await expect(employmentContract.correctionReasonValue).toBeVisible();
-        })
         await test.step("Регистрация инструкции",async () => {
-            await employmentContract.updateInstructionState(InstructionStateIds.registered);
+            await employmentContract.registrationInstruction();
             await expect(employmentContract.instructionState(InstructionStates.registered)).toBeVisible();
             await expect(employmentContract.registerCommentValue).toBeVisible();
+            await expect(employmentContract.regBeginDate).toHaveValue(employmentContract.prevContractPrevClubStartDate);
+            await expect(employmentContract.regEndDate).toHaveValue(String(employmentContract.prevContractPrevClubEndDate));
         })
     })
 })
