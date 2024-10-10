@@ -1,5 +1,6 @@
 node_modules/
 /playwright-report/
+/src/artifacts/logs/rfstransfer.log
 /src/artifacts/report/
 /src/artifacts/screenshots/*/
 /playwright/.cache/

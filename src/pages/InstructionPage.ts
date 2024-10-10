@@ -18,6 +18,7 @@ import {SelectedFilesType} from "../helpers/types/SelectedFilesType";
 import {PlayerStates} from "../helpers/enums/PlayerStates";
 import {RegistrationTypes} from "../helpers/enums/RegistrationTypes";
 import {IntTransferSubTypes} from "../helpers/enums/IntTransferSubTypes";
+import {CreateTransferOptionsType} from "../helpers/types/CreateTransferOptionsType";
 
 export class InstructionPage extends CreateInstructionPage {
     public prevContractStopDateValue: string = ''
@@ -443,9 +444,9 @@ export class InstructionPage extends CreateInstructionPage {
     /**
      * Добавление трансферного соглашения
      */
-    public async addTransferAgreement(transferContractType?: TransferContractType, isTransferForEarlyFinish?: boolean): Promise<void> {
+    public async addTransferAgreement(createTransferOptions: CreateTransferOptionsType): Promise<void> {
         await this.addButton.click();
-        switch (transferContractType) {
+        switch (createTransferOptions.transferContractType) {
             case TransferContractType.withTermination:
                 await this.withTerminationContractRadio.click();
                 break;
@@ -458,17 +459,27 @@ export class InstructionPage extends CreateInstructionPage {
             await this.reason.click();
             await this.reasonValues.first().click();
         }
-        if (transferContractType == TransferContractType.withSuspension && !await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible()) {
+        if (
+            createTransferOptions.transferContractType == TransferContractType.withSuspension &&
+            !await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible()
+        ) {
             /*
             * Для ТК "С приостановкой" заполняем поле "Дата возобновления ТД с пред. клубом" датой: -1 день от даты окончания пред. договора
             * c пред. клубом для обхода коллизии "Дата возобновления старого ТД не меньше срока его окончания"
-            * */
-            (isTransferForEarlyFinish) ?
+            */
+            (createTransferOptions.isTransferForEarlyFinish) ?
                 await DateInput.fillDateInput(this.prevContractRestartDate,InputData.futureDate(-1,this.earlyFinishPrevContractEndDate)) :
                 await DateInput.fillDateInput(this.prevContractRestartDate,InputData.futureDate(-1,this.prevContractPrevClubEndDate));
             const prevContractRestartDateValue: string | null = await this.prevContractRestartDate.last().getAttribute("value");
             if (prevContractRestartDateValue) this.prevContractRestartDateValue = prevContractRestartDateValue;
         }
+        /*
+            * Для инструкции "Досрочное завершение аренды с изменением ТД" заполняем значение в поле "Дата завершения ТД с предыдущим клубом"
+            * значением , которое находится в диапазоне дат пред. договора с новым клубом
+            * для обхода коллизии "Дата прекращения старого ТД находится не в диапазоне дат возобновляемого ТД аренды"
+        */
+        if (createTransferOptions.instructionSubType == TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract)
+            await DateInput.fillDateInput(this.prevContractStopDate.last(),InputData.futureDate(-1,this.prevContractNewClubEndDate));
         const prevContractStopDateValue: string | null = await this.prevContractStopDate.last().getAttribute("value");
         if (prevContractStopDateValue) this.prevContractStopDateValue = prevContractStopDateValue;
         await this.addContractDocuments();
@@ -511,6 +522,7 @@ export class InstructionPage extends CreateInstructionPage {
      * Регистрация инструкции
      */
     public async registrationInstruction(playerState?: PlayerStates): Promise<void> {
+        await this.page.pause()
         if (playerState == PlayerStates.amateur) {
             await DateInput.fillDateInput(this.regBeginDate,this.newContractStartDate);
             await DateInput.fillDateInput(this.regEndDate,this.newContractEndDate);
@@ -536,12 +548,12 @@ export class InstructionPage extends CreateInstructionPage {
      */
     public async addRandomTransferContract(): Promise<void> {
         if (await this.registrationType(RegistrationTypes.permanent).isChecked())
-            await this.addTransferAgreement()
+            await this.addTransferAgreement({})
         else {
             const transferTypeRandomNumber: number = randomInt(0,2);
             (transferTypeRandomNumber == 0) ?
-                await this.addTransferAgreement(TransferContractType.withTermination) :
-                await this.addTransferAgreement(TransferContractType.withSuspension);
+                await this.addTransferAgreement({transferContractType: TransferContractType.withTermination}) :
+                await this.addTransferAgreement({transferContractType: TransferContractType.withSuspension});
         }
     }
     /**
@@ -576,14 +588,25 @@ export class InstructionPage extends CreateInstructionPage {
             subType: createOptions.subType,
             clubId: createOptions.clubId
         });
-        if (createOptions.clubId == this.clubId) await this.addContract(this.prevContractNewClubStartDate,this.prevContractNewClubEndDate);
+        if (createOptions.clubId == this.clubId) {
+            /*
+            * Если инструкция не типа "Досрочное завершение аренды", то предыдущий договора с новым клубом
+            * заполняем датам так, чтобы договор был в статусе "Активен"
+            */
+            (createOptions.isInstructionForEarlyFinish) ?
+                await this.addContract(this.prevContractNewClubStartDate,this.prevContractNewClubEndDate) :
+                await this.addContract(this.earlyFinishPrevContractStartDate,this.earlyFinishPrevContractEndDate);
+        }
         else if (createOptions.clubId == this.srcClubId) await this.addContract(this.prevContractPrevClubStartDate,this.prevContractPrevClubEndDate);
         else await this.addContract(this.earlyFinishPrevContractStartDate,this.earlyFinishPrevContractEndDate);
         await Elements.waitForVisible(this.numberValueByName(this.createdContractNumber));
         if (createOptions.type == InstructionTypes.transferAgreementOnRentTerms) {
             (createOptions.isInstructionForEarlyFinish) ?
-            await this.addTransferAgreement(TransferContractType.withSuspension,true) :
-            await this.addTransferAgreement(TransferContractType.withSuspension);
+            await this.addTransferAgreement({
+                transferContractType: TransferContractType.withSuspension,
+                isTransferForEarlyFinish: true
+            }) :
+            await this.addTransferAgreement({transferContractType: TransferContractType.withSuspension});
             await this.isInstructionWithPayments(false).click();
         }
         await this.registrationInstruction();

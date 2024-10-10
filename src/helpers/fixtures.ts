@@ -110,7 +110,8 @@ export const test = base.extend<Fixtures>({
         await transferRentEarlyFinish.addTestInstruction({
             type: InstructionTypes.transferAgreementOnRentTerms,
             subType: TransferAgreementRentSubTypes.toRent,
-            clubId: transferRentEarlyFinish.clubId
+            clubId: transferRentEarlyFinish.clubId,
+            isInstructionForEarlyFinish: true
         });
         await use(transferRentEarlyFinish);
         await dbHelper.deleteInstructions(transferRentEarlyFinish.personId);

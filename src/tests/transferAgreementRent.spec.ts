@@ -30,7 +30,7 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(transferRent.numberValueByName(transferRent.createdContractNumber)).toBeVisible();
             })
             await test.step("Добавление трансферного контракта",async () => {
-                await transferRent.addTransferAgreement(TransferContractType.withTermination);
+                await transferRent.addTransferAgreement({transferContractType: TransferContractType.withTermination});
                 await expect(transferRent.numberValueByName(transferRent.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
@@ -68,7 +68,7 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(transferRent.numberValueByName(transferRent.createdContractNumber)).toBeVisible();
             })
             await test.step("Добавление трансферного контракта",async () => {
-                await transferRent.addTransferAgreement(TransferContractType.withSuspension);
+                await transferRent.addTransferAgreement({transferContractType: TransferContractType.withSuspension});
                 await expect(transferRent.numberValueByName(transferRent.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
@@ -106,7 +106,7 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(transferRentProlongation.numberValueByName(transferRentProlongation.createdContractNumber)).toBeVisible();
             })
             await test.step("Добавление трансферного контракта",async () => {
-                await transferRentProlongation.addTransferAgreement(TransferContractType.withSuspension);
+                await transferRentProlongation.addTransferAgreement({transferContractType: TransferContractType.withSuspension});
                 await expect(transferRentProlongation.numberValueByName(transferRentProlongation.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
@@ -188,7 +188,7 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(transferRentProlongation.numberValueByName(transferRentProlongation.additionalAgreementWithChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного контракта",async () => {
-                await transferRentProlongation.addTransferAgreement(TransferContractType.withSuspension);
+                await transferRentProlongation.addTransferAgreement({transferContractType: TransferContractType.withSuspension});
                 await expect(transferRentProlongation.numberValueByName(transferRentProlongation.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
@@ -201,7 +201,7 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Регистрация инструкции",async () => {
                 await transferRentProlongation.registrationInstruction();
                 await expect(transferRentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(transferRentProlongation.regBeginDate).toHaveValue(transferRentProlongation.prevContractNewClubStartDate);
+                await expect(transferRentProlongation.regBeginDate).toHaveValue(transferRentProlongation.earlyFinishPrevContractStartDate);
                 await expect(transferRentProlongation.regEndDate).toHaveValue(transferRentProlongation.additionalAgreementDateEndByDs);
                 expect(await transferRentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationNewTransfer,TransferContractType.withSuspension)).toBeTruthy()
             })
@@ -245,7 +245,7 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Регистрация инструкции",async () => {
                 await transferRentProlongation.registrationInstruction();
                 await expect(transferRentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(transferRentProlongation.regBeginDate).toHaveValue(transferRentProlongation.prevContractNewClubStartDate);
+                await expect(transferRentProlongation.regBeginDate).toHaveValue(transferRentProlongation.earlyFinishPrevContractStartDate);
                 await expect(transferRentProlongation.regEndDate).toHaveValue(transferRentProlongation.additionalAgreementDateEndByDs);
                 expect(await transferRentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationWithoutNewContracts,TransferContractType.withSuspension)).toBeTruthy()
             })
@@ -274,7 +274,7 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(transferRentEarlyFinish.numberValueByName(transferRentEarlyFinish.additionalAgreementWithoutChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного контракта",async () => {
-                await transferRentEarlyFinish.addTransferAgreement();
+                await transferRentEarlyFinish.addTransferAgreement({});
                 await expect(transferRentEarlyFinish.numberValueByName(transferRentEarlyFinish.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
@@ -292,7 +292,7 @@ test.describe("Инструкция с типом 'Переход на врем�
                 expect(await transferRentEarlyFinish.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithNewContract,TransferContractType.withSuspension)).toBeTruthy()
             })
         })
-    test.only(`Досрочное завершение(изменение ТД). Версия модуля: ${Process.env.APP_VERSION}`,
+    test(`Досрочное завершение(изменение ТД). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({transferRentEarlyFinish}) => {
             test.info().annotations.push
             (
@@ -315,7 +315,7 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(transferRentEarlyFinish.numberValueByName(transferRentEarlyFinish.additionalAgreementWithoutChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного контракта",async () => {
-                await transferRentEarlyFinish.addTransferAgreement();
+                await transferRentEarlyFinish.addTransferAgreement({instructionSubType: TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract});
                 await expect(transferRentEarlyFinish.numberValueByName(transferRentEarlyFinish.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {

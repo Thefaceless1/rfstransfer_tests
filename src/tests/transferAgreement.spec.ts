@@ -33,7 +33,7 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(transfer.numberValueByName(transfer.additionalAgreementWithoutChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного соглашения",async () => {
-                await transfer.addTransferAgreement();
+                await transfer.addTransferAgreement({});
                 await expect(transfer.numberValueByName(transfer.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
@@ -75,7 +75,7 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(transferLeaseBuyout.numberValueByName(transferLeaseBuyout.additionalAgreementWithoutChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного соглашения",async () => {
-                await transferLeaseBuyout.addTransferAgreement();
+                await transferLeaseBuyout.addTransferAgreement({});
                 await expect(transferLeaseBuyout.numberValueByName(transferLeaseBuyout.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
@@ -116,7 +116,7 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(transferLeaseBuyout.numberValueByName(transferLeaseBuyout.additionalAgreementWithChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного соглашения",async () => {
-                await transferLeaseBuyout.addTransferAgreement();
+                await transferLeaseBuyout.addTransferAgreement({});
                 await expect(transferLeaseBuyout.numberValueByName(transferLeaseBuyout.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
@@ -129,7 +129,7 @@ test.describe("Инструкция с типом 'Переход на пост�
             await test.step("Регистрация инструкции",async () => {
                 await transferLeaseBuyout.registrationInstruction();
                 await expect(transferLeaseBuyout.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(transferLeaseBuyout.regBeginDate).toHaveValue(transferLeaseBuyout.prevContractNewClubStartDate);
+                await expect(transferLeaseBuyout.regBeginDate).toHaveValue(transferLeaseBuyout.earlyFinishPrevContractStartDate);
                 await expect(transferLeaseBuyout.regEndDate).toHaveValue(transferLeaseBuyout.additionalAgreementDateEndByDs);
                 expect(await transferLeaseBuyout.checkPrevContractsDateChanges(TransferAgreementSubTypes.buyoutFromRentWithoutNewContract)).toBeTruthy()
             })

@@ -28,8 +28,8 @@ class DbHelper {
              AND ext_clubid=$2
              AND state_id IN (3,4,5)
              AND labour_contract_id is null`;
-        if(isTemporary) queryText+=`AND is_temporary=true`;
-        queryText+=`ORDER BY (CASE state_id WHEN 3 THEN 0 ELSE 1 END), duration_begin_date DESC`;
+        if(isTemporary) queryText+=` AND is_temporary=true`;
+        queryText+=` ORDER BY (CASE state_id WHEN 3 THEN 0 ELSE 1 END), duration_begin_date DESC`;
         const values: string[] = [`${userId}`,`${clubId}`];
         const result = await client.query(queryText,values);
         return result.rows;

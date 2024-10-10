@@ -3,7 +3,7 @@ import type { PlaywrightTestConfig } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
   testDir: './src/tests',
-  timeout: 60 * 1000,
+  timeout: 120 * 1000,
 
   expect: {
     timeout: 5000
@@ -15,7 +15,7 @@ const config: PlaywrightTestConfig = {
   reporter: [['html', { outputFolder: 'src/artifacts/report',open: "never"}]],
   use: {
     screenshot : "only-on-failure",
-    baseURL: (process.env.BRANCH == "preprod") ? "https://preprod-contract.platform.rfs.ru/" : "https://rfs-transfer-dev.fors.ru/",
+    baseURL: (process.env.BRANCH == "preprod") ? "https://preprod-contract.platform.rfs.ru/" : "https://rfs-transfer-test.fors.ru/",
     headless: true,
     actionTimeout: 10000,
     trace: 'off',
