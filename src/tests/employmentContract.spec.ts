@@ -6,6 +6,7 @@ import config from "../../playwright.config";
 import {expect} from "@playwright/test";
 import 'dotenv/config'
 import {InstructionStates} from "../helpers/enums/InstructionStates";
+import {PaymentTypes} from "../helpers/enums/PaymentTypes";
 
 test.describe("Инструкция с типом 'Трудовой договор'",() => {
     test(`Версия модуля: ${Process.env.APP_VERSION}`,
@@ -30,6 +31,10 @@ test.describe("Инструкция с типом 'Трудовой догово
         await test.step("Добавление дополнительного соглашения",async () => {
             await employmentContract.addAdditionalAgreement(false,employmentContract.prevContractPrevClubStartDate);
             await expect(employmentContract.numberValueByName(employmentContract.additionalAgreementWithoutChangeDate)).toBeVisible();
+        })
+        await test.step("Добавление планового платежа 'Выплата за расторжение(выкуп)'",async () => {
+            await employmentContract.addPayments(InstructionTypes.newEmploymentContract);
+            await expect(employmentContract.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
         })
         await test.step("Регистрация инструкции",async () => {
             await employmentContract.registrationInstruction();

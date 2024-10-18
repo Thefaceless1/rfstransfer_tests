@@ -199,6 +199,14 @@ export class InstructionPage extends CreateInstructionPage {
      */
     private readonly intTransferFileName: Locator = this.page.locator("//*[contains(text(),'International_Transfer_Certificate')]")
     /**
+     * Поле "Получатель"
+     */
+    private readonly recipient: Locator = this.page.locator("//input[@class='Buyout.0.srcClub__input']")
+    /**
+     * Значения выпадающего списка поля "Получатель"
+     */
+    private readonly recipientValues: Locator = this.page.locator("//div[contains(@class,'Buyout.0.srcClub__option')]")
+    /**
      * Чекбокс "Не записывать в историю переходов"
      */
     private readonly skipHistoryChangeCheckBox: Locator = this.page.locator("//input[@name='skipHistoryChange']")
@@ -264,20 +272,14 @@ export class InstructionPage extends CreateInstructionPage {
             this.page.locator("//input[@name='isOtherMemberAssociation']//following-sibling::span[text()='Нет']");
     }
     /**
-     * Радиобаттон "Были ли согласованы какие-либо платежи за переход?"
+     * Радиобаттон "Были ли согласованы какие-либо платежи за переход?" в инструкции "Переход на постоянной/временной основе"
+     * или "Производилась ли выплата бывшему клубу футболиста за расторжение контракта между этим клубом и футболистом?"
+     * в инструкции "Новый ТД"
      */
     private isInstructionWithPayments(isWithPayments: boolean): Locator {
         return (isWithPayments) ?
             this.page.locator("//input[@name='isInstructionWithPayments']//following-sibling::span[text()='Да']") :
             this.page.locator("//input[@name='isInstructionWithPayments']//following-sibling::span[text()='Нет']");
-    }
-    /**
-     * Радиобаттон "Плата за выпуск (выкуп)"
-     */
-    private isWithBuyout(isWithBuyout: boolean): Locator {
-        return (isWithBuyout) ?
-            this.page.locator("//input[@name='isWithBuyout']//following-sibling::span[text()='Да']") :
-            this.page.locator("//input[@name='isWithBuyout']//following-sibling::span[text()='Нет']");
     }
     /**
      * Радиобаттон "Статус футболиста в прежней национальной ассоциации"
@@ -503,7 +505,7 @@ export class InstructionPage extends CreateInstructionPage {
      */
     private async addContractDocuments(): Promise<void> {
         const documentFields = await this.documents.all();
-        for(const documentField of documentFields) {
+        for (const documentField of documentFields) {
             const index = documentFields.indexOf(documentField);
             if (index == 0) continue
             else if (index == 1) {
@@ -522,7 +524,6 @@ export class InstructionPage extends CreateInstructionPage {
      * Регистрация инструкции
      */
     public async registrationInstruction(playerState?: PlayerStates): Promise<void> {
-        await this.page.pause()
         if (playerState == PlayerStates.amateur) {
             await DateInput.fillDateInput(this.regBeginDate,this.newContractStartDate);
             await DateInput.fillDateInput(this.regEndDate,this.newContractEndDate);
@@ -559,10 +560,13 @@ export class InstructionPage extends CreateInstructionPage {
     /**
      * Добавление выплат для инструкций
      */
-    public async addPayments(): Promise<void> {
+    public async addPayments(instructionType: InstructionTypes): Promise<void> {
         await this.isInstructionWithPayments(true).click();
-        await this.isWithBuyout(true).click();
-        for(const paymentType of Object.values(PaymentTypes)) {
+        for (const paymentType of Object.values(PaymentTypes)) {
+            if (
+                (instructionType == InstructionTypes.newEmploymentContract && paymentType != PaymentTypes.ransomPayment) ||
+                (instructionType != InstructionTypes.newEmploymentContract && paymentType == PaymentTypes.ransomPayment)
+            ) continue;
             if (paymentType != PaymentTypes.resalePayment) {
                 const paymentAmount: number = randomInt(10,10000);
                 await this.totalAmount(paymentType).fill(String(paymentAmount));
@@ -571,6 +575,10 @@ export class InstructionPage extends CreateInstructionPage {
                 await this.currencyValues(paymentType).first().click();
                 await this.paymentNote(paymentType).fill(InputData.randomWord);
                 await DateInput.fillDateInput(this.paymentDate(paymentType),InputData.currentDate);
+                if (instructionType == InstructionTypes.newEmploymentContract) {
+                    await this.recipient.fill(String(this.clubId));
+                    await this.recipientValues.first().click();
+                }
             }
             else {
                 await this.resalePercent.fill(String(randomInt(1,100)));
@@ -607,8 +615,8 @@ export class InstructionPage extends CreateInstructionPage {
                 isTransferForEarlyFinish: true
             }) :
             await this.addTransferAgreement({transferContractType: TransferContractType.withSuspension});
-            await this.isInstructionWithPayments(false).click();
         }
+        await this.isInstructionWithPayments(false).click();
         await this.registrationInstruction();
         await Elements.waitForVisible(this.instructionState(InstructionStates.registered));
     }
@@ -662,11 +670,7 @@ export class InstructionPage extends CreateInstructionPage {
             prevContractNewClubEndDate = prevContractNewClub[0]["actual_end_date"].toLocaleDateString();
             if (prevContractNewClub[0]["restart_date"]) prevContractNewClubRestartDate = prevContractNewClub[0]["restart_date"].toLocaleDateString();
         }
-        if (transferAgreementSubType == TransferAgreementSubTypes.withoutBuyoutFromRent) {
-            logger.info(`Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, введено: ${this.prevContractStopDateValue}`);
-            return prevContractPrevClubStopDate == this.prevContractStopDateValue;
-        }
-        else if (transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithNewContract ||
+        if (transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithNewContract ||
                 transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithNewContract) {
             logger.info(`
                  Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, указано: ${this.prevContractStopDateValue}
@@ -687,7 +691,8 @@ export class InstructionPage extends CreateInstructionPage {
                     prevContractPrevClubEndDate == this.prevContractStopDateValue &&
                     prevContractNewClubEndDate == this.additionalAgreementDateEndByDs)
         }
-        else if (transferAgreementSubType == TransferAgreementRentSubTypes.toRent && transferContractType == TransferContractType.withTermination) {
+        else if ((transferAgreementSubType == TransferAgreementRentSubTypes.toRent && transferContractType == TransferContractType.withTermination) ||
+                  transferAgreementSubType == TransferAgreementSubTypes.withoutBuyoutFromRent) {
             logger.info(`
                  Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, введено: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: end_date: ${prevContractPrevClubEndDate}, введено: ${this.prevContractStopDateValue}
@@ -704,8 +709,8 @@ export class InstructionPage extends CreateInstructionPage {
                     prevContractPrevClubRestartDate == this.prevContractRestartDateValue)
         }
         else if ((transferAgreementSubType == TransferAgreementRentSubTypes.prolongationNewContractNewTransfer ||
-                 transferAgreementSubType ==  TransferAgreementRentSubTypes.prolongationNewContract) &&
-                transferContractType == TransferContractType.withSuspension) {
+                  transferAgreementSubType ==  TransferAgreementRentSubTypes.prolongationNewContract) &&
+                 transferContractType == TransferContractType.withSuspension) {
             logger.info(`
                  Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, введено: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: restart_date: ${prevContractPrevClubRestartDate}, введено: ${this.prevContractRestartDateValue}
@@ -716,7 +721,7 @@ export class InstructionPage extends CreateInstructionPage {
                     prevContractNewClubEndDate == this.newContractStartDate)
         }
         else if (transferAgreementSubType == TransferAgreementRentSubTypes.prolongationNewTransfer ||
-                transferAgreementSubType == TransferAgreementRentSubTypes.prolongationWithoutNewContracts) {
+                 transferAgreementSubType == TransferAgreementRentSubTypes.prolongationWithoutNewContracts) {
             logger.info(`
                  Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, введено: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: restart_date: ${prevContractPrevClubRestartDate}, введено: ${this.prevContractRestartDateValue}

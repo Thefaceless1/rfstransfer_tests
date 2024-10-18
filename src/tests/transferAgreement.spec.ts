@@ -37,9 +37,8 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(transfer.numberValueByName(transfer.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
-                await transfer.addPayments();
+                await transfer.addPayments(InstructionTypes.transferAgreement);
                 await expect(transfer.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(transfer.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
                 await expect(transfer.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
                 await expect(transfer.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
             })
@@ -79,7 +78,7 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(transferLeaseBuyout.numberValueByName(transferLeaseBuyout.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
-                await transferLeaseBuyout.addPayments();
+                await transferLeaseBuyout.addPayments(InstructionTypes.transferAgreement);
                 await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
                 await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
                 await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
@@ -120,7 +119,7 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(transferLeaseBuyout.numberValueByName(transferLeaseBuyout.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
-                await transferLeaseBuyout.addPayments();
+                await transferLeaseBuyout.addPayments(InstructionTypes.transferAgreement);
                 await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
                 await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
                 await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();

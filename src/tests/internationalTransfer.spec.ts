@@ -67,7 +67,7 @@ test.describe("Инструкция с типом 'Международный п
                 await expect(intTransfer.numberValueByName(intTransfer.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
-                await intTransfer.addPayments();
+                await intTransfer.addPayments(InstructionTypes.internationalTransfer);
                 await expect(intTransfer.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
                 await expect(intTransfer.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
                 await expect(intTransfer.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
