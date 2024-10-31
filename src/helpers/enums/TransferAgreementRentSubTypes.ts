@@ -4,6 +4,6 @@ export enum TransferAgreementRentSubTypes {
     prolongationNewContract = "Продление аренды (новый ТД, продление ТК)",
     prolongationNewTransfer = "Продление аренды (ДС к ТД, новый ТК)",
     prolongationWithoutNewContracts = "Продление аренды (ДС к ТД, ДС к ТК)",
-    earlyFinishRentWithNewContract = "Досрочное завершение аренды (новый ТД)",
-    earlyFinishRentWithoutNewContract = "Продление аренды (изменение ТД)",
+    earlyFinishRentWithNewContract = "Досрочное завершение аренды с новым ТД",
+    earlyFinishRentWithoutNewContract = "Досрочное завершение аренды с изменением ТД",
 }

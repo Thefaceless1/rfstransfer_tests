@@ -30,25 +30,21 @@ export class InstructionPage extends CreateInstructionPage {
     public readonly additionalAgreementForTk: string = InputData.randomWord
     public readonly createdTransferAgreementNumber: string = InputData.randomWord
     private readonly registerComment: string = InputData.randomWord
-    public readonly contractDurationDays: number = 30
+    public readonly contractDurationDays: number = 365
     public readonly extendContractCountDays: number = 5
+    public readonly daysCountBetweenContracts: number = 30
+    public readonly prevContractPrevClubStartDate: string = InputData.futureDate(-this.daysCountBetweenContracts,InputData.currentDate)
+    public readonly prevContractPrevClubEndDate: string = InputData.futureDate(this.contractDurationDays,this.prevContractPrevClubStartDate)
     public readonly prevContractNewClubStartDate: string
     public readonly prevContractNewClubEndDate: string
-    public readonly prevContractPrevClubStartDate: string
-    public readonly prevContractPrevClubEndDate: string
     public readonly newContractStartDate: string
     public readonly newContractEndDate: string
-    public readonly earlyFinishPrevContractStartDate: string = InputData.currentDate
-    public readonly earlyFinishPrevContractEndDate: string
     constructor(page: Page) {
         super(page);
-        this.earlyFinishPrevContractEndDate = InputData.futureDate(this.contractDurationDays,this.earlyFinishPrevContractStartDate)
-        this.prevContractNewClubEndDate = InputData.futureDate(-1,this.earlyFinishPrevContractStartDate)
-        this.prevContractNewClubStartDate = InputData.futureDate(-this.contractDurationDays,this.prevContractNewClubEndDate)
-        this.prevContractPrevClubEndDate = InputData.futureDate(-1,this.prevContractNewClubStartDate)
-        this.prevContractPrevClubStartDate = InputData.futureDate(-this.contractDurationDays,this.prevContractPrevClubEndDate)
-        this.newContractStartDate = InputData.futureDate(1,this.earlyFinishPrevContractEndDate)
-        this.newContractEndDate = InputData.futureDate(this.contractDurationDays,this.newContractStartDate)
+        this.prevContractNewClubStartDate = InputData.futureDate(this.daysCountBetweenContracts,this.prevContractPrevClubStartDate)
+        this.prevContractNewClubEndDate = InputData.futureDate(this.contractDurationDays/2,this.prevContractNewClubStartDate)
+        this.newContractStartDate = InputData.futureDate(this.daysCountBetweenContracts,this.prevContractNewClubEndDate)
+        this.newContractEndDate = InputData.futureDate(-this.daysCountBetweenContracts,this.prevContractPrevClubEndDate)
     }
     /**
      * Кнопка "Добавить"
@@ -461,17 +457,8 @@ export class InstructionPage extends CreateInstructionPage {
             await this.reason.click();
             await this.reasonValues.first().click();
         }
-        if (
-            createTransferOptions.transferContractType == TransferContractType.withSuspension &&
-            !await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible()
-        ) {
-            /*
-            * Для ТК "С приостановкой" заполняем поле "Дата возобновления ТД с пред. клубом" датой: -1 день от даты окончания пред. договора
-            * c пред. клубом для обхода коллизии "Дата возобновления старого ТД не меньше срока его окончания"
-            */
-            (createTransferOptions.isTransferForEarlyFinish) ?
-                await DateInput.fillDateInput(this.prevContractRestartDate,InputData.futureDate(-1,this.earlyFinishPrevContractEndDate)) :
-                await DateInput.fillDateInput(this.prevContractRestartDate,InputData.futureDate(-1,this.prevContractPrevClubEndDate));
+        if (createTransferOptions.transferContractType == TransferContractType.withSuspension &&
+            !await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible()) {
             const prevContractRestartDateValue: string | null = await this.prevContractRestartDate.last().getAttribute("value");
             if (prevContractRestartDateValue) this.prevContractRestartDateValue = prevContractRestartDateValue;
         }
@@ -590,32 +577,32 @@ export class InstructionPage extends CreateInstructionPage {
     /**
      * Создание и регистрация тестовой инструкции для сценария проверки инструкций других типов
      */
-    public async addTestInstruction(createOptions: CreateInstructionOptionsType): Promise<void> {
+    public async addTestInstruction(createOptions: CreateInstructionOptionsType, transferContractType?: TransferContractType): Promise<void> {
         await this.createInstruction({
             type: createOptions.type,
             subType: createOptions.subType,
-            clubId: createOptions.clubId
+            clubId: createOptions.clubId,
+            isInstructionForEarlyFinish: createOptions.isInstructionForEarlyFinish
         });
         if (createOptions.clubId == this.clubId) {
-            /*
-            * Если инструкция не типа "Досрочное завершение аренды", то предыдущий договора с новым клубом
-            * заполняем датам так, чтобы договор был в статусе "Активен"
-            */
+            (createOptions.isInstructionForEarlyFinish) ?
+                await this.addContract(this.prevContractPrevClubStartDate,this.prevContractPrevClubEndDate) :
+                await this.addContract(this.prevContractNewClubStartDate,this.prevContractNewClubEndDate);
+        }
+        else {
             (createOptions.isInstructionForEarlyFinish) ?
                 await this.addContract(this.prevContractNewClubStartDate,this.prevContractNewClubEndDate) :
-                await this.addContract(this.earlyFinishPrevContractStartDate,this.earlyFinishPrevContractEndDate);
+                await this.addContract(this.prevContractPrevClubStartDate,this.prevContractPrevClubEndDate);
         }
-        else if (createOptions.clubId == this.srcClubId) await this.addContract(this.prevContractPrevClubStartDate,this.prevContractPrevClubEndDate);
-        else await this.addContract(this.earlyFinishPrevContractStartDate,this.earlyFinishPrevContractEndDate);
         await Elements.waitForVisible(this.numberValueByName(this.createdContractNumber));
-        if (createOptions.type == InstructionTypes.transferAgreementOnRentTerms) {
-            (createOptions.isInstructionForEarlyFinish) ?
-            await this.addTransferAgreement({
-                transferContractType: TransferContractType.withSuspension,
-                isTransferForEarlyFinish: true
-            }) :
-            await this.addTransferAgreement({transferContractType: TransferContractType.withSuspension});
-        }
+        if (createOptions.type == InstructionTypes.transferAgreementOnRentTerms)
+            switch (transferContractType) {
+                case TransferContractType.withSuspension:
+                    await this.addTransferAgreement({transferContractType: TransferContractType.withSuspension});
+                    break;
+                case TransferContractType.withTermination:
+                    await this.addTransferAgreement({transferContractType: TransferContractType.withTermination});
+            }
         await this.isInstructionWithPayments(false).click();
         await this.registrationInstruction();
         await Elements.waitForVisible(this.instructionState(InstructionStates.registered));
@@ -670,8 +657,7 @@ export class InstructionPage extends CreateInstructionPage {
             prevContractNewClubEndDate = prevContractNewClub[0]["actual_end_date"].toLocaleDateString();
             if (prevContractNewClub[0]["restart_date"]) prevContractNewClubRestartDate = prevContractNewClub[0]["restart_date"].toLocaleDateString();
         }
-        if (transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithNewContract ||
-                transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithNewContract) {
+        if (transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithNewContract) {
             logger.info(`
                  Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, указано: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: actual_end_date: ${prevContractPrevClubEndDate}, указано: ${this.prevContractStopDateValue}
@@ -692,7 +678,8 @@ export class InstructionPage extends CreateInstructionPage {
                     prevContractNewClubEndDate == this.additionalAgreementDateEndByDs)
         }
         else if ((transferAgreementSubType == TransferAgreementRentSubTypes.toRent && transferContractType == TransferContractType.withTermination) ||
-                  transferAgreementSubType == TransferAgreementSubTypes.withoutBuyoutFromRent) {
+                  transferAgreementSubType == TransferAgreementSubTypes.withoutBuyoutFromRent ||
+                  transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithNewContract) {
             logger.info(`
                  Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, введено: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: end_date: ${prevContractPrevClubEndDate}, введено: ${this.prevContractStopDateValue}

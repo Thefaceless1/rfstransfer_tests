@@ -3,6 +3,7 @@ import {InstructionPage} from "../pages/InstructionPage";
 import {dbHelper} from "../db/DbHelper";
 import {InstructionTypes} from "./enums/InstructionTypes";
 import {TransferAgreementRentSubTypes} from "./enums/TransferAgreementRentSubTypes";
+import {TransferContractType} from "./enums/TransferContractType";
 
 type Fixtures = {
     employmentContract: InstructionPage,
@@ -54,11 +55,14 @@ export const test = base.extend<Fixtures>({
             type: InstructionTypes.newEmploymentContract,
             clubId: transferLeaseBuyout.srcClubId
         });
-        await transferLeaseBuyout.addTestInstruction({
+        await transferLeaseBuyout.addTestInstruction(
+            {
             type: InstructionTypes.transferAgreementOnRentTerms,
             subType: TransferAgreementRentSubTypes.toRent,
             clubId: transferLeaseBuyout.clubId
-        });
+            },
+            TransferContractType.withSuspension
+        );
         await use(transferLeaseBuyout);
         await dbHelper.deleteInstructions(transferLeaseBuyout.personId);
     },
@@ -81,11 +85,14 @@ export const test = base.extend<Fixtures>({
             type: InstructionTypes.newEmploymentContract,
             clubId: transferRentProlongation.srcClubId
         });
-        await transferRentProlongation.addTestInstruction({
+        await transferRentProlongation.addTestInstruction(
+            {
             type: InstructionTypes.transferAgreementOnRentTerms,
             subType: TransferAgreementRentSubTypes.toRent,
             clubId: transferRentProlongation.clubId
-        });
+            },
+            TransferContractType.withSuspension
+        );
         await use(transferRentProlongation);
         await dbHelper.deleteInstructions(transferRentProlongation.personId);
     },
@@ -95,24 +102,18 @@ export const test = base.extend<Fixtures>({
         await transferRentEarlyFinish.authorization();
         await transferRentEarlyFinish.addTestInstruction({
             type: InstructionTypes.newEmploymentContract,
-            clubId: transferRentEarlyFinish.earlyFinishSrcClubId
-        });
-        await transferRentEarlyFinish.addTestInstruction({
-            type: InstructionTypes.transferAgreementOnRentTerms,
-            subType: TransferAgreementRentSubTypes.toRent,
-            clubId: transferRentEarlyFinish.earlyFinishSrcClubId,
-            isInstructionForEarlyFinish: true
-        });
-        await transferRentEarlyFinish.addTestInstruction({
-            type: InstructionTypes.newEmploymentContract,
-            clubId: transferRentEarlyFinish.srcClubId
-        });
-        await transferRentEarlyFinish.addTestInstruction({
-            type: InstructionTypes.transferAgreementOnRentTerms,
-            subType: TransferAgreementRentSubTypes.toRent,
             clubId: transferRentEarlyFinish.clubId,
             isInstructionForEarlyFinish: true
         });
+        await transferRentEarlyFinish.addTestInstruction(
+            {
+            type: InstructionTypes.transferAgreementOnRentTerms,
+            subType: TransferAgreementRentSubTypes.toRent,
+            clubId: transferRentEarlyFinish.srcClubId,
+            isInstructionForEarlyFinish: true
+            },
+            TransferContractType.withTermination
+        );
         await use(transferRentEarlyFinish);
         await dbHelper.deleteInstructions(transferRentEarlyFinish.personId);
     },
@@ -135,7 +136,7 @@ export const test = base.extend<Fixtures>({
             type: InstructionTypes.transferAgreementOnRentTerms,
             subType: TransferAgreementRentSubTypes.toRent,
             clubId: intTransferGiveAwayProfessional.clubId
-        });
+        },TransferContractType.withSuspension);
         await use(intTransferGiveAwayProfessional);
         await dbHelper.deleteInstructions(intTransferGiveAwayProfessional.personId);
     }

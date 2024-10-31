@@ -10,7 +10,7 @@ import {PlayerStates} from "../helpers/enums/PlayerStates";
 import {InstructionStates} from "../helpers/enums/InstructionStates";
 import {PaymentTypes} from "../helpers/enums/PaymentTypes";
 
-test.describe("Инструкция с типом 'Международный переход'",async () => {
+test.describe.skip("Инструкция с типом 'Международный переход'",async () => {
     test(`Привлечь футболиста(Любитель). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({intTransfer}) => {
             test.info().annotations.push

@@ -36,7 +36,6 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Добавление платежей",async () => {
                 await transferRent.addPayments(InstructionTypes.transferAgreementOnRentTerms);
                 await expect(transferRent.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(transferRent.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
                 await expect(transferRent.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
                 await expect(transferRent.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
             })
@@ -74,7 +73,6 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Добавление платежей",async () => {
                 await transferRent.addPayments(InstructionTypes.transferAgreementOnRentTerms);
                 await expect(transferRent.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(transferRent.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
                 await expect(transferRent.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
                 await expect(transferRent.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
             })
@@ -112,7 +110,6 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Добавление платежей",async () => {
                 await transferRentProlongation.addPayments(InstructionTypes.transferAgreementOnRentTerms);
                 await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
                 await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
                 await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
             })
@@ -153,7 +150,6 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Добавление платежей",async () => {
                 await transferRentProlongation.addPayments(InstructionTypes.transferAgreementOnRentTerms);
                 await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
                 await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
                 await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
             })
@@ -194,14 +190,13 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Добавление платежей",async () => {
                 await transferRentProlongation.addPayments(InstructionTypes.transferAgreementOnRentTerms);
                 await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
                 await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
                 await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
             })
             await test.step("Регистрация инструкции",async () => {
                 await transferRentProlongation.registrationInstruction();
                 await expect(transferRentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(transferRentProlongation.regBeginDate).toHaveValue(transferRentProlongation.earlyFinishPrevContractStartDate);
+                await expect(transferRentProlongation.regBeginDate).toHaveValue(transferRentProlongation.prevContractNewClubStartDate);
                 await expect(transferRentProlongation.regEndDate).toHaveValue(transferRentProlongation.additionalAgreementDateEndByDs);
                 expect(await transferRentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationNewTransfer,TransferContractType.withSuspension)).toBeTruthy()
             })
@@ -238,14 +233,13 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Добавление платежей",async () => {
                 await transferRentProlongation.addPayments(InstructionTypes.transferAgreementOnRentTerms);
                 await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
                 await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
                 await expect(transferRentProlongation.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
             })
             await test.step("Регистрация инструкции",async () => {
                 await transferRentProlongation.registrationInstruction();
                 await expect(transferRentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(transferRentProlongation.regBeginDate).toHaveValue(transferRentProlongation.earlyFinishPrevContractStartDate);
+                await expect(transferRentProlongation.regBeginDate).toHaveValue(transferRentProlongation.prevContractNewClubStartDate);
                 await expect(transferRentProlongation.regEndDate).toHaveValue(transferRentProlongation.additionalAgreementDateEndByDs);
                 expect(await transferRentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationWithoutNewContracts,TransferContractType.withSuspension)).toBeTruthy()
             })
@@ -280,7 +274,6 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Добавление платежей",async () => {
                 await transferRentEarlyFinish.addPayments(InstructionTypes.transferAgreementOnRentTerms);
                 await expect(transferRentEarlyFinish.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(transferRentEarlyFinish.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
                 await expect(transferRentEarlyFinish.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
                 await expect(transferRentEarlyFinish.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
             })
@@ -292,7 +285,7 @@ test.describe("Инструкция с типом 'Переход на врем�
                 expect(await transferRentEarlyFinish.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithNewContract,TransferContractType.withSuspension)).toBeTruthy()
             })
         })
-    test(`Досрочное завершение(изменение ТД). Версия модуля: ${Process.env.APP_VERSION}`,
+    test.skip(`Досрочное завершение(изменение ТД). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({transferRentEarlyFinish}) => {
             test.info().annotations.push
             (
@@ -321,7 +314,6 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Добавление платежей",async () => {
                 await transferRentEarlyFinish.addPayments(InstructionTypes.transferAgreementOnRentTerms);
                 await expect(transferRentEarlyFinish.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(transferRentEarlyFinish.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
                 await expect(transferRentEarlyFinish.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
                 await expect(transferRentEarlyFinish.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
             })

@@ -24,8 +24,8 @@ export class InputData {
         const month: number = Number(fromDate?.slice(3,5))-1;
         const year: number = Number(fromDate?.slice(6));
         const msCountForFutureDate: number = (fromDate) ?
-            new Date(year,month,day).getTime() + (plusDaysCount * msInOneDay) :
-            Date.now() + (plusDaysCount * msInOneDay);
+            new Date(year,month,day).getTime() + (Math.round(plusDaysCount) * msInOneDay) :
+            Date.now() + (Math.round(plusDaysCount) * msInOneDay);
         return new Date(msCountForFutureDate).toLocaleDateString('ru-RU');
     }
     /**

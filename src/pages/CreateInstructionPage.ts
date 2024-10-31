@@ -14,7 +14,6 @@ export class CreateInstructionPage extends MainPage {
     private readonly person: string = "Автотест Трансфер"
     public readonly clubId: number = 279720
     public readonly srcClubId: number = 282970
-    public readonly earlyFinishSrcClubId: number = 280610
     constructor(page: Page) {
         super(page);
     }
@@ -178,19 +177,19 @@ export class CreateInstructionPage extends MainPage {
         if(createOptions.type == InstructionTypes.transferAgreement ||
            createOptions.type == InstructionTypes.transferAgreementOnRentTerms ||
            createOptions.type == InstructionTypes.internationalTransfer) {
-            if(createOptions.clubId == this.earlyFinishSrcClubId) {
-                await this.clubInput.fill(String(this.srcClubId))
-                await this.clubValue(this.srcClubId).click();
-                await this.srcClub.click();
-                await this.srcClubInput.fill(String(this.earlyFinishSrcClubId));
-                await this.srcClubValue(this.earlyFinishSrcClubId).click();
+           if (createOptions.isInstructionForEarlyFinish) {
+               await this.clubInput.fill(String(this.srcClubId))
+               await this.clubValue(this.srcClubId).click();
+               await this.srcClub.click();
+               await this.srcClubInput.fill(String(this.clubId));
+               await this.srcClubValue(this.clubId).click();
             }
             else {
-                await this.clubInput.fill(String(this.clubId))
-                await this.clubValue(this.clubId).click();
-                await this.srcClub.click();
-                await this.srcClubInput.fill(String(this.srcClubId));
-                await this.srcClubValue(this.srcClubId).click();
+               await this.clubInput.fill(String(this.clubId))
+               await this.clubValue(this.clubId).click();
+               await this.srcClub.click();
+               await this.srcClubInput.fill(String(this.srcClubId));
+               await this.srcClubValue(this.srcClubId).click();
             }
             if(createOptions.type == InstructionTypes.transferAgreement) {
                 switch (createOptions.subType) {

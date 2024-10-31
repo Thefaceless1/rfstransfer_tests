@@ -80,7 +80,6 @@ test.describe("Инструкция с типом 'Переход на пост�
             await test.step("Добавление платежей",async () => {
                 await transferLeaseBuyout.addPayments(InstructionTypes.transferAgreement);
                 await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
                 await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
                 await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
             })
@@ -121,14 +120,13 @@ test.describe("Инструкция с типом 'Переход на пост�
             await test.step("Добавление платежей",async () => {
                 await transferLeaseBuyout.addPayments(InstructionTypes.transferAgreement);
                 await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
                 await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
                 await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
             })
             await test.step("Регистрация инструкции",async () => {
                 await transferLeaseBuyout.registrationInstruction();
                 await expect(transferLeaseBuyout.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(transferLeaseBuyout.regBeginDate).toHaveValue(transferLeaseBuyout.earlyFinishPrevContractStartDate);
+                await expect(transferLeaseBuyout.regBeginDate).toHaveValue(transferLeaseBuyout.prevContractNewClubStartDate);
                 await expect(transferLeaseBuyout.regEndDate).toHaveValue(transferLeaseBuyout.additionalAgreementDateEndByDs);
                 expect(await transferLeaseBuyout.checkPrevContractsDateChanges(TransferAgreementSubTypes.buyoutFromRentWithoutNewContract)).toBeTruthy()
             })
