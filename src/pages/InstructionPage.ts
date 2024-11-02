@@ -19,6 +19,7 @@ import {PlayerStates} from "../helpers/enums/PlayerStates";
 import {RegistrationTypes} from "../helpers/enums/RegistrationTypes";
 import {IntTransferSubTypes} from "../helpers/enums/IntTransferSubTypes";
 import {CreateTransferOptionsType} from "../helpers/types/CreateTransferOptionsType";
+import {PaymentStates} from "../helpers/enums/PaymentStates";
 
 export class InstructionPage extends CreateInstructionPage {
     public prevContractStopDateValue: string = ''
@@ -131,6 +132,10 @@ export class InstructionPage extends CreateInstructionPage {
      */
     private readonly dateEndByDS: Locator = this.page.locator("//input[@name='dateEndByDS']")
     /**
+     * Кнопка "Да"
+     */
+    private readonly yesButton: Locator = this.page.locator("//button[text()='Да']")
+    /**
      * Заголовок поля "Комментарий к регистрации"
      */
     private readonly commentForRegistrationTitle: Locator = this.page.locator("//*[text()='Комментарий к регистрации']")
@@ -147,13 +152,37 @@ export class InstructionPage extends CreateInstructionPage {
      */
     private readonly reasonValues: Locator = this.page.locator("//*[contains(@class,'reason__option')]")
     /**
+     * Поле "Причина отмены"
+     */
+    private readonly cancelReason: Locator = this.page.locator("//div[@class='flex justify-between'][.//div[text()='Причина отмены']]//following-sibling::div//input")
+    /**
+     * Значения выпадающего списка поля "Причина"
+     */
+    private readonly submitPerformButton: Locator = this.page.locator("//button[text()='Подтвердить выполнение' and not(@disabled)]")
+    /**
      * Поле "ID перехода"
      */
     private readonly transitionId: Locator = this.page.locator("//input[@name='transitionNumber']")
     /**
+     * Кнопка управления статусами выплат
+     */
+    private readonly paymentStateManagementButton: Locator = this.page.locator("//button[.//span[contains(@class,'IconKebab ')]]")
+    /**
+     * Кнопка "Управление фактическими платежами"
+     */
+    private readonly managementFactPaymentsButton: Locator = this.page.locator("//button[@data-tooltip-content='Управление фактическими платежами']")
+    /**
      * Поле "Дисциплина"
      */
     private readonly discipline: Locator = this.page.locator("//*[contains(@class,'discipline__dropdown')]")
+    /**
+     * Кнопка "Отменить выплату"
+     */
+    private readonly cancelPaymentButton: Locator = this.page.locator("//div[text()='Отменить выплату']")
+    /**
+     * Кнопка "Вернуть предыдущий статус"
+     */
+    private readonly returnPreviousState: Locator = this.page.locator("//div[text()='Вернуть предыдущий статус']")
     /**
      * Значения выпадающего списка поля "Дисциплина"
      */
@@ -226,7 +255,17 @@ export class InstructionPage extends CreateInstructionPage {
      * Получение значения поля "Номер" таблицы списка договоров и доп. соглашений по наименованию
      */
     public numberValueByName(text: string): Locator {
-        return this.page.locator("//span[contains(@id,'cell-number')]",{hasText: text})
+        return this.page.locator("//span[contains(@id,'cell-number')]",{hasText: text});
+    }
+    /**
+     * Выбранный тип выплаты с указанным статусом
+     */
+    public paymentState(paymentType: PaymentTypes, paymentState: PaymentStates): Locator {
+        if (paymentType == PaymentTypes.ransomPayment || paymentType == PaymentTypes.fixedPayment)
+            return this.page.locator(`//div[@row-index='0']//div[text()='${paymentState}']`);
+        else if (paymentType == PaymentTypes.conditionalPayment)
+            return this.page.locator(`//div[@row-index='1']//div[text()='${paymentState}']`);
+        else return this.page.locator(`//div[@row-index='2']//div[text()='${paymentState}']`);
     }
     /**
      * Заголовок с выбранным типом инструкции
@@ -245,12 +284,6 @@ export class InstructionPage extends CreateInstructionPage {
      */
     public instructionState(stateText: InstructionStates): Locator {
         return this.page.locator("//*[contains(@class,'Badge_status')]",{hasText: stateText});
-    }
-    /**
-     * Значение столбца "Тип платежа" в таблице добавленных платежей
-     */
-    public paymentTypeColumnValue(paymentType: PaymentTypes): Locator {
-        return this.page.locator("//*[@col-id='type']//*//span",{hasText: paymentType});
     }
     /**
      * Иконка файла выбранного формата
@@ -323,56 +356,71 @@ export class InstructionPage extends CreateInstructionPage {
     /**
      * Поле "Сумма платежа" выбранного типа платежа
      */
-    private paymentAmount(paymentType: PaymentTypes): Locator {
-        switch (paymentType) {
-            case PaymentTypes.fixedPayment: return this.page.locator("//input[@name='Fix.0.parts.0.summa']");
-            case PaymentTypes.conditionalPayment: return this.page.locator("//input[@name='Conditional.0.parts.0.summa']");
-            case PaymentTypes.ransomPayment: return this.page.locator("//input[@name='Buyout.0.parts.0.summa']");
-            default: throw new Error("Поле 'Сумма платежа' не существует для указанного типа платежа'");
+    private paymentAmount(paymentType: PaymentTypes, isFactPayment?: boolean): Locator {
+        if (isFactPayment) return this.page.locator("//input[@name='Facts.0.summa']");
+        else {
+            switch (paymentType) {
+                case PaymentTypes.fixedPayment: return this.page.locator("//input[@name='Fix.0.parts.0.summa']");
+                case PaymentTypes.conditionalPayment: return this.page.locator("//input[@name='Conditional.0.parts.0.summa']");
+                case PaymentTypes.ransomPayment: return this.page.locator("//input[@name='Buyout.0.parts.0.summa']");
+                default: throw new Error("Поле 'Сумма платежа' не существует для указанного типа платежа'");
+            }
         }
     }
     /**
      * Поле "Валюта" выбранного типа платежа
      */
-    private currency(paymentType: PaymentTypes): Locator {
-        switch (paymentType) {
-            case PaymentTypes.fixedPayment: return this.page.locator("//*[contains(@class,'Fix.0.currency__indicators')]");
-            case PaymentTypes.conditionalPayment: return this.page.locator("//*[contains(@class,'Conditional.0.currency__indicators')]");
-            case PaymentTypes.ransomPayment: return this.page.locator("//*[contains(@class,'Buyout.0.currency__indicators')]");
-            default: throw new Error("Поле 'Валюта' не существует для указанного типа платежа'");
+    private currency(paymentType: PaymentTypes, isFactPayment?: boolean): Locator {
+        if (isFactPayment) return this.page.locator("//*[contains(@class,'Facts.0.currency__indicators')]");
+        else {
+            switch (paymentType) {
+                case PaymentTypes.fixedPayment: return this.page.locator("//*[contains(@class,'Fix.0.currency__indicators')]");
+                case PaymentTypes.conditionalPayment: return this.page.locator("//*[contains(@class,'Conditional.0.currency__indicators')]");
+                case PaymentTypes.ransomPayment: return this.page.locator("//*[contains(@class,'Buyout.0.currency__indicators')]");
+                default: throw new Error("Поле 'Валюта' не существует для указанного типа платежа'");
+            }
         }
     }
     /**
      * Значения выпадающего списка поля "Валюта" выбранного типа платежа
      */
-    private currencyValues(paymentType: PaymentTypes): Locator {
-        switch (paymentType) {
-            case PaymentTypes.fixedPayment: return this.page.locator("//*[contains(@class,'Fix.0.currency__option')]");
-            case PaymentTypes.conditionalPayment: return this.page.locator("//*[contains(@class,'Conditional.0.currency__option')]");
-            case PaymentTypes.ransomPayment: return this.page.locator("//*[contains(@class,'Buyout.0.currency__option')]");
-            default: throw new Error("Поле 'Список валют' не существует для указанного типа платежа'");
+    private currencyValues(paymentType: PaymentTypes, isFactPayment?: boolean): Locator {
+        if (isFactPayment) return this.page.locator("//*[contains(@class,'Facts.0.currency__option')]");
+        else {
+            switch (paymentType) {
+                case PaymentTypes.fixedPayment: return this.page.locator("//*[contains(@class,'Fix.0.currency__option')]");
+                case PaymentTypes.conditionalPayment: return this.page.locator("//*[contains(@class,'Conditional.0.currency__option')]");
+                case PaymentTypes.ransomPayment: return this.page.locator("//*[contains(@class,'Buyout.0.currency__option')]");
+                default: throw new Error("Поле 'Список валют' не существует для указанного типа платежа'");
+            }
         }
     }
     /**
      * Поле "Примечание" выбранного типа платежа
      */
-    private paymentNote(paymentType: PaymentTypes): Locator {
-        switch (paymentType) {
-            case PaymentTypes.fixedPayment: return this.page.locator("//textarea[@name='Fix.0.note']");
-            case PaymentTypes.conditionalPayment: return this.page.locator("//textarea[@name='Conditional.0.note']");
-            case PaymentTypes.ransomPayment: return this.page.locator("//textarea[@name='Buyout.0.note']");
-            case PaymentTypes.resalePayment: return this.page.locator("//textarea[@name='Resale.0.note']");
+    private paymentNote(paymentType: PaymentTypes, isFactPayment?: boolean): Locator {
+        if (isFactPayment) return this.page.locator("//textarea[@name='Facts.0.note']");
+        else {
+            switch (paymentType) {
+                case PaymentTypes.fixedPayment: return this.page.locator("//textarea[@name='Fix.0.note']");
+                case PaymentTypes.conditionalPayment: return this.page.locator("//textarea[@name='Conditional.0.note']");
+                case PaymentTypes.ransomPayment: return this.page.locator("//textarea[@name='Buyout.0.note']");
+                case PaymentTypes.resalePayment: return this.page.locator("//textarea[@name='Resale.0.note']");
+            }
         }
     }
     /**
      * Поле "Дата" выбранного типа платежа
      */
-    private paymentDate(paymentType: PaymentTypes): Locator {
-        switch (paymentType) {
-            case PaymentTypes.fixedPayment: return this.page.locator("//input[@name='Fix.0.parts.0.planeDate']");
-            case PaymentTypes.conditionalPayment: return this.page.locator("//input[@name='Conditional.0.parts.0.planeDate']");
-            case PaymentTypes.ransomPayment: return this.page.locator("//input[@name='Buyout.0.parts.0.planeDate']");
-            default: throw new Error("Поле 'Дата' не существует для указанного типа платежа'");
+    private paymentDate(paymentType: PaymentTypes, isFactPayment?: boolean): Locator {
+        if (isFactPayment) return this.page.locator("//input[@name='Facts.0.factDate']");
+        else {
+            switch (paymentType) {
+                case PaymentTypes.fixedPayment: return this.page.locator("//input[@name='Fix.0.parts.0.planeDate']");
+                case PaymentTypes.conditionalPayment: return this.page.locator("//input[@name='Conditional.0.parts.0.planeDate']");
+                case PaymentTypes.ransomPayment: return this.page.locator("//input[@name='Buyout.0.parts.0.planeDate']");
+                default: throw new Error("Поле 'Дата' не существует для указанного типа платежа'");
+            }
         }
     }
     /**
@@ -545,15 +593,14 @@ export class InstructionPage extends CreateInstructionPage {
         }
     }
     /**
-     * Добавление выплат для инструкций
+     * Добавление плановых выплат для инструкций
      */
     public async addPayments(instructionType: InstructionTypes): Promise<void> {
         await this.isInstructionWithPayments(true).click();
         for (const paymentType of Object.values(PaymentTypes)) {
-            if (
-                (instructionType == InstructionTypes.newEmploymentContract && paymentType != PaymentTypes.ransomPayment) ||
-                (instructionType != InstructionTypes.newEmploymentContract && paymentType == PaymentTypes.ransomPayment)
-            ) continue;
+            if ((instructionType == InstructionTypes.newEmploymentContract && paymentType != PaymentTypes.ransomPayment) ||
+                (instructionType != InstructionTypes.newEmploymentContract && paymentType == PaymentTypes.ransomPayment))
+                continue;
             if (paymentType != PaymentTypes.resalePayment) {
                 const paymentAmount: number = randomInt(10,10000);
                 await this.totalAmount(paymentType).fill(String(paymentAmount));
@@ -573,6 +620,54 @@ export class InstructionPage extends CreateInstructionPage {
             }
         }
         await this.onwardButton.click();
+    }
+    /**
+     * Добавление фактических платежей
+     */
+    public async addFactPayments(instructionType: InstructionTypes): Promise<void> {
+        for (const paymentType of Object.values(PaymentTypes)) {
+            if ((instructionType == InstructionTypes.newEmploymentContract && paymentType != PaymentTypes.ransomPayment) ||
+                (instructionType != InstructionTypes.newEmploymentContract && paymentType == PaymentTypes.ransomPayment))
+                continue;
+            else {
+                const paymentAmount: number = randomInt(10,10000);
+                if (paymentType == PaymentTypes.fixedPayment || paymentType == PaymentTypes.ransomPayment)
+                    await this.managementFactPaymentsButton.first().click();
+                else if (paymentType == PaymentTypes.conditionalPayment)
+                    await this.managementFactPaymentsButton.nth(1).click();
+                else await this.managementFactPaymentsButton.last().click();
+                await this.documents.first().setInputFiles(InputData.getTestFiles("pdf"));
+                await Elements.waitForVisible(this.fileIcon("pdf"));
+                await this.paymentAmount(paymentType,true).fill(String(paymentAmount));
+                await this.currency(paymentType,true).click();
+                await this.currencyValues(paymentType,true).first().click();
+                await this.paymentNote(paymentType,true).fill(InputData.randomWord);
+                await DateInput.fillDateInput(this.paymentDate(paymentType,true),InputData.currentDate);
+                await this.submitPerformButton.click();
+                await this.submitButton.click();
+            }
+        }
+    }
+    /**
+     * Отмена выплаты
+     */
+    public async cancelPayment(): Promise<void> {
+        await this.paymentStateManagementButton.first().click();
+        await this.cancelPaymentButton.click();
+        await this.cancelReason.fill(InputData.randomWord);
+        await this.cancelButton.click();
+    }
+    /**
+     * Возврат выплаты в предыдущий статус
+     */
+    public async returnPaymentToPrevState(): Promise<void> {
+        const paymentsCount: number = await this.paymentStateManagementButton.count();
+        for (let i = 0; i < paymentsCount; i++) {
+            await this.paymentStateManagementButton.nth(i).click();
+            await this.returnPreviousState.click();
+            await this.yesButton.click();
+        }
+        await this.page.pause()
     }
     /**
      * Создание и регистрация тестовой инструкции для сценария проверки инструкций других типов

@@ -7,6 +7,7 @@ import {expect} from "@playwright/test";
 import {TransferAgreementSubTypes} from "../helpers/enums/TransferAgreementSubTypes";
 import {PaymentTypes} from "../helpers/enums/PaymentTypes";
 import {InstructionStates} from "../helpers/enums/InstructionStates";
+import {PaymentStates} from "../helpers/enums/PaymentStates";
 
 test.describe("Инструкция с типом 'Переход на постоянной основе'",() => {
     test(`Без выкупа из аренды. Версия модуля: ${Process.env.APP_VERSION}`,
@@ -38,9 +39,9 @@ test.describe("Инструкция с типом 'Переход на пост�
             })
             await test.step("Добавление платежей",async () => {
                 await transfer.addPayments(InstructionTypes.transferAgreement);
-                await expect(transfer.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(transfer.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
-                await expect(transfer.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
+                await expect(transfer.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(transfer.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(transfer.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Регистрация инструкции",async () => {
                 await transfer.registrationInstruction();
@@ -48,6 +49,22 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(transfer.regBeginDate).toHaveValue(transfer.newContractStartDate);
                 await expect(transfer.regEndDate).toHaveValue(transfer.newContractEndDate);
                 expect(await transfer.checkPrevContractsDateChanges(TransferAgreementSubTypes.withoutBuyoutFromRent)).toBeTruthy()
+            })
+            await test.step("Добавление и подтверждение фактических платежей",async () => {
+                await transfer.addFactPayments(InstructionTypes.transferAgreement);
+                await expect(transfer.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
+                await expect(transfer.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
+                await expect(transfer.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+            })
+            await test.step("Возврат выплат в предыдущий статус",async () => {
+                await transfer.returnPaymentToPrevState();
+                await expect(transfer.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(transfer.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(transfer.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+            })
+            await test.step("Отмена выплаты",async () => {
+                await transfer.cancelPayment();
+                await expect(transfer.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
         })
     test(`Выкуп из аренды с расторжением. Версия модуля: ${Process.env.APP_VERSION}`,
@@ -79,9 +96,9 @@ test.describe("Инструкция с типом 'Переход на пост�
             })
             await test.step("Добавление платежей",async () => {
                 await transferLeaseBuyout.addPayments(InstructionTypes.transferAgreement);
-                await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
-                await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Регистрация инструкции",async () => {
                 await transferLeaseBuyout.registrationInstruction();
@@ -89,6 +106,22 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(transferLeaseBuyout.regBeginDate).toHaveValue(transferLeaseBuyout.newContractStartDate);
                 await expect(transferLeaseBuyout.regEndDate).toHaveValue(transferLeaseBuyout.newContractEndDate);
                 expect(await transferLeaseBuyout.checkPrevContractsDateChanges(TransferAgreementSubTypes.buyoutFromRentWithNewContract)).toBeTruthy()
+            })
+            await test.step("Добавление и подтверждение фактических платежей",async () => {
+                await transferLeaseBuyout.addFactPayments(InstructionTypes.transferAgreement);
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+            })
+            await test.step("Возврат выплат в предыдущий статус",async () => {
+                await transferLeaseBuyout.returnPaymentToPrevState();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+            })
+            await test.step("Отмена выплаты",async () => {
+                await transferLeaseBuyout.cancelPayment();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
         })
     test(`Выкуп из аренды без расторжения. Версия модуля: ${Process.env.APP_VERSION}`,
@@ -119,9 +152,9 @@ test.describe("Инструкция с типом 'Переход на пост�
             })
             await test.step("Добавление платежей",async () => {
                 await transferLeaseBuyout.addPayments(InstructionTypes.transferAgreement);
-                await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
-                await expect(transferLeaseBuyout.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Регистрация инструкции",async () => {
                 await transferLeaseBuyout.registrationInstruction();
@@ -129,6 +162,22 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(transferLeaseBuyout.regBeginDate).toHaveValue(transferLeaseBuyout.prevContractNewClubStartDate);
                 await expect(transferLeaseBuyout.regEndDate).toHaveValue(transferLeaseBuyout.additionalAgreementDateEndByDs);
                 expect(await transferLeaseBuyout.checkPrevContractsDateChanges(TransferAgreementSubTypes.buyoutFromRentWithoutNewContract)).toBeTruthy()
+            })
+            await test.step("Добавление и подтверждение фактических платежей",async () => {
+                await transferLeaseBuyout.addFactPayments(InstructionTypes.transferAgreement);
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+            })
+            await test.step("Возврат выплат в предыдущий статус",async () => {
+                await transferLeaseBuyout.returnPaymentToPrevState();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+            })
+            await test.step("Отмена выплаты",async () => {
+                await transferLeaseBuyout.cancelPayment();
+                await expect(transferLeaseBuyout.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
         })
 })

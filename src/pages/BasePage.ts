@@ -14,7 +14,11 @@ export class BasePage extends PlaywrightDevPage{
      */
     protected readonly saveButton: Locator = this.page.locator("//button[text()='Сохранить']")
     /**
-     * Кнопка "Да"
+     * Кнопка "Подтвердить"
      */
-    protected readonly yesButton: Locator = this.page.locator("//button[text()='Да']")
+    protected readonly submitButton: Locator = this.page.locator("//button[text()='Подтвердить']")
+    /**
+     * Кнопка "Отменить"
+     */
+    protected readonly cancelButton: Locator = this.page.locator("//span[text()='Отменить']")
 }

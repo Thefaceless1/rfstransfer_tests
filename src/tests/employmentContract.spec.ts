@@ -7,6 +7,7 @@ import {expect} from "@playwright/test";
 import 'dotenv/config'
 import {InstructionStates} from "../helpers/enums/InstructionStates";
 import {PaymentTypes} from "../helpers/enums/PaymentTypes";
+import {PaymentStates} from "../helpers/enums/PaymentStates";
 
 test.describe("Инструкция с типом 'Трудовой договор'",() => {
     test(`Версия модуля: ${Process.env.APP_VERSION}`,
@@ -34,7 +35,7 @@ test.describe("Инструкция с типом 'Трудовой догово
         })
         await test.step("Добавление планового платежа 'Выплата за расторжение(выкуп)'",async () => {
             await employmentContract.addPayments(InstructionTypes.newEmploymentContract);
-            await expect(employmentContract.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
+            await expect(employmentContract.paymentState(PaymentTypes.ransomPayment, PaymentStates.expired)).toBeVisible();
         })
         await test.step("Регистрация инструкции",async () => {
             await employmentContract.registrationInstruction();
@@ -42,6 +43,18 @@ test.describe("Инструкция с типом 'Трудовой догово
             await expect(employmentContract.registerCommentValue).toBeVisible();
             await expect(employmentContract.regBeginDate).toHaveValue(employmentContract.prevContractPrevClubStartDate);
             await expect(employmentContract.regEndDate).toHaveValue(String(employmentContract.prevContractPrevClubEndDate));
+        })
+        await test.step("Добавление и подтверждение фактического платежа",async () => {
+            await employmentContract.addFactPayments(InstructionTypes.newEmploymentContract);
+            await expect(employmentContract.paymentState(PaymentTypes.ransomPayment, PaymentStates.completed)).toBeVisible();
+        })
+        await test.step("Возврат выплаты в предыдущий статус",async () => {
+            await employmentContract.returnPaymentToPrevState();
+            await expect(employmentContract.paymentState(PaymentTypes.ransomPayment, PaymentStates.expired)).toBeVisible();
+        })
+        await test.step("Отмена выплаты",async () => {
+            await employmentContract.cancelPayment();
+            await expect(employmentContract.paymentState(PaymentTypes.ransomPayment, PaymentStates.cancelled)).toBeVisible();
         })
     })
 })
