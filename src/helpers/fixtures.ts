@@ -9,10 +9,10 @@ type Fixtures = {
     employmentContract: InstructionPage,
     additionalAgreement: InstructionPage,
     transfer: InstructionPage,
-    transferLeaseBuyout: InstructionPage,
+    leaseBuyout: InstructionPage,
     transferRent: InstructionPage,
-    transferRentProlongation: InstructionPage,
-    transferRentEarlyFinish: InstructionPage,
+    rentProlongation: InstructionPage,
+    earlyFinishRentNewTd: InstructionPage,
     intTransfer: InstructionPage
     intTransferGiveAwayProfessional: InstructionPage
 }
@@ -47,24 +47,24 @@ export const test = base.extend<Fixtures>({
         await use(transfer);
         await dbHelper.deleteInstructions(transfer.personId);
     },
-    transferLeaseBuyout: async ({page},use) => {
-        const transferLeaseBuyout = new InstructionPage(page);
-        await dbHelper.deleteInstructions(transferLeaseBuyout.personId);
-        await transferLeaseBuyout.authorization();
-        await transferLeaseBuyout.addTestInstruction({
+    leaseBuyout: async ({page},use) => {
+        const leaseBuyout = new InstructionPage(page);
+        await dbHelper.deleteInstructions(leaseBuyout.personId);
+        await leaseBuyout.authorization();
+        await leaseBuyout.addTestInstruction({
             type: InstructionTypes.newEmploymentContract,
-            clubId: transferLeaseBuyout.srcClubId
+            clubId: leaseBuyout.srcClubId
         });
-        await transferLeaseBuyout.addTestInstruction(
+        await leaseBuyout.addTestInstruction(
             {
             type: InstructionTypes.transferAgreementOnRentTerms,
             subType: TransferAgreementRentSubTypes.toRent,
-            clubId: transferLeaseBuyout.clubId
+            clubId: leaseBuyout.clubId
             },
             TransferContractType.withSuspension
         );
-        await use(transferLeaseBuyout);
-        await dbHelper.deleteInstructions(transferLeaseBuyout.personId);
+        await use(leaseBuyout);
+        await dbHelper.deleteInstructions(leaseBuyout.personId);
     },
     transferRent: async ({page},use) => {
         const transferRent = new InstructionPage(page);
@@ -77,29 +77,30 @@ export const test = base.extend<Fixtures>({
         await use(transferRent);
         await dbHelper.deleteInstructions(transferRent.personId);
     },
-    transferRentProlongation: async ({page},use)=> {
-        const transferRentProlongation = new InstructionPage(page);
-        await dbHelper.deleteInstructions(transferRentProlongation.personId);
-        await transferRentProlongation.authorization();
-        await transferRentProlongation.addTestInstruction({
+    rentProlongation: async ({page},use)=> {
+        const rentProlongation = new InstructionPage(page);
+        await dbHelper.deleteInstructions(rentProlongation.personId);
+        await rentProlongation.authorization();
+        await rentProlongation.addTestInstruction({
             type: InstructionTypes.newEmploymentContract,
-            clubId: transferRentProlongation.srcClubId
+            clubId: rentProlongation.srcClubId
         });
-        await transferRentProlongation.addTestInstruction(
+        await rentProlongation.addTestInstruction(
             {
             type: InstructionTypes.transferAgreementOnRentTerms,
             subType: TransferAgreementRentSubTypes.toRent,
-            clubId: transferRentProlongation.clubId
+            clubId: rentProlongation.clubId
             },
             TransferContractType.withSuspension
         );
-        await use(transferRentProlongation);
-        await dbHelper.deleteInstructions(transferRentProlongation.personId);
+        await use(rentProlongation);
+        await dbHelper.deleteInstructions(rentProlongation.personId);
     },
-    transferRentEarlyFinish: async ({page},use)=> {
+    earlyFinishRentNewTd: async ({page},use,testInfo)=> {
         const transferRentEarlyFinish = new InstructionPage(page);
         await dbHelper.deleteInstructions(transferRentEarlyFinish.personId);
         await transferRentEarlyFinish.authorization();
+        const earlyFinishChangeTdTestId: string = "405e690b3f4edc939e5f-4fc4d1d194cd58b7fbab";
         await transferRentEarlyFinish.addTestInstruction({
             type: InstructionTypes.newEmploymentContract,
             clubId: transferRentEarlyFinish.clubId,
@@ -112,7 +113,9 @@ export const test = base.extend<Fixtures>({
             clubId: transferRentEarlyFinish.srcClubId,
             isInstructionForEarlyFinish: true
             },
-            TransferContractType.withTermination
+            (testInfo.testId == earlyFinishChangeTdTestId) ?
+                TransferContractType.withSuspension:
+                TransferContractType.withTermination
         );
         await use(transferRentEarlyFinish);
         await dbHelper.deleteInstructions(transferRentEarlyFinish.personId);

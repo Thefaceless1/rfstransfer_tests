@@ -118,7 +118,7 @@ test.describe("Инструкция с типом 'Переход на врем�
             })
         })
     test(`Продление аренды(новый ТД, новый ТК). Версия модуля: ${Process.env.APP_VERSION}`,
-        async ({transferRentProlongation}) => {
+        async ({rentProlongation}) => {
             test.info().annotations.push
             (
                 {type: "Дата и время запуска",description: InputData.testAnnotationDate},
@@ -126,52 +126,52 @@ test.describe("Инструкция с типом 'Переход на врем�
                 {type: "Адрес сервера",description: `${config.use?.baseURL}`}
             );
             await test.step("Создание инструкции", async () => {
-                await transferRentProlongation.createInstruction({
+                await rentProlongation.createInstruction({
                     type: InstructionTypes.transferAgreementOnRentTerms,
                     subType: TransferAgreementRentSubTypes.prolongationNewContractNewTransfer
                 });
-                await expect(transferRentProlongation.instructionName).toBeVisible();
+                await expect(rentProlongation.instructionName).toBeVisible();
             })
             await test.step("Добавление трудового договора",async () => {
-                await transferRentProlongation.addContract(transferRentProlongation.newContractStartDate,transferRentProlongation.newContractEndDate);
-                await expect(transferRentProlongation.numberValueByName(transferRentProlongation.createdContractNumber)).toBeVisible();
+                await rentProlongation.addContract(rentProlongation.newContractStartDate,rentProlongation.newContractEndDate);
+                await expect(rentProlongation.numberValueByName(rentProlongation.createdContractNumber)).toBeVisible();
             })
             await test.step("Добавление трансферного контракта",async () => {
-                await transferRentProlongation.addTransferAgreement({transferContractType: TransferContractType.withSuspension});
-                await expect(transferRentProlongation.numberValueByName(transferRentProlongation.createdTransferAgreementNumber)).toBeVisible();
+                await rentProlongation.addTransferAgreement({transferContractType: TransferContractType.withSuspension});
+                await expect(rentProlongation.numberValueByName(rentProlongation.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
-                await transferRentProlongation.addPayments(InstructionTypes.transferAgreementOnRentTerms);
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+                await rentProlongation.addPayments(InstructionTypes.transferAgreementOnRentTerms);
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Регистрация инструкции",async () => {
-                await transferRentProlongation.registrationInstruction();
-                await expect(transferRentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(transferRentProlongation.regBeginDate).toHaveValue(transferRentProlongation.newContractStartDate);
-                await expect(transferRentProlongation.regEndDate).toHaveValue(transferRentProlongation.newContractEndDate);
-                expect(await transferRentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationNewContractNewTransfer,TransferContractType.withSuspension)).toBeTruthy()
+                await rentProlongation.registrationInstruction();
+                await expect(rentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
+                await expect(rentProlongation.regBeginDate).toHaveValue(rentProlongation.newContractStartDate);
+                await expect(rentProlongation.regEndDate).toHaveValue(rentProlongation.newContractEndDate);
+                expect(await rentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationNewContractNewTransfer,TransferContractType.withSuspension)).toBeTruthy()
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
-                await transferRentProlongation.addFactPayments(InstructionTypes.transferAgreement);
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+                await rentProlongation.addFactPayments(InstructionTypes.transferAgreement);
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
-                await transferRentProlongation.returnPaymentToPrevState();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+                await rentProlongation.returnPaymentToPrevState();
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Отмена выплаты",async () => {
-                await transferRentProlongation.cancelPayment();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
+                await rentProlongation.cancelPayment();
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
         })
     test(`Продление аренды(новый ТД, ДС к ТК). Версия модуля: ${Process.env.APP_VERSION}`,
-        async ({transferRentProlongation}) => {
+        async ({rentProlongation}) => {
             test.info().annotations.push
             (
                 {type: "Дата и время запуска",description: InputData.testAnnotationDate},
@@ -179,55 +179,55 @@ test.describe("Инструкция с типом 'Переход на врем�
                 {type: "Адрес сервера",description: `${config.use?.baseURL}`}
             );
             await test.step("Создание инструкции", async () => {
-                await transferRentProlongation.createInstruction({
+                await rentProlongation.createInstruction({
                     type: InstructionTypes.transferAgreementOnRentTerms,
                     subType: TransferAgreementRentSubTypes.prolongationNewContract
                 });
-                await expect(transferRentProlongation.instructionName).toBeVisible();
+                await expect(rentProlongation.instructionName).toBeVisible();
             })
             await test.step("Наличие автоматически добавленного ТК",async () => {
-                await expect(transferRentProlongation.numberValueByName(transferRentProlongation.createdTransferAgreementNumber)).toBeVisible();
+                await expect(rentProlongation.numberValueByName(rentProlongation.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление трудового договора",async () => {
-                await transferRentProlongation.addContract(transferRentProlongation.newContractStartDate,transferRentProlongation.newContractEndDate);
-                await expect(transferRentProlongation.numberValueByName(transferRentProlongation.createdContractNumber)).toBeVisible();
+                await rentProlongation.addContract(rentProlongation.newContractStartDate,rentProlongation.newContractEndDate);
+                await expect(rentProlongation.numberValueByName(rentProlongation.createdContractNumber)).toBeVisible();
             })
             await test.step("Добавление ДС к ТК",async () => {
-                await transferRentProlongation.addAdditionalAgreementForTk();
-                await expect(transferRentProlongation.numberValueByName(transferRentProlongation.additionalAgreementForTk)).toBeVisible();
+                await rentProlongation.addAdditionalAgreementForTk();
+                await expect(rentProlongation.numberValueByName(rentProlongation.additionalAgreementForTk)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
-                await transferRentProlongation.addPayments(InstructionTypes.transferAgreementOnRentTerms);
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+                await rentProlongation.addPayments(InstructionTypes.transferAgreementOnRentTerms);
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Регистрация инструкции",async () => {
-                await transferRentProlongation.registrationInstruction();
-                await expect(transferRentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(transferRentProlongation.regBeginDate).toHaveValue(transferRentProlongation.newContractStartDate);
-                await expect(transferRentProlongation.regEndDate).toHaveValue(transferRentProlongation.newContractEndDate);
-                expect(await transferRentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationNewContract,TransferContractType.withSuspension)).toBeTruthy()
+                await rentProlongation.registrationInstruction();
+                await expect(rentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
+                await expect(rentProlongation.regBeginDate).toHaveValue(rentProlongation.newContractStartDate);
+                await expect(rentProlongation.regEndDate).toHaveValue(rentProlongation.newContractEndDate);
+                expect(await rentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationNewContract,TransferContractType.withSuspension)).toBeTruthy()
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
-                await transferRentProlongation.addFactPayments(InstructionTypes.transferAgreement);
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+                await rentProlongation.addFactPayments(InstructionTypes.transferAgreement);
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
-                await transferRentProlongation.returnPaymentToPrevState();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+                await rentProlongation.returnPaymentToPrevState();
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Отмена выплаты",async () => {
-                await transferRentProlongation.cancelPayment();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
+                await rentProlongation.cancelPayment();
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
         })
     test(`Продление аренды(ДС к ТД, новый ТК). Версия модуля: ${Process.env.APP_VERSION}`,
-        async ({transferRentProlongation}) => {
+        async ({rentProlongation}) => {
             test.info().annotations.push
             (
                 {type: "Дата и время запуска",description: InputData.testAnnotationDate},
@@ -235,55 +235,55 @@ test.describe("Инструкция с типом 'Переход на врем�
                 {type: "Адрес сервера",description: `${config.use?.baseURL}`}
             );
             await test.step("Создание инструкции", async () => {
-                await transferRentProlongation.createInstruction({
+                await rentProlongation.createInstruction({
                     type: InstructionTypes.transferAgreementOnRentTerms,
                     subType: TransferAgreementRentSubTypes.prolongationNewTransfer
                 });
-                await expect(transferRentProlongation.instructionName).toBeVisible();
+                await expect(rentProlongation.instructionName).toBeVisible();
             })
             await test.step("Наличие автоматически добавленного пред. договора с новым клубом",async () => {
-                await expect(transferRentProlongation.numberValueByName(transferRentProlongation.createdContractNumber)).toBeVisible();
+                await expect(rentProlongation.numberValueByName(rentProlongation.createdContractNumber)).toBeVisible();
             })
             await test.step("Добавление дополнительного соглашения на продление",async () => {
-                await transferRentProlongation.addAdditionalAgreement(true,transferRentProlongation.newContractStartDate);
-                await expect(transferRentProlongation.numberValueByName(transferRentProlongation.additionalAgreementWithChangeDate)).toBeVisible();
+                await rentProlongation.addAdditionalAgreement(true,rentProlongation.newContractStartDate);
+                await expect(rentProlongation.numberValueByName(rentProlongation.additionalAgreementWithChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного контракта",async () => {
-                await transferRentProlongation.addTransferAgreement({transferContractType: TransferContractType.withSuspension});
-                await expect(transferRentProlongation.numberValueByName(transferRentProlongation.createdTransferAgreementNumber)).toBeVisible();
+                await rentProlongation.addTransferAgreement({transferContractType: TransferContractType.withSuspension});
+                await expect(rentProlongation.numberValueByName(rentProlongation.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
-                await transferRentProlongation.addPayments(InstructionTypes.transferAgreementOnRentTerms);
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+                await rentProlongation.addPayments(InstructionTypes.transferAgreementOnRentTerms);
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Регистрация инструкции",async () => {
-                await transferRentProlongation.registrationInstruction();
-                await expect(transferRentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(transferRentProlongation.regBeginDate).toHaveValue(transferRentProlongation.prevContractNewClubStartDate);
-                await expect(transferRentProlongation.regEndDate).toHaveValue(transferRentProlongation.additionalAgreementDateEndByDs);
-                expect(await transferRentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationNewTransfer,TransferContractType.withSuspension)).toBeTruthy()
+                await rentProlongation.registrationInstruction();
+                await expect(rentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
+                await expect(rentProlongation.regBeginDate).toHaveValue(rentProlongation.prevContractNewClubStartDate);
+                await expect(rentProlongation.regEndDate).toHaveValue(rentProlongation.additionalAgreementDateEndByDs);
+                expect(await rentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationNewTransfer,TransferContractType.withSuspension)).toBeTruthy()
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
-                await transferRentProlongation.addFactPayments(InstructionTypes.transferAgreement);
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+                await rentProlongation.addFactPayments(InstructionTypes.transferAgreement);
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
-                await transferRentProlongation.returnPaymentToPrevState();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+                await rentProlongation.returnPaymentToPrevState();
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Отмена выплаты",async () => {
-                await transferRentProlongation.cancelPayment();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
+                await rentProlongation.cancelPayment();
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
         })
     test(`Продление аренды(ДС к ТД, ДС к ТК). Версия модуля: ${Process.env.APP_VERSION}`,
-        async ({transferRentProlongation}) => {
+        async ({rentProlongation}) => {
             test.info().annotations.push
             (
                 {type: "Дата и время запуска",description: InputData.testAnnotationDate},
@@ -291,58 +291,58 @@ test.describe("Инструкция с типом 'Переход на врем�
                 {type: "Адрес сервера",description: `${config.use?.baseURL}`}
             );
             await test.step("Создание инструкции", async () => {
-                await transferRentProlongation.createInstruction({
+                await rentProlongation.createInstruction({
                     type: InstructionTypes.transferAgreementOnRentTerms,
                     subType: TransferAgreementRentSubTypes.prolongationWithoutNewContracts
                 });
-                await expect(transferRentProlongation.instructionName).toBeVisible();
+                await expect(rentProlongation.instructionName).toBeVisible();
             })
             await test.step("Наличие автоматически добавленного пред. договора с новым клубом",async () => {
-                await expect(transferRentProlongation.numberValueByName(transferRentProlongation.createdContractNumber)).toBeVisible();
+                await expect(rentProlongation.numberValueByName(rentProlongation.createdContractNumber)).toBeVisible();
             })
             await test.step("Наличие автоматически добавленного ТК",async () => {
-                await expect(transferRentProlongation.numberValueByName(transferRentProlongation.createdTransferAgreementNumber)).toBeVisible();
+                await expect(rentProlongation.numberValueByName(rentProlongation.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление дополнительного соглашения на продление",async () => {
-                await transferRentProlongation.addAdditionalAgreement(true,transferRentProlongation.newContractStartDate);
-                await expect(transferRentProlongation.numberValueByName(transferRentProlongation.additionalAgreementWithChangeDate)).toBeVisible();
+                await rentProlongation.addAdditionalAgreement(true,rentProlongation.newContractStartDate);
+                await expect(rentProlongation.numberValueByName(rentProlongation.additionalAgreementWithChangeDate)).toBeVisible();
             })
             await test.step("Добавление ДС к ТК",async () => {
-                await transferRentProlongation.addAdditionalAgreementForTk();
-                await expect(transferRentProlongation.numberValueByName(transferRentProlongation.additionalAgreementForTk)).toBeVisible();
+                await rentProlongation.addAdditionalAgreementForTk();
+                await expect(rentProlongation.numberValueByName(rentProlongation.additionalAgreementForTk)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
-                await transferRentProlongation.addPayments(InstructionTypes.transferAgreementOnRentTerms);
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+                await rentProlongation.addPayments(InstructionTypes.transferAgreementOnRentTerms);
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Регистрация инструкции",async () => {
-                await transferRentProlongation.registrationInstruction();
-                await expect(transferRentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(transferRentProlongation.regBeginDate).toHaveValue(transferRentProlongation.prevContractNewClubStartDate);
-                await expect(transferRentProlongation.regEndDate).toHaveValue(transferRentProlongation.additionalAgreementDateEndByDs);
-                expect(await transferRentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationWithoutNewContracts,TransferContractType.withSuspension)).toBeTruthy()
+                await rentProlongation.registrationInstruction();
+                await expect(rentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
+                await expect(rentProlongation.regBeginDate).toHaveValue(rentProlongation.prevContractNewClubStartDate);
+                await expect(rentProlongation.regEndDate).toHaveValue(rentProlongation.additionalAgreementDateEndByDs);
+                expect(await rentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationWithoutNewContracts,TransferContractType.withSuspension)).toBeTruthy()
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
-                await transferRentProlongation.addFactPayments(InstructionTypes.transferAgreement);
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+                await rentProlongation.addFactPayments(InstructionTypes.transferAgreement);
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
-                await transferRentProlongation.returnPaymentToPrevState();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+                await rentProlongation.returnPaymentToPrevState();
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Отмена выплаты",async () => {
-                await transferRentProlongation.cancelPayment();
-                await expect(transferRentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
+                await rentProlongation.cancelPayment();
+                await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
         })
-    test(`Досрочное завершение(новый ТД). Версия модуля: ${Process.env.APP_VERSION}`,
-        async ({transferRentEarlyFinish}) => {
+    test.only(`Досрочное завершение(новый ТД). Версия модуля: ${Process.env.APP_VERSION}`,
+        async ({earlyFinishRentNewTd}) => {
             test.info().annotations.push
             (
                 {type: "Дата и время запуска",description: InputData.testAnnotationDate},
@@ -350,56 +350,56 @@ test.describe("Инструкция с типом 'Переход на врем�
                 {type: "Адрес сервера",description: `${config.use?.baseURL}`}
             );
             await test.step("Создание инструкции", async () => {
-                await transferRentEarlyFinish.createInstruction({
+                await earlyFinishRentNewTd.createInstruction({
                     type: InstructionTypes.transferAgreementOnRentTerms,
                     subType: TransferAgreementRentSubTypes.earlyFinishRentWithNewContract
                 });
-                await expect(transferRentEarlyFinish.instructionName).toBeVisible();
+                await expect(earlyFinishRentNewTd.instructionName).toBeVisible();
             })
             await test.step("Добавление трудового договора",async () => {
-                await transferRentEarlyFinish.addContract(transferRentEarlyFinish.newContractStartDate,transferRentEarlyFinish.newContractEndDate);
-                await expect(transferRentEarlyFinish.numberValueByName(transferRentEarlyFinish.createdContractNumber)).toBeVisible();
+                await earlyFinishRentNewTd.addContract(earlyFinishRentNewTd.newContractStartDate,earlyFinishRentNewTd.newContractEndDate);
+                await expect(earlyFinishRentNewTd.numberValueByName(earlyFinishRentNewTd.createdContractNumber)).toBeVisible();
             })
             await test.step("Добавление дополнительного соглашения без изменения сроков",async () => {
-                await transferRentEarlyFinish.addAdditionalAgreement(false,transferRentEarlyFinish.newContractStartDate);
-                await expect(transferRentEarlyFinish.numberValueByName(transferRentEarlyFinish.additionalAgreementWithoutChangeDate)).toBeVisible();
+                await earlyFinishRentNewTd.addAdditionalAgreement(false,earlyFinishRentNewTd.newContractStartDate);
+                await expect(earlyFinishRentNewTd.numberValueByName(earlyFinishRentNewTd.additionalAgreementWithoutChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного контракта",async () => {
-                await transferRentEarlyFinish.addTransferAgreement({});
-                await expect(transferRentEarlyFinish.numberValueByName(transferRentEarlyFinish.createdTransferAgreementNumber)).toBeVisible();
+                await earlyFinishRentNewTd.addTransferAgreement({});
+                await expect(earlyFinishRentNewTd.numberValueByName(earlyFinishRentNewTd.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
-                await transferRentEarlyFinish.addPayments(InstructionTypes.transferAgreementOnRentTerms);
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+                await earlyFinishRentNewTd.addPayments(InstructionTypes.transferAgreementOnRentTerms);
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Регистрация инструкции",async () => {
-                await transferRentEarlyFinish.registrationInstruction();
-                await expect(transferRentEarlyFinish.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(transferRentEarlyFinish.regBeginDate).toHaveValue(transferRentEarlyFinish.newContractStartDate);
-                await expect(transferRentEarlyFinish.regEndDate).toHaveValue(transferRentEarlyFinish.newContractEndDate);
-                expect(await transferRentEarlyFinish.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithNewContract,TransferContractType.withSuspension)).toBeTruthy()
+                await earlyFinishRentNewTd.registrationInstruction();
+                await expect(earlyFinishRentNewTd.instructionState(InstructionStates.registered)).toBeVisible();
+                await expect(earlyFinishRentNewTd.regBeginDate).toHaveValue(earlyFinishRentNewTd.newContractStartDate);
+                await expect(earlyFinishRentNewTd.regEndDate).toHaveValue(earlyFinishRentNewTd.newContractEndDate);
+                expect(await earlyFinishRentNewTd.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithNewContract,TransferContractType.withSuspension)).toBeTruthy()
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
-                await transferRentEarlyFinish.addFactPayments(InstructionTypes.transferAgreement);
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+                await earlyFinishRentNewTd.addFactPayments(InstructionTypes.transferAgreement);
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
-                await transferRentEarlyFinish.returnPaymentToPrevState();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+                await earlyFinishRentNewTd.returnPaymentToPrevState();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Отмена выплаты",async () => {
-                await transferRentEarlyFinish.cancelPayment();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
+                await earlyFinishRentNewTd.cancelPayment();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
         })
     test(`Досрочное завершение(изменение ТД). Версия модуля: ${Process.env.APP_VERSION}`,
-        async ({transferRentEarlyFinish}) => {
+        async ({earlyFinishRentNewTd}) => {
             test.info().annotations.push
             (
                 {type: "Дата и время запуска",description: InputData.testAnnotationDate},
@@ -407,51 +407,51 @@ test.describe("Инструкция с типом 'Переход на врем�
                 {type: "Адрес сервера",description: `${config.use?.baseURL}`}
             );
             await test.step("Создание инструкции", async () => {
-                await transferRentEarlyFinish.createInstruction({
+                await earlyFinishRentNewTd.createInstruction({
                     type: InstructionTypes.transferAgreementOnRentTerms,
                     subType: TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract
                 });
-                await expect(transferRentEarlyFinish.instructionName).toBeVisible();
+                await expect(earlyFinishRentNewTd.instructionName).toBeVisible();
             })
             await test.step("Наличие автоматически добавленного пред. договора с новым клубом",async () => {
-                await expect(transferRentEarlyFinish.numberValueByName(transferRentEarlyFinish.createdContractNumber)).toBeVisible();
+                await expect(earlyFinishRentNewTd.numberValueByName(earlyFinishRentNewTd.createdContractNumber)).toBeVisible();
             })
             await test.step("Добавление дополнительного соглашения без изменения сроков",async () => {
-                await transferRentEarlyFinish.addAdditionalAgreement(false,transferRentEarlyFinish.newContractStartDate);
-                await expect(transferRentEarlyFinish.numberValueByName(transferRentEarlyFinish.additionalAgreementWithoutChangeDate)).toBeVisible();
+                await earlyFinishRentNewTd.addAdditionalAgreement(false,earlyFinishRentNewTd.newContractStartDate);
+                await expect(earlyFinishRentNewTd.numberValueByName(earlyFinishRentNewTd.additionalAgreementWithoutChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного контракта",async () => {
-                await transferRentEarlyFinish.addTransferAgreement({instructionSubType: TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract});
-                await expect(transferRentEarlyFinish.numberValueByName(transferRentEarlyFinish.createdTransferAgreementNumber)).toBeVisible();
+                await earlyFinishRentNewTd.addTransferAgreement({instructionSubType: TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract});
+                await expect(earlyFinishRentNewTd.numberValueByName(earlyFinishRentNewTd.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
-                await transferRentEarlyFinish.addPayments(InstructionTypes.transferAgreementOnRentTerms);
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+                await earlyFinishRentNewTd.addPayments(InstructionTypes.transferAgreementOnRentTerms);
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Регистрация инструкции",async () => {
-                await transferRentEarlyFinish.registrationInstruction();
-                await expect(transferRentEarlyFinish.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(transferRentEarlyFinish.regBeginDate).toHaveValue(transferRentEarlyFinish.prevContractNewClubStartDate);
-                await expect(transferRentEarlyFinish.regEndDate).toHaveValue(transferRentEarlyFinish.prevContractNewClubEndDate);
-                expect(await transferRentEarlyFinish.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract,TransferContractType.withSuspension)).toBeTruthy()
+                await earlyFinishRentNewTd.registrationInstruction();
+                await expect(earlyFinishRentNewTd.instructionState(InstructionStates.registered)).toBeVisible();
+                await expect(earlyFinishRentNewTd.regBeginDate).toHaveValue(earlyFinishRentNewTd.prevContractNewClubStartDate);
+                await expect(earlyFinishRentNewTd.regEndDate).toHaveValue(earlyFinishRentNewTd.prevContractNewClubEndDate);
+                expect(await earlyFinishRentNewTd.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract,TransferContractType.withSuspension)).toBeTruthy()
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
-                await transferRentEarlyFinish.addFactPayments(InstructionTypes.transferAgreement);
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+                await earlyFinishRentNewTd.addFactPayments(InstructionTypes.transferAgreement);
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
-                await transferRentEarlyFinish.returnPaymentToPrevState();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
+                await earlyFinishRentNewTd.returnPaymentToPrevState();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.fixedPayment, PaymentStates.expired)).toBeVisible();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.conditionalPayment, PaymentStates.expired)).toBeVisible();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.resalePayment, PaymentStates.waiting)).toBeVisible();
             })
             await test.step("Отмена выплаты",async () => {
-                await transferRentEarlyFinish.cancelPayment();
-                await expect(transferRentEarlyFinish.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
+                await earlyFinishRentNewTd.cancelPayment();
+                await expect(earlyFinishRentNewTd.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
         })
 })

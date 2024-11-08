@@ -11,9 +11,9 @@ import {RegistrationTypes} from "../helpers/enums/RegistrationTypes";
 import {randomInt} from "crypto";
 
 export class CreateInstructionPage extends MainPage {
-    private readonly person: string = "Автотест Трансфер"
-    public readonly clubId: number = 279720
-    public readonly srcClubId: number = 282970
+    private readonly person: string = (process.env.BRANCH == "preprod") ? "Техническая учетная запись ручная ОРСТ" : "Автотест Трансфер"
+    public readonly clubId: number = (process.env.BRANCH == "preprod") ? 333890 : 279720
+    public readonly srcClubId: number = (process.env.BRANCH == "preprod") ? 330620 : 282970
     constructor(page: Page) {
         super(page);
     }
