@@ -501,10 +501,6 @@ export class InstructionPage extends CreateInstructionPage {
         }
         await this.transferNumber.fill(this.createdTransferAgreementNumber);
         await DateInput.fillDateInput(this.signingDate,InputData.currentDate);
-        if (await this.reason.isVisible()) {
-            await this.reason.click();
-            await this.reasonValues.first().click();
-        }
         if (createTransferOptions.transferContractType == TransferContractType.withSuspension &&
             !await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible()) {
             const prevContractRestartDateValue: string | null = await this.prevContractRestartDate.last().getAttribute("value");

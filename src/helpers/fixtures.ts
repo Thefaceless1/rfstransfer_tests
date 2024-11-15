@@ -12,7 +12,7 @@ type Fixtures = {
     leaseBuyout: InstructionPage,
     transferRent: InstructionPage,
     rentProlongation: InstructionPage,
-    earlyFinishRentNewTd: InstructionPage,
+    earlyFinishRent: InstructionPage,
     intTransfer: InstructionPage
     intTransferGiveAwayProfessional: InstructionPage
 }
@@ -96,7 +96,7 @@ export const test = base.extend<Fixtures>({
         await use(rentProlongation);
         await dbHelper.deleteInstructions(rentProlongation.personId);
     },
-    earlyFinishRentNewTd: async ({page},use,testInfo)=> {
+    earlyFinishRent: async ({page},use,testInfo)=> {
         const transferRentEarlyFinish = new InstructionPage(page);
         await dbHelper.deleteInstructions(transferRentEarlyFinish.personId);
         await transferRentEarlyFinish.authorization();

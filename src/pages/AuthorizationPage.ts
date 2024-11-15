@@ -84,8 +84,12 @@ export class AuthorizationPage extends BasePage {
      * Get 2FA code
      */
     private get get2FaToken(): string {
-        const token = twoFactor.generateToken("MFEONTQDSEYUEMWYXWJMPJY6QZSYO2U7");
-        return (token) ? token.token : this.get2FaToken;
+        const secret: string = "BWNZJHQR5LUNH55NW64DN43UO66KT526";
+        //ZSIT225P7VWEA6TIHIBMM25JQ7VR3C74
+        const token = twoFactor.generateToken(secret);
+        return (token && !twoFactor.verifyToken(secret,token?.token)?.delta) ?
+            token.token:
+            this.get2FaToken;
     }
     /**
      * Ввод кода подтверждения
