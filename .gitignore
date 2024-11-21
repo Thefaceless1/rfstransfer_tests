@@ -6,4 +6,3 @@ node_modules/
 /playwright/.cache/
 .idea
 .env
-package-lock.json

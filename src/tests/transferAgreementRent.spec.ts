@@ -398,7 +398,7 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(earlyFinishRent.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
         })
-    test.only(`Досрочное завершение(изменение ТД). Версия модуля: ${Process.env.APP_VERSION}`,
+    test(`Досрочное завершение(изменение ТД). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({earlyFinishRent}) => {
             test.info().annotations.push
             (

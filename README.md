@@ -1,1 +1,1 @@
-Auto tests for module 'Transfer'
+# РФС.ЦП Контракты. Автотесты
