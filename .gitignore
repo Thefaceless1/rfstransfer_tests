@@ -3,6 +3,7 @@ node_modules/
 /src/artifacts/logs/rfstransfer.log
 /src/artifacts/report/
 /src/artifacts/screenshots/*/
+/src/artifacts/screenshots/.last-run.json
 /playwright/.cache/
 .idea
 .env

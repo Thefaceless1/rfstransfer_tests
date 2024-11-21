@@ -9,10 +9,10 @@ import {logsFileName, logsFilePath} from "../logger/log4js.config.js";
 export const transporter = nodemailer.createTransport({
     service: 'SMTP',
     host: Process.env.MAIL_HOST,
-    secure: true,
-    auth: {
-        user: Process.env.MAIL_FROM,
-        pass: Process.env.MAIL_PASS
+    port: Number(Process.env.MAIL_PORT),
+    secure: false,
+    tls: {
+        rejectUnauthorized: false
     }
 })
 

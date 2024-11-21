@@ -1,8 +1,8 @@
-FROM mcr.microsoft.com/playwright:v1.34.3-jammy
+FROM mcr.microsoft.com/playwright:v1.49.0-jammy
 
-COPY . /rfslic_tests
+COPY . /rfstransfer_tests
 
-WORKDIR /rfslic_tests
+WORKDIR /rfstransfer_tests
 
 RUN npm ci
 
