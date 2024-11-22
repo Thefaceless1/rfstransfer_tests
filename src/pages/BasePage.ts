@@ -21,4 +21,8 @@ export class BasePage extends PlaywrightDevPage{
      * Кнопка "Отменить"
      */
     protected readonly cancelButton: Locator = this.page.locator("//span[text()='Отменить']")
+    /**
+     * Логотип РФС
+     */
+    protected readonly rfsLogo: Locator = this.page.locator("//img[contains(@src,'assets/logo')]")
 }

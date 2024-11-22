@@ -7,7 +7,7 @@ import {InstructionTypes} from "../helpers/enums/InstructionTypes";
 import {expect} from "@playwright/test";
 import {InstructionStates} from "../helpers/enums/InstructionStates";
 
-test.describe.only("Инструкция с типом 'Изменение трудового договора'",() => {
+test.describe("Инструкция с типом 'Изменение трудового договора'",() => {
     test(`Версия модуля: ${Process.env.APP_VERSION}`,
         async ({additionalAgreement}) => {
             test.info().annotations.push

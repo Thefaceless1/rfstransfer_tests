@@ -1,4 +1,4 @@
-import {Elements} from "./elements";
+import {Elements} from "./Elements";
 import {Locator} from "@playwright/test";
 
 export class DateInput extends Elements {

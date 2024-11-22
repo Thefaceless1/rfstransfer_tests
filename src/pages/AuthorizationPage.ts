@@ -1,6 +1,6 @@
 import {BasePage} from "./BasePage";
 import {Locator, Page} from "@playwright/test";
-import {Elements} from "../framework/elements/elements";
+import {Elements} from "../framework/elements/Elements";
 import {logger} from "../logger/logger";
 import twoFactor from "node-2fa";
 
@@ -73,12 +73,12 @@ export class AuthorizationPage extends BasePage {
             await this.authorizationButton.click();
             await Elements.waitForVisible(this.selectUser);
             await this.selectUser.click();
-            await this.page.waitForTimeout(1000)
             await this.user.click();
             await Elements.waitForVisible(this.userValues.first());
             await this.userValues.first().click();
             await this.saveButton.click();
         }
+        await Elements.waitForVisible(this.rfsLogo, 60000);
     }
     /**
      * Get 2FA code

@@ -1,7 +1,7 @@
 import {MainPage} from "./MainPage";
 import {Locator, Page} from "@playwright/test";
 import {InstructionTypes} from "../helpers/enums/InstructionTypes";
-import {Elements} from "../framework/elements/elements";
+import {Elements} from "../framework/elements/Elements";
 import {CreateInstructionOptionsType} from "../helpers/types/CreateInstructionOptionsType";
 import {TransferAgreementSubTypes} from "../helpers/enums/TransferAgreementSubTypes";
 import {TransferAgreementRentSubTypes} from "../helpers/enums/TransferAgreementRentSubTypes";
@@ -76,7 +76,7 @@ export class CreateInstructionPage extends MainPage {
     /**
      * Значение футболиста в выпадающем списке
      */
-    private readonly personValue: Locator = this.page.locator(`//*[text()='${this.person}']`)
+    private readonly playerValue: Locator = this.page.locator(`//*[contains(@class,'player__option')]//*[contains(text(),'${this.person}')]`)
     /**
      * Выбранное значение выпадающего списка поля "Тип инструкции"
      */
@@ -164,15 +164,15 @@ export class CreateInstructionPage extends MainPage {
      * Создание инструкции с указанным типом
      */
     public async createInstruction(createOptions: CreateInstructionOptionsType): Promise<void> {
-        await this.page.goto("/");
+        if (!await this.createInstructionButton.isVisible()) await this.page.goto("/");
         await this.createInstructionButton.click();
         await this.instructionType.click();
         await Elements.waitForVisible(this.selectedInstructionTypeValue(createOptions.type));
         await this.selectedInstructionTypeValue(createOptions.type).click();
         await this.player.click();
         await this.playerInput.fill(this.person);
-        await Elements.waitForVisible(this.personValue);
-        await this.personValue.click();
+        await Elements.waitForVisible(this.playerValue);
+        await this.playerValue.click();
         await this.club.click();
         if(createOptions.type == InstructionTypes.transferAgreement ||
            createOptions.type == InstructionTypes.transferAgreementOnRentTerms ||

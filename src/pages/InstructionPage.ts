@@ -1,7 +1,7 @@
 import {CreateInstructionPage} from "./CreateInstructionPage";
 import {Locator, Page} from "@playwright/test";
 import {Mediators} from "../helpers/enums/Mediators";
-import {Elements} from "../framework/elements/elements";
+import {Elements} from "../framework/elements/Elements";
 import {InputData} from "../helpers/InputData";
 import {DateInput} from "../framework/elements/DateInput";
 import {InstructionStates} from "../helpers/enums/InstructionStates";
@@ -663,7 +663,6 @@ export class InstructionPage extends CreateInstructionPage {
             await this.returnPreviousState.click();
             await this.yesButton.click();
         }
-        await this.page.pause()
     }
     /**
      * Создание и регистрация тестовой инструкции для сценария проверки инструкций других типов
