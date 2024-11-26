@@ -164,8 +164,10 @@ export class CreateInstructionPage extends MainPage {
      * Создание инструкции с указанным типом
      */
     public async createInstruction(createOptions: CreateInstructionOptionsType): Promise<void> {
-        if (!await this.createInstructionButton.isVisible()) await this.page.goto("/");
-        await this.createInstructionButton.click();
+        if (!await this.internalTransfersButton.isVisible()) await this.page.goto("/");
+        (createOptions.type == InstructionTypes.internationalTransfer) ?
+            await this.internationalTransfersButton.click():
+            await this.internalTransfersButton.click();
         await this.instructionType.click();
         await Elements.waitForVisible(this.selectedInstructionTypeValue(createOptions.type));
         await this.selectedInstructionTypeValue(createOptions.type).click();

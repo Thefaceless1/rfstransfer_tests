@@ -21,7 +21,7 @@ export class AuthorizationPage extends BasePage {
     /**
      * Поле 'Пользователь'
      */
-    private readonly user: Locator = this.page.locator("//*[contains(@class,'fakeUser__indicators')]")
+    private readonly user: Locator = this.page.locator("//*[contains(@class,'fakeUser__dropdown-indicator')]")
     /**
      * Значения выпадающего списка поля 'Пользователь'
      */
@@ -71,14 +71,13 @@ export class AuthorizationPage extends BasePage {
         }
         else {
             await this.authorizationButton.click();
-            await Elements.waitForVisible(this.selectUser);
             await this.selectUser.click();
+            await this.page.waitForTimeout(1000)
             await this.user.click();
-            await Elements.waitForVisible(this.userValues.first());
             await this.userValues.first().click();
             await this.saveButton.click();
         }
-        await Elements.waitForVisible(this.rfsLogo, 60000);
+        await Elements.waitForVisible(this.internalTransfersButton,60000);
     }
     /**
      * Get 2FA code

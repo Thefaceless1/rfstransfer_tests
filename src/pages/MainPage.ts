@@ -6,7 +6,7 @@ export class MainPage extends AuthorizationPage {
         super(page);
     }
     /**
-     * Кнопка "Создание инструкции"
+     * Кнопка "Международные переходы"
      */
-    protected readonly createInstructionButton: Locator = this.page.locator("//p[text()='Создание инструкции']")
+    protected readonly internationalTransfersButton: Locator = this.page.locator("//a[text()='Международные переходы']")
 }

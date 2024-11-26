@@ -22,7 +22,7 @@ export class BasePage extends PlaywrightDevPage{
      */
     protected readonly cancelButton: Locator = this.page.locator("//span[text()='Отменить']")
     /**
-     * Логотип РФС
+     * Кнопка "Внутренние переходы"
      */
-    protected readonly rfsLogo: Locator = this.page.locator("//img[contains(@src,'assets/logo')]")
+    protected readonly internalTransfersButton: Locator = this.page.locator("//a[text()='Внутренние переходы']")
 }
