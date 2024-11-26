@@ -17,6 +17,20 @@ class DbHelper {
         await client.end();
     }
     /**
+     * Удаление записей отправки сведений в ФИФА для выбранного пользователя
+     */
+    public async deleteFifaSending(personId: number): Promise<void> {
+        const client: pkg.Client = new Client(dbConfig);
+        await client.connect();
+        const queryText: string = `DELETE FROM rfstran.fifa_sendings 
+                                   WHERE instruction_id IN 
+                                   (SELECT id FROM rfstran.instructions 
+                                    WHERE ext_personid=$1)`;
+        const values: string[] = [`${personId}`];
+        await client.query(queryText,values);
+        await client.end();
+    }
+    /**
      * Получение предыдущих договоров по id пользователя и id клуба
      */
     public async getPreviousContract(userId: number,clubId: number,isTemporary: boolean) {
