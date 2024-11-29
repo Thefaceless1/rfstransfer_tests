@@ -433,8 +433,8 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Регистрация инструкции",async () => {
                 await earlyFinishRent.registrationInstruction();
                 await expect(earlyFinishRent.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(earlyFinishRent.regBeginDate).toHaveValue(earlyFinishRent.prevContractNewClubStartDate);
-                await expect(earlyFinishRent.regEndDate).toHaveValue(earlyFinishRent.prevContractNewClubEndDate);
+                await expect(earlyFinishRent.regBeginDate).toHaveValue(earlyFinishRent.prevContractPrevClubStartDate);
+                await expect(earlyFinishRent.regEndDate).toHaveValue(earlyFinishRent.prevContractPrevClubEndDate);
                 expect(await earlyFinishRent.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract,TransferContractType.withSuspension)).toBeTruthy()
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {

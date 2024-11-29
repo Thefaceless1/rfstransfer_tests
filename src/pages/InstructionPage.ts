@@ -715,9 +715,8 @@ export class InstructionPage extends CreateInstructionPage {
     public async checkPrevContractsDateChanges(
         transferAgreementSubType: TransferAgreementSubTypes | TransferAgreementRentSubTypes,
         transferContractType?: TransferContractType): Promise<boolean> {
-        const prevContractPrevClub: any[] =
-            (transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithNewContract ||
-             transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract) ?
+        const prevContractPrevClub: any[] = (transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithNewContract ||
+                                             transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract) ?
             await dbHelper.getPreviousContract(this.personId,this.srcClubId,true) :
             await dbHelper.getPreviousContract(this.personId,this.srcClubId,false);
         let prevContractPrevClubStopDate: string = '';
@@ -728,7 +727,10 @@ export class InstructionPage extends CreateInstructionPage {
             prevContractPrevClubEndDate = prevContractPrevClub[0]["actual_end_date"].toLocaleDateString();
             if (prevContractPrevClub[0]["restart_date"]) prevContractPrevClubRestartDate = prevContractPrevClub[0]["restart_date"].toLocaleDateString();
         }
-        const prevContractNewClub: any[] = await dbHelper.getPreviousContract(this.personId,this.clubId,true);
+        const prevContractNewClub: any[] = (transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithNewContract ||
+                                            transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract) ?
+            await dbHelper.getPreviousContract(this.personId,this.clubId,false):
+            await dbHelper.getPreviousContract(this.personId,this.clubId,true);
         let prevContractNewClubRestartDate: string = '';
         let prevContractNewClubEndDate: string = '';
         if (prevContractNewClub.length > 0) {
@@ -800,8 +802,8 @@ export class InstructionPage extends CreateInstructionPage {
             const prevContractPrevClubEndDatePlusOneDay: string = InputData.futureDate(1,prevContractPrevClubEndDate);
             logger.info(`
                  Пред. договор с пред. клубом: stop_date: ${prevContractPrevClubStopDate}, введено: ${this.prevContractStopDateValue}
-                 Пред. договор с пред. клубом: restart_date: ${prevContractPrevClubEndDate}, введено: ${this.prevContractStopDateValue}
-                 Пред. договор с нов. клубом: actual_end_date: ${prevContractNewClubRestartDate}, введено: ${prevContractPrevClubEndDatePlusOneDay}
+                 Пред. договор с пред. клубом: actual_end_date: ${prevContractPrevClubEndDate}, введено: ${this.prevContractStopDateValue}
+                 Пред. договор с нов. клубом: restart_date: ${prevContractNewClubRestartDate}, введено: ${prevContractPrevClubEndDatePlusOneDay}
                 `);
             return (prevContractPrevClubStopDate == this.prevContractStopDateValue &&
                     prevContractPrevClubEndDate == this.prevContractStopDateValue &&
