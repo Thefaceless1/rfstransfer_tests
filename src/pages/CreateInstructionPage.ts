@@ -42,6 +42,30 @@ export class CreateInstructionPage extends MainPage {
      */
     private readonly srcClub: Locator = this.page.locator("//*[contains(@class,'srcClub__dropdown-indicator')]")
     /**
+     * Поле "Прежняя ассоциация"
+     */
+    private readonly previousAssociation: Locator = this.page.locator("//*[contains(@class,'srcAssociation__indicators')]")
+    /**
+     * Значения выпадающего списка поля "Прежняя ассоциация"
+     */
+    private readonly previousAssociationValues: Locator = this.page.locator("//*[contains(@class,'srcAssociation__option')]")
+    /**
+     * Поле "Предыдущая ассоциация", заполненное значением "РФС"
+     */
+    private readonly prevAssociationWithRfsValue: Locator = this.page.locator("//div[contains(@class,'srcAssociation__single-value')]//div[contains(text(),'РФС')]")
+    /**
+     * Поле "Новая ассоциация"
+     */
+    private readonly newAssociation: Locator = this.page.locator("//*[contains(@class,'destAssociation__indicators')]")
+    /**
+     * Значения выпадающего списка поля "Новая ассоциация"
+     */
+    private readonly newAssociationValues: Locator = this.page.locator("//*[contains(@class,'destAssociation__option')]")
+    /**
+     * Поле "Новая ассоциация", заполненное значением "РФС"
+     */
+    private readonly newAssociationWithRfsValue: Locator = this.page.locator("//div[contains(@class,'destAssociation__single-value')]//div[contains(text(),'РФС')]")
+    /**
      * Поле "Тип инструкции"
      */
     private readonly instructionType: Locator = this.page.locator("//*[contains(text(),'Выберите тип инструкции')]")
@@ -68,7 +92,7 @@ export class CreateInstructionPage extends MainPage {
     /**
      * Радиобаттон "Привлечь футболиста"
      */
-    public readonly acceptPlayerRadio: Locator = this.page.locator("//span[text()='Привлечь футболиста']")
+    public readonly acceptPlayerRadio: Locator = this.page.locator("//span[text()='Взять футболиста']")
     /**
      * Радиобаттон "Отдать футболиста"
      */
@@ -168,15 +192,48 @@ export class CreateInstructionPage extends MainPage {
         (createOptions.type == InstructionTypes.internationalTransfer) ?
             await this.internationalTransfersButton.click():
             await this.internalTransfersButton.click();
-        await this.instructionType.click();
-        await Elements.waitForVisible(this.selectedInstructionTypeValue(createOptions.type));
-        await this.selectedInstructionTypeValue(createOptions.type).click();
         await this.player.click();
         await this.playerInput.fill(this.person);
-        await Elements.waitForVisible(this.playerValue);
         await this.playerValue.click();
+        if (createOptions.type == InstructionTypes.internationalTransfer) {
+            switch (createOptions.subType) {
+                case IntTransferSubTypes.acceptAmateurPlayer:
+                    await this.acceptPlayerRadio.click();
+                    await this.newClubPlayerStateRadio(PlayerStates.amateur).click();
+                    await this.previousAssociation.click();
+                    await this.previousAssociationValues.first().click();
+                    await Elements.waitForVisible(this.newAssociationWithRfsValue);
+                    break;
+                case IntTransferSubTypes.acceptProfessionalPlayer:
+                    await this.acceptPlayerRadio.click();
+                    await this.newClubPlayerStateRadio(PlayerStates.professional).click();
+                    await this.setRandomRegistrationType();
+                    await this.previousAssociation.click();
+                    await this.previousAssociationValues.first().click();
+                    await Elements.waitForVisible(this.newAssociationWithRfsValue);
+                    break;
+                case IntTransferSubTypes.giveAwayAmateurPlayer:
+                    await this.giveAwayPlayerRadio.click();
+                    await this.newClubPlayerStateRadio(PlayerStates.amateur).click();
+                    await this.newAssociation.click();
+                    await this.newAssociationValues.first().click();
+                    await Elements.waitForVisible(this.prevAssociationWithRfsValue);
+                    break;
+                case IntTransferSubTypes.giveAwayProfessionalPlayer:
+                    await this.giveAwayPlayerRadio.click();
+                    await this.newClubPlayerStateRadio(PlayerStates.professional).click();
+                    await this.setRandomRegistrationType();
+                    await this.newAssociation.click();
+                    await this.newAssociationValues.first().click();
+                    await Elements.waitForVisible(this.prevAssociationWithRfsValue);
+            }
+        }
+        else {
+            await this.instructionType.click();
+            await this.selectedInstructionTypeValue(createOptions.type).click();
+        }
         await this.club.click();
-        if(createOptions.type == InstructionTypes.transferAgreement ||
+        if (createOptions.type == InstructionTypes.transferAgreement ||
            createOptions.type == InstructionTypes.transferAgreementOnRentTerms ||
            createOptions.type == InstructionTypes.internationalTransfer) {
            if (createOptions.isInstructionForEarlyFinish) {
@@ -193,7 +250,7 @@ export class CreateInstructionPage extends MainPage {
                await this.srcClubInput.fill(String(this.srcClubId));
                await this.srcClubValue(this.srcClubId).click();
             }
-            if(createOptions.type == InstructionTypes.transferAgreement) {
+            if (createOptions.type == InstructionTypes.transferAgreement) {
                 switch (createOptions.subType) {
                     case TransferAgreementSubTypes.withoutBuyoutFromRent:
                         await this.isTsWithBuyoutRadio(false).click();
@@ -207,7 +264,7 @@ export class CreateInstructionPage extends MainPage {
                         await this.isTsWithNewTdRadio(false).click();
                 }
             }
-            if(createOptions.type == InstructionTypes.transferAgreementOnRentTerms) {
+            if (createOptions.type == InstructionTypes.transferAgreementOnRentTerms) {
                 switch (createOptions.subType) {
                     case TransferAgreementRentSubTypes.toRent:
                         await this.toRentRadio.click();
@@ -241,33 +298,12 @@ export class CreateInstructionPage extends MainPage {
                         await this.isTsRentFinishWithNewTdRadio(false).click();
                 }
             }
-            if(createOptions.type == InstructionTypes.internationalTransfer) {
-                switch(createOptions.subType) {
-                    case IntTransferSubTypes.acceptAmateurPlayer:
-                        await this.acceptPlayerRadio.click();
-                        await this.newClubPlayerStateRadio(PlayerStates.amateur).click();
-                        break;
-                    case IntTransferSubTypes.acceptProfessionalPlayer:
-                        await this.acceptPlayerRadio.click();
-                        await this.newClubPlayerStateRadio(PlayerStates.professional).click();
-                        await this.setRandomRegistrationType();
-                        break;
-                    case IntTransferSubTypes.giveAwayAmateurPlayer:
-                        await this.giveAwayPlayerRadio.click();
-                        await this.newClubPlayerStateRadio(PlayerStates.amateur).click();
-                        break;
-                    case IntTransferSubTypes.giveAwayProfessionalPlayer:
-                        await this.giveAwayPlayerRadio.click();
-                        await this.newClubPlayerStateRadio(PlayerStates.professional).click();
-                        await this.setRandomRegistrationType();
-                }
-            }
         }
         else {
             await this.clubInput.fill(String(createOptions.clubId));
             await this.clubValue(createOptions.clubId!).click();
         }
-        if(createOptions.type == InstructionTypes.additionalAgreement) await Elements.waitForVisible(this.employmentContractValue);
+        if (createOptions.type == InstructionTypes.additionalAgreement) await Elements.waitForVisible(this.employmentContractValue);
         await this.createButton.click();
     }
 }

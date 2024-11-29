@@ -188,14 +188,6 @@ export class InstructionPage extends CreateInstructionPage {
      */
     private readonly disciplineValues: Locator = this.page.locator("//*[contains(@class,'discipline__option')]")
     /**
-     * Поле "Особая отметка МТС"
-     */
-    private readonly specialMarkMts: Locator = this.page.locator("//*[contains(@class,'specialMark__dropdown')]")
-    /**
-     * Значения выпадающего списка поля "Особая отметка МТС"
-     */
-    private readonly specialMarkMtsValues: Locator = this.page.locator("//*[contains(@class,'specialMark__option')]")
-    /**
      * Радиобаттон "Без изменения срока действия ТД"
      */
     private readonly withoutDeadlinesChangeDS: Locator = this.page.locator("//span[text()='Без изменения срока действия ТД']")
@@ -240,6 +232,10 @@ export class InstructionPage extends CreateInstructionPage {
      */
     private readonly resalePercent: Locator = this.page.locator("//input[@name='Resale.0.percent']")
     /**
+     * Чекбокс "Футбольный агент(ы), представляющий клуб и/или футболиста в связи с подписанием трудового договора?"
+     */
+    private readonly withMediatorsCheckbox: Locator = this.page.locator("//input[@name='withMediatorsTypeInternational']")
+    /**
      * Радио баттон "Да" для поля "Футбольный агент(ы), представляющий клуб и/или футболиста в связи с подписанием трудового договора?"
      */
     private readonly withMediatorsRadio: Locator = this.page.locator("//input[@name='withMediatorsType']//following-sibling::span[@class='Radio-Label' and text()='Да']")
@@ -251,6 +247,14 @@ export class InstructionPage extends CreateInstructionPage {
      * Радио баттон "С разрывом ТД" поля "Тип арендного соглашения"
      */
     private readonly withTerminationContractRadio: Locator = this.page.locator("//span[@class='Radio-Label' and text()='с разрывом ТД']")
+    /**
+     * Чекбокс "МТС"
+     */
+    private readonly mtsCheckbox: Locator = this.page.locator("//input[@name='isWithMtsOption']")
+    /**
+     * Чекбокс "Спортивные (дисциплинарные) санкции"
+     */
+    private readonly sportSanctionCheckbox: Locator = this.page.locator("//input[@name='isWithSportSanctionsOption']")
     /**
      * Получение значения поля "Номер" таблицы списка договоров и доп. соглашений по наименованию
      */
@@ -317,22 +321,6 @@ export class InstructionPage extends CreateInstructionPage {
         return (playerState == PlayerStates.professional) ?
             this.page.locator("//input[@name='isPrevProfessionalOption']//following-sibling::span[text()='Профессионал']") :
             this.page.locator("//input[@name='isPrevProfessionalOption']//following-sibling::span[text()='Любитель']");
-    }
-    /**
-     * Радиобаттон "Спортивные (дисциплинарные) санкции"
-     */
-    private isWithSportSanctionsRadio(isWithSanction: boolean): Locator {
-        return (isWithSanction) ?
-            this.page.locator("//input[@name='isWithSportSanctionsOption']//following-sibling::span[text()='Да']") :
-            this.page.locator("//input[@name='isWithSportSanctionsOption']//following-sibling::span[text()='Нет']");
-    }
-    /**
-     * Радиобаттон "МТС"
-     */
-    private isWithMts(isWithMts: boolean): Locator {
-        return (isWithMts) ?
-            this.page.locator("//input[@name='isWithMtsOption']//following-sibling::span[text()='Да']") :
-            this.page.locator("//input[@name='isWithMtsOption']//following-sibling::span[text()='Нет']");
     }
     /**
      * Радиобаттон "Сформировать МТС?"
@@ -523,7 +511,9 @@ export class InstructionPage extends CreateInstructionPage {
      * Добавление посредников
      */
     private async addMediators(): Promise<void> {
-        await this.withMediatorsRadio.click();
+        (await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible()) ?
+            await this.withMediatorsCheckbox.click():
+            await this.withMediatorsRadio.click();
         await this.side.click();
         await Elements.waitForVisible(this.selectedMediatorSideValue(Mediators.player));
         await this.selectedMediatorSideValue(Mediators.player).click();
@@ -701,16 +691,14 @@ export class InstructionPage extends CreateInstructionPage {
      * Добавление МТС
      */
     public async addMts(intTransferSubType?: IntTransferSubTypes): Promise<void> {
-        await this.isWithMts(true).click();
+        await this.mtsCheckbox.click();
         if (intTransferSubType == IntTransferSubTypes.giveAwayAmateurPlayer ||
            intTransferSubType == IntTransferSubTypes.giveAwayProfessionalPlayer) await this.isFormMts(true).click();
-        await this.isWithSportSanctionsRadio(true).click();
+        await this.sportSanctionCheckbox.click();
         await this.addContractDocuments();
         await this.transitionId.fill(InputData.randomWord);
         await this.discipline.click();
         await this.disciplineValues.first().click();
-        await this.specialMarkMts.click();
-        await this.specialMarkMtsValues.first().click();
         await DateInput.fillDateInput(this.dateConclusion,InputData.currentDate);
         if (intTransferSubType == IntTransferSubTypes.giveAwayAmateurPlayer ||
            intTransferSubType == IntTransferSubTypes.giveAwayProfessionalPlayer) {

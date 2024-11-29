@@ -8,10 +8,9 @@ import {expect} from "@playwright/test";
 import {IntTransferSubTypes} from "../helpers/enums/IntTransferSubTypes";
 import {PlayerStates} from "../helpers/enums/PlayerStates";
 import {InstructionStates} from "../helpers/enums/InstructionStates";
-import {PaymentTypes} from "../helpers/enums/PaymentTypes";
 
-test.describe.skip("Инструкция с типом 'Международный переход'",async () => {
-    test(`Привлечь футболиста(Любитель). Версия модуля: ${Process.env.APP_VERSION}`,
+test.describe("Инструкция с типом 'Международный переход'",async () => {
+    test(`Взять футболиста(Любитель). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({intTransfer}) => {
             test.info().annotations.push
             (
@@ -38,7 +37,7 @@ test.describe.skip("Инструкция с типом 'Международны
                 await expect(intTransfer.registerCommentValue).toBeVisible();
             })
     })
-    test(`Привлечь футболиста(Профессионал). Версия модуля: ${Process.env.APP_VERSION}`,
+    test(`Взять футболиста(Профессионал). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({intTransfer}) => {
             test.info().annotations.push
             (
@@ -65,13 +64,6 @@ test.describe.skip("Инструкция с типом 'Международны
             await test.step("Добавление трансферного соглашения",async () => {
                 await intTransfer.addRandomTransferContract();
                 await expect(intTransfer.numberValueByName(intTransfer.createdTransferAgreementNumber)).toBeVisible();
-            })
-            await test.step("Добавление платежей",async () => {
-                await intTransfer.addPayments(InstructionTypes.internationalTransfer);
-                await expect(intTransfer.paymentTypeColumnValue(PaymentTypes.fixedPayment)).toBeVisible();
-                await expect(intTransfer.paymentTypeColumnValue(PaymentTypes.ransomPayment)).toBeVisible();
-                await expect(intTransfer.paymentTypeColumnValue(PaymentTypes.conditionalPayment)).toBeVisible();
-                await expect(intTransfer.paymentTypeColumnValue(PaymentTypes.resalePayment)).toBeVisible();
             })
             await test.step("Добавление МТС",async () => {
                 await intTransfer.addMts();
@@ -103,6 +95,37 @@ test.describe.skip("Инструкция с типом 'Международны
             })
             await test.step("Добавление МТС",async () => {
                 await intTransfer.addMts(IntTransferSubTypes.giveAwayAmateurPlayer);
+                await expect(intTransfer.mtsSavedNotification).toBeVisible();
+            })
+            await test.step("Регистрация инструкции",async () => {
+                await intTransfer.registrationInstruction();
+                await expect(intTransfer.instructionState(InstructionStates.registered)).toBeVisible();
+                await expect(intTransfer.prevContractStopDate).toHaveValue(intTransfer.prevContractNewClubStartDate);
+                await expect(intTransfer.registerCommentValue).toBeVisible();
+            })
+        })
+    test(`Отдать футболиста(Профессионал). Версия модуля: ${Process.env.APP_VERSION}`,
+        async ({intTransfer}) => {
+            test.info().annotations.push
+            (
+                {type: "Дата и время запуска",description: InputData.testAnnotationDate},
+                {type: "Версия модуля",description: `${Process.env.APP_VERSION}`},
+                {type: "Адрес сервера",description: `${config.use?.baseURL}`}
+            );
+            await test.step("Создание инструкции",async () => {
+                await intTransfer.createInstruction({
+                    type: InstructionTypes.internationalTransfer,
+                    subType: IntTransferSubTypes.giveAwayProfessionalPlayer
+                });
+                await expect(intTransfer.instructionName).toBeVisible();
+                await expect(intTransfer.instructionTypeTitle(InstructionTypes.internationalTransfer)).toBeVisible();
+            })
+            await test.step("Добавление трансферного соглашения",async () => {
+                await intTransfer.addRandomTransferContract();
+                await expect(intTransfer.numberValueByName(intTransfer.createdTransferAgreementNumber)).toBeVisible();
+            })
+            await test.step("Добавление МТС",async () => {
+                await intTransfer.addMts(IntTransferSubTypes.giveAwayProfessionalPlayer);
                 await expect(intTransfer.mtsSavedNotification).toBeVisible();
             })
             await test.step("Регистрация инструкции",async () => {

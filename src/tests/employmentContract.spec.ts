@@ -9,7 +9,7 @@ import {InstructionStates} from "../helpers/enums/InstructionStates";
 import {PaymentTypes} from "../helpers/enums/PaymentTypes";
 import {PaymentStates} from "../helpers/enums/PaymentStates";
 
-test.describe.only("Инструкция с типом 'Трудовой договор'",() => {
+test.describe("Инструкция с типом 'Трудовой договор'",() => {
     test(`Версия модуля: ${Process.env.APP_VERSION}`,
         async ({employmentContract}) => {
         test.info().annotations.push

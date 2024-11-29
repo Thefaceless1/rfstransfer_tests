@@ -14,7 +14,6 @@ type Fixtures = {
     rentProlongation: InstructionPage,
     earlyFinishRent: InstructionPage,
     intTransfer: InstructionPage
-    intTransferGiveAwayProfessional: InstructionPage
 }
 
 export const test = base.extend<Fixtures>({
@@ -135,31 +134,13 @@ export const test = base.extend<Fixtures>({
         await dbHelper.deleteInstructions(transferRentEarlyFinish.personId);
     },
     intTransfer: async ({page},use) => {
-        const intTransferAccept = new InstructionPage(page);
-        await dbHelper.deleteFifaSending(intTransferAccept.personId);
-        await dbHelper.deleteInstructions(intTransferAccept.personId);
-        await intTransferAccept.authorization();
-        await use(intTransferAccept);
-        await dbHelper.deleteFifaSending(intTransferAccept.personId);
-        await dbHelper.deleteInstructions(intTransferAccept.personId);
-    },
-    intTransferGiveAwayProfessional: async ({page},use) => {
-        const intTransferGiveAwayProfessional = new InstructionPage(page);
-        await dbHelper.deleteFifaSending(intTransferGiveAwayProfessional.personId);
-        await dbHelper.deleteInstructions(intTransferGiveAwayProfessional.personId);
-        await intTransferGiveAwayProfessional.authorization();
-        await intTransferGiveAwayProfessional.addTestInstruction({
-            type: InstructionTypes.newEmploymentContract,
-            clubId: intTransferGiveAwayProfessional.srcClubId
-        });
-        await intTransferGiveAwayProfessional.addTestInstruction({
-            type: InstructionTypes.transferAgreementOnRentTerms,
-            subType: TransferAgreementRentSubTypes.toRent,
-            clubId: intTransferGiveAwayProfessional.clubId
-        },TransferContractType.withSuspension);
-        await use(intTransferGiveAwayProfessional);
-        await dbHelper.deleteFifaSending(intTransferGiveAwayProfessional.personId);
-        await dbHelper.deleteInstructions(intTransferGiveAwayProfessional.personId);
+        const intTransfer = new InstructionPage(page);
+        await dbHelper.deleteFifaSending(intTransfer.personId);
+        await dbHelper.deleteInstructions(intTransfer.personId);
+        await intTransfer.authorization();
+        await use(intTransfer);
+        await dbHelper.deleteFifaSending(intTransfer.personId);
+        await dbHelper.deleteInstructions(intTransfer.personId);
     }
 })
 
