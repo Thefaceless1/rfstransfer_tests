@@ -48,5 +48,18 @@ class DbHelper {
         const result = await client.query(queryText,values);
         return result.rows;
     }
+    /**
+     * Получение описания коллизии по ее id
+     */
+    public async getCollisionDescription(collisionId: number): Promise<string> {
+        const client: pkg.Client = new Client(dbConfig);
+        await client.connect();
+        const queryText: string = `SELECT * FROM rfstran.nsi_collision_types 
+                                   WHERE id = $1`;
+        const values: string[] = [`${collisionId}`];
+        const result = await client.query(queryText,values);
+        if (result.rowCount == 0) throw new Error(`Отсутствует коллизия с id: ${collisionId}`);
+        return result.rows[0].description;
+    }
 }
 export const dbHelper = new DbHelper();

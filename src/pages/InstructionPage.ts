@@ -1,5 +1,5 @@
 import {CreateInstructionPage} from "./CreateInstructionPage";
-import {Locator, Page} from "@playwright/test";
+import {expect, Locator, Page} from "@playwright/test";
 import {Mediators} from "../helpers/enums/Mediators";
 import {Elements} from "../framework/elements/Elements";
 import {InputData} from "../helpers/InputData";
@@ -20,6 +20,8 @@ import {RegistrationTypes} from "../helpers/enums/RegistrationTypes";
 import {IntTransferSubTypes} from "../helpers/enums/IntTransferSubTypes";
 import {CreateTransferOptionsType} from "../helpers/types/CreateTransferOptionsType";
 import {PaymentStates} from "../helpers/enums/PaymentStates";
+import Process from "process";
+import {CollisionIds} from "../helpers/enums/CollisionIds";
 
 export class InstructionPage extends CreateInstructionPage {
     public prevContractStopDateValue: string = ''
@@ -127,6 +129,10 @@ export class InstructionPage extends CreateInstructionPage {
      * Кнопка "Зарегистрировать"
      */
     private readonly registerButton: Locator = this.page.locator("//span[text()='Зарегистрировать']")
+    /**
+     * Кнопка "Зарегистрировать" на модальном окне подтверждения действия
+     */
+    private readonly submitWindowRegisterButton: Locator = this.page.locator("//button[text()='Зарегистрировать']")
     /**
      * Поле "Новый срок действия ТД по ДС"
      */
@@ -260,6 +266,14 @@ export class InstructionPage extends CreateInstructionPage {
      */
     public numberValueByName(text: string): Locator {
         return this.page.locator("//span[contains(@id,'cell-number')]",{hasText: text});
+    }
+    /**
+     * Если не указано наименование коллизии, то возвращет все коллизии в инструкции, если указан - то коллизию с указанным наименованием
+     */
+    private collisions(collisionName?: string): Locator {
+        return (collisionName) ?
+            this.page.locator(`//div[@col-id='description']//span[@class='ag-cell-value' and text()='${collisionName}']`):
+            this.page.locator("//div[@col-id='description']//span[@class='ag-cell-value']");
     }
     /**
      * Выбранный тип выплаты с указанным статусом
@@ -555,6 +569,16 @@ export class InstructionPage extends CreateInstructionPage {
             await this.isOtherMemberAssociationRadio(false).click();
         await this.skipHistoryChangeCheckBox.click();
         await this.registerButton.click();
+        if (Process.env.BRANCH == "preprod") {
+            await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.missingPlayerFifaId)));
+            await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.restrictRegisterPlayers)));
+            expect(await this.collisions().count()).toBe(2);
+            if (await this.isOtherMemberAssociationRadio(false).isVisible())
+                await this.isOtherMemberAssociationRadio(false).click();
+            await this.addRegistrationCommentAndDocs();
+            await this.registerButton.click();
+            await this.submitWindowRegisterButton.click();
+        }
     }
     /**
      * Добавление комментария, документов и выполнение выбранного решения по инструкции
