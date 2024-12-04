@@ -6,6 +6,7 @@ import 'dotenv/config'
 import {InstructionTypes} from "../helpers/enums/InstructionTypes";
 import {expect} from "@playwright/test";
 import {InstructionStates} from "../helpers/enums/InstructionStates";
+import {FifaSendingActionTypes} from "../helpers/enums/FifaSendingActionTypes";
 
 test.describe("Инструкция с типом 'Изменение трудового договора'",() => {
     test(`Версия модуля: ${Process.env.APP_VERSION}`,
@@ -37,6 +38,7 @@ test.describe("Инструкция с типом 'Изменение трудо
                 await expect(additionalAgreement.regBeginDate).toHaveValue(additionalAgreement.prevContractPrevClubStartDate);
                 await expect(additionalAgreement.regEndDate).toHaveValue(additionalAgreement.additionalAgreementDateEndByDs);
                 await expect(additionalAgreement.registerCommentValue).toBeVisible();
+                await additionalAgreement.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })
         })
 })

@@ -8,6 +8,7 @@ import 'dotenv/config'
 import {InstructionStates} from "../helpers/enums/InstructionStates";
 import {PaymentTypes} from "../helpers/enums/PaymentTypes";
 import {PaymentStates} from "../helpers/enums/PaymentStates";
+import {FifaSendingActionTypes} from "../helpers/enums/FifaSendingActionTypes";
 
 test.describe("Инструкция с типом 'Трудовой договор'",() => {
     test(`Версия модуля: ${Process.env.APP_VERSION}`,
@@ -43,10 +44,12 @@ test.describe("Инструкция с типом 'Трудовой догово
             await expect(employmentContract.registerCommentValue).toBeVisible();
             await expect(employmentContract.regBeginDate).toHaveValue(employmentContract.prevContractPrevClubStartDate);
             await expect(employmentContract.regEndDate).toHaveValue(String(employmentContract.prevContractPrevClubEndDate));
+            await employmentContract.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
         })
         await test.step("Добавление и подтверждение фактического платежа",async () => {
             await employmentContract.addFactPayments(InstructionTypes.newEmploymentContract);
             await expect(employmentContract.paymentState(PaymentTypes.ransomPayment, PaymentStates.completed)).toBeVisible();
+            await employmentContract.checkFifaSending(FifaSendingActionTypes.proofOfPayment);
         })
         await test.step("Возврат выплаты в предыдущий статус",async () => {
             await employmentContract.returnPaymentToPrevState();

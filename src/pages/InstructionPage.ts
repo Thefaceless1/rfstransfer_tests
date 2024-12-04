@@ -1,5 +1,5 @@
 import {CreateInstructionPage} from "./CreateInstructionPage";
-import {expect, Locator, Page} from "@playwright/test";
+import {Locator, Page} from "@playwright/test";
 import {Mediators} from "../helpers/enums/Mediators";
 import {Elements} from "../framework/elements/Elements";
 import {InputData} from "../helpers/InputData";
@@ -22,6 +22,7 @@ import {CreateTransferOptionsType} from "../helpers/types/CreateTransferOptionsT
 import {PaymentStates} from "../helpers/enums/PaymentStates";
 import Process from "process";
 import {CollisionIds} from "../helpers/enums/CollisionIds";
+import {FifaSendingActionTypes} from "../helpers/enums/FifaSendingActionTypes";
 
 export class InstructionPage extends CreateInstructionPage {
     public prevContractStopDateValue: string = ''
@@ -572,9 +573,10 @@ export class InstructionPage extends CreateInstructionPage {
         if (Process.env.BRANCH == "preprod") {
             await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.missingPlayerFifaId)));
             await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.restrictRegisterPlayers)));
-            expect(await this.collisions().count()).toBe(2);
+            if (await this.collisions().count() != 2) throw new Error("Количество коллизий превышает ожидаемое");
             if (await this.isOtherMemberAssociationRadio(false).isVisible())
                 await this.isOtherMemberAssociationRadio(false).click();
+            if (await this.isInstructionWithPayments(false).isVisible()) await this.isInstructionWithPayments(false).click();
             await this.addRegistrationCommentAndDocs();
             await this.registerButton.click();
             await this.submitWindowRegisterButton.click();
@@ -712,6 +714,55 @@ export class InstructionPage extends CreateInstructionPage {
         await Elements.waitForVisible(this.instructionState(InstructionStates.registered));
     }
     /**
+     * Проверка отправки сведений в ФИФА
+     */
+    public async checkFifaSending(actionType: FifaSendingActionTypes): Promise<void> {
+        await dbHelper.getFifaSendingFlagState();
+        if (await dbHelper.getFifaSendingFlagState() == "false") logger.info("Отправка сведений в ФИФА отключена");
+        else if (Process.env.BRANCH != "preprod" && actionType == FifaSendingActionTypes.firstProRegistration) return;
+        else {
+            const regExpData: RegExpMatchArray | null  = this.page.url().match(/\d+/);
+            if (!regExpData) throw new Error("Отсутствует значение после применение рег. выражения к url");
+            const instructionId: number = Number(regExpData[0]);
+            let result: any[] = await dbHelper.getFifaSendingData(instructionId,actionType);
+            /**
+             * Проверяем до 30 секунд дал ли ФИФА сервис ответ на запрос и появилась ли запись в БД модуля
+             */
+            if (result.length == 0) {
+                const maxWaitingTime: number = 30000;
+                const checkIntervalTime: number = 1000;
+                for (let i = 0; i < maxWaitingTime; i+=checkIntervalTime) {
+                    await this.page.waitForTimeout(checkIntervalTime);
+                    const fifaSendingData: any[] = await dbHelper.getFifaSendingData(instructionId,actionType);
+                    if (fifaSendingData.length != 0) {
+                        result = fifaSendingData;
+                        break;
+                    }
+                }
+            }
+            switch (actionType) {
+                case FifaSendingActionTypes.proofOfPayment:
+                    if (result.length == 0) throw new Error("Данные о подтверждении платежа не отправлены в ФИФА");
+                    else if (result.some(value => value.error != "")) {
+                        result.forEach(row => {
+                            if (row.error != "") logger.warn(`Ошибка при отправке сведений о платеже: ${row.error}`);
+                        });
+                    }
+                    else logger.info("Отправка сведений прошла успешно");
+                    break;
+                case FifaSendingActionTypes.transferDeclaration:
+                    if (result.length == 0) throw new Error("Данные о декларации ТК не отправлены в ФИФА");
+                    else if (result[0].error != "") logger.warn(`Ошибка при отправке сведений о декларации ТК: ${result[0].error}`);
+                    else logger.info("Отправка сведений прошла успешно");
+                    break;
+                case FifaSendingActionTypes.firstProRegistration:
+                    if (result.length == 0) throw new Error("Данные о смене статуса не отправлены в ФИФА");
+                    else if (result[0].error != "") logger.warn(`Ошибка при отправке сведений о смене статуса: ${result[0].error}`);
+                    else logger.info("Отправка сведений прошла успешно");
+            }
+        }
+    }
+    /**
      * Добавление МТС
      */
     public async addMts(intTransferSubType?: IntTransferSubTypes): Promise<void> {
@@ -833,6 +884,6 @@ export class InstructionPage extends CreateInstructionPage {
                     prevContractPrevClubEndDate == this.prevContractStopDateValue &&
                     prevContractNewClubRestartDate == prevContractPrevClubEndDatePlusOneDay)
         }
-        else throw new Error("Неверно указаны параметры метода")
+        else throw new Error("Неверно указаны параметры метода");
     }
 }

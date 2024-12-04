@@ -59,7 +59,32 @@ class DbHelper {
         const values: string[] = [`${collisionId}`];
         const result = await client.query(queryText,values);
         if (result.rowCount == 0) throw new Error(`Отсутствует коллизия с id: ${collisionId}`);
+        else if (result.rows[0]["is_fatal"] == true) throw new Error(`Коллизия '${result.rows[0].description}' является критичной`);
         return result.rows[0].description;
+    }
+    /**
+     * Получение значения флага отправки сведений в ФИФА
+     */
+    public async getFifaSendingFlagState(): Promise<string> {
+        const client: pkg.Client = new Client(dbConfig);
+        await client.connect();
+        const queryText: string = `SELECT * FROM rfstran.work_params
+                                   WHERE sys_name = 'FIFA_Send'`;
+        const result = await client.query(queryText);
+        return result.rows[0].value;
+    }
+    /**
+     * Получение данных из таблицы 'fifa_sendings' по указанному 'instructionId' и "typeId"
+     */
+    public async getFifaSendingData(instructionId: number, actionType: number): Promise<any[]> {
+        const client: pkg.Client = new Client(dbConfig);
+        await client.connect();
+        const queryText: string = `SELECT * FROM rfstran.fifa_sendings 
+                                   WHERE instruction_id = $1 
+                                   AND type_id = $2`;
+        const values: string[] = [`${instructionId}`,`${actionType}`];
+        const result = await client.query(queryText,values);
+        return result.rows;
     }
 }
 export const dbHelper = new DbHelper();

@@ -9,6 +9,7 @@ import {TransferContractType} from "../helpers/enums/TransferContractType";
 import {PaymentTypes} from "../helpers/enums/PaymentTypes";
 import {InstructionStates} from "../helpers/enums/InstructionStates";
 import {PaymentStates} from "../helpers/enums/PaymentStates";
+import {FifaSendingActionTypes} from "../helpers/enums/FifaSendingActionTypes";
 
 test.describe("Инструкция с типом 'Переход на временной основе (аренда)'",() => {
     test(`Взять в аренду(ТК с разрывом). Версия модуля: ${Process.env.APP_VERSION}`,
@@ -45,13 +46,16 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(transferRent.instructionState(InstructionStates.registered)).toBeVisible();
                 await expect(transferRent.regBeginDate).toHaveValue(transferRent.newContractStartDate);
                 await expect(transferRent.regEndDate).toHaveValue(transferRent.newContractEndDate);
-                expect(await transferRent.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.toRent,TransferContractType.withTermination)).toBeTruthy()
+                expect(await transferRent.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.toRent,TransferContractType.withTermination)).toBeTruthy();
+                await transferRent.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
+                await transferRent.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
                 await transferRent.addFactPayments(InstructionTypes.transferAgreement);
                 await expect(transferRent.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
                 await expect(transferRent.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
                 await expect(transferRent.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+                await transferRent.checkFifaSending(FifaSendingActionTypes.proofOfPayment);
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
                 await transferRent.returnPaymentToPrevState();
@@ -98,13 +102,16 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(transferRent.instructionState(InstructionStates.registered)).toBeVisible();
                 await expect(transferRent.regBeginDate).toHaveValue(transferRent.newContractStartDate);
                 await expect(transferRent.regEndDate).toHaveValue(transferRent.newContractEndDate);
-                expect(await transferRent.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.toRent,TransferContractType.withSuspension)).toBeTruthy()
+                expect(await transferRent.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.toRent,TransferContractType.withSuspension)).toBeTruthy();
+                await transferRent.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
+                await transferRent.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
                 await transferRent.addFactPayments(InstructionTypes.transferAgreement);
                 await expect(transferRent.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
                 await expect(transferRent.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
                 await expect(transferRent.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+                await transferRent.checkFifaSending(FifaSendingActionTypes.proofOfPayment);
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
                 await transferRent.returnPaymentToPrevState();
@@ -151,13 +158,16 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(rentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
                 await expect(rentProlongation.regBeginDate).toHaveValue(rentProlongation.newContractStartDate);
                 await expect(rentProlongation.regEndDate).toHaveValue(rentProlongation.newContractEndDate);
-                expect(await rentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationNewContractNewTransfer,TransferContractType.withSuspension)).toBeTruthy()
+                expect(await rentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationNewContractNewTransfer,TransferContractType.withSuspension)).toBeTruthy();
+                await rentProlongation.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
+                await rentProlongation.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
                 await rentProlongation.addFactPayments(InstructionTypes.transferAgreement);
                 await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
                 await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
                 await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+                await rentProlongation.checkFifaSending(FifaSendingActionTypes.proofOfPayment);
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
                 await rentProlongation.returnPaymentToPrevState();
@@ -207,13 +217,16 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(rentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
                 await expect(rentProlongation.regBeginDate).toHaveValue(rentProlongation.newContractStartDate);
                 await expect(rentProlongation.regEndDate).toHaveValue(rentProlongation.newContractEndDate);
-                expect(await rentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationNewContract,TransferContractType.withSuspension)).toBeTruthy()
+                expect(await rentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationNewContract,TransferContractType.withSuspension)).toBeTruthy();
+                await rentProlongation.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
+                await rentProlongation.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
                 await rentProlongation.addFactPayments(InstructionTypes.transferAgreement);
                 await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
                 await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
                 await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+                await rentProlongation.checkFifaSending(FifaSendingActionTypes.proofOfPayment);
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
                 await rentProlongation.returnPaymentToPrevState();
@@ -263,13 +276,16 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(rentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
                 await expect(rentProlongation.regBeginDate).toHaveValue(rentProlongation.prevContractNewClubStartDate);
                 await expect(rentProlongation.regEndDate).toHaveValue(rentProlongation.additionalAgreementDateEndByDs);
-                expect(await rentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationNewTransfer,TransferContractType.withSuspension)).toBeTruthy()
+                expect(await rentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationNewTransfer,TransferContractType.withSuspension)).toBeTruthy();
+                await rentProlongation.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
+                await rentProlongation.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
                 await rentProlongation.addFactPayments(InstructionTypes.transferAgreement);
                 await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
                 await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
                 await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+                await rentProlongation.checkFifaSending(FifaSendingActionTypes.proofOfPayment);
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
                 await rentProlongation.returnPaymentToPrevState();
@@ -322,13 +338,16 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(rentProlongation.instructionState(InstructionStates.registered)).toBeVisible();
                 await expect(rentProlongation.regBeginDate).toHaveValue(rentProlongation.prevContractNewClubStartDate);
                 await expect(rentProlongation.regEndDate).toHaveValue(rentProlongation.additionalAgreementDateEndByDs);
-                expect(await rentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationWithoutNewContracts,TransferContractType.withSuspension)).toBeTruthy()
+                expect(await rentProlongation.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.prolongationWithoutNewContracts,TransferContractType.withSuspension)).toBeTruthy();
+                await rentProlongation.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
+                await rentProlongation.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
                 await rentProlongation.addFactPayments(InstructionTypes.transferAgreement);
                 await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
                 await expect(rentProlongation.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
                 await expect(rentProlongation.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+                await rentProlongation.checkFifaSending(FifaSendingActionTypes.proofOfPayment);
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
                 await rentProlongation.returnPaymentToPrevState();
@@ -379,13 +398,16 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(earlyFinishRent.instructionState(InstructionStates.registered)).toBeVisible();
                 await expect(earlyFinishRent.regBeginDate).toHaveValue(earlyFinishRent.newContractStartDate);
                 await expect(earlyFinishRent.regEndDate).toHaveValue(earlyFinishRent.newContractEndDate);
-                expect(await earlyFinishRent.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithNewContract,TransferContractType.withSuspension)).toBeTruthy()
+                expect(await earlyFinishRent.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithNewContract,TransferContractType.withSuspension)).toBeTruthy();
+                await earlyFinishRent.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
+                await earlyFinishRent.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
                 await earlyFinishRent.addFactPayments(InstructionTypes.transferAgreement);
                 await expect(earlyFinishRent.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
                 await expect(earlyFinishRent.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
                 await expect(earlyFinishRent.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+                await earlyFinishRent.checkFifaSending(FifaSendingActionTypes.proofOfPayment);
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
                 await earlyFinishRent.returnPaymentToPrevState();
@@ -435,13 +457,16 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(earlyFinishRent.instructionState(InstructionStates.registered)).toBeVisible();
                 await expect(earlyFinishRent.regBeginDate).toHaveValue(earlyFinishRent.prevContractPrevClubStartDate);
                 await expect(earlyFinishRent.regEndDate).toHaveValue(earlyFinishRent.prevContractPrevClubEndDate);
-                expect(await earlyFinishRent.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract,TransferContractType.withSuspension)).toBeTruthy()
+                expect(await earlyFinishRent.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract,TransferContractType.withSuspension)).toBeTruthy();
+                await earlyFinishRent.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
+                await earlyFinishRent.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
                 await earlyFinishRent.addFactPayments(InstructionTypes.transferAgreement);
                 await expect(earlyFinishRent.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
                 await expect(earlyFinishRent.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
                 await expect(earlyFinishRent.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
+                await earlyFinishRent.checkFifaSending(FifaSendingActionTypes.proofOfPayment);
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
                 await earlyFinishRent.returnPaymentToPrevState();
