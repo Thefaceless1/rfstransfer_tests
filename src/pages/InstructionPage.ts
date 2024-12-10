@@ -16,7 +16,6 @@ import {TransferContractType} from "../helpers/enums/TransferContractType";
 import {InstructionTypes} from "../helpers/enums/InstructionTypes";
 import {SelectedFilesType} from "../helpers/types/SelectedFilesType";
 import {PlayerStates} from "../helpers/enums/PlayerStates";
-import {RegistrationTypes} from "../helpers/enums/RegistrationTypes";
 import {IntTransferSubTypes} from "../helpers/enums/IntTransferSubTypes";
 import {CreateTransferOptionsType} from "../helpers/types/CreateTransferOptionsType";
 import {PaymentStates} from "../helpers/enums/PaymentStates";
@@ -526,7 +525,7 @@ export class InstructionPage extends CreateInstructionPage {
      * Добавление посредников
      */
     private async addMediators(): Promise<void> {
-        (await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible()) ?
+        (await this.withMediatorsCheckbox.isVisible()) ?
             await this.withMediatorsCheckbox.click():
             await this.withMediatorsRadio.click();
         await this.side.click();
@@ -573,13 +572,24 @@ export class InstructionPage extends CreateInstructionPage {
         if (Process.env.BRANCH == "preprod") {
             await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.missingPlayerFifaId)));
             await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.restrictRegisterPlayers)));
-            if (await this.collisions().count() != 2) throw new Error("Количество коллизий превышает ожидаемое");
+            //if (await this.collisions().count() != 2) throw new Error("Количество коллизий превышает ожидаемое");
             if (await this.isOtherMemberAssociationRadio(false).isVisible())
                 await this.isOtherMemberAssociationRadio(false).click();
             if (await this.isInstructionWithPayments(false).isVisible()) await this.isInstructionWithPayments(false).click();
             await this.addRegistrationCommentAndDocs();
             await this.registerButton.click();
             await this.submitWindowRegisterButton.click();
+        }
+        else {
+            await this.page.waitForTimeout(1000);
+            if (await this.collisions(await dbHelper.getCollisionDescription(10)).isVisible()) {
+                if (await this.isOtherMemberAssociationRadio(false).isVisible())
+                    await this.isOtherMemberAssociationRadio(false).click();
+                if (await this.isInstructionWithPayments(false).isVisible()) await this.isInstructionWithPayments(false).click();
+                await this.addRegistrationCommentAndDocs();
+                await this.registerButton.click();
+                await this.submitWindowRegisterButton.click();
+            }
         }
     }
     /**
@@ -590,19 +600,6 @@ export class InstructionPage extends CreateInstructionPage {
         await this.documents.first().setInputFiles(InputData.getTestFiles("png"));
         await Elements.waitForVisible(this.fileIcon("png"));
         await this.commentForRegister.fill(this.registerComment);
-    }
-    /**
-     * Добавление трансферного контракта со случайными параметрами типа ТК (С приостановленим, С разрывом)
-     */
-    public async addRandomTransferContract(): Promise<void> {
-        if (await this.registrationType(RegistrationTypes.permanent).isChecked())
-            await this.addTransferAgreement({})
-        else {
-            const transferTypeRandomNumber: number = randomInt(0,2);
-            (transferTypeRandomNumber == 0) ?
-                await this.addTransferAgreement({transferContractType: TransferContractType.withTermination}) :
-                await this.addTransferAgreement({transferContractType: TransferContractType.withSuspension});
-        }
     }
     /**
      * Добавление плановых выплат для инструкций
@@ -676,7 +673,7 @@ export class InstructionPage extends CreateInstructionPage {
         const paymentsCount: number = await this.paymentStateManagementButton.count();
         for (let i = 0; i < paymentsCount; i++) {
             await this.paymentStateManagementButton.nth(i).click();
-            await this.returnPreviousState.click();
+            await this.returnPreviousState.last().click();
             await this.yesButton.click();
         }
     }

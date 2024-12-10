@@ -4,6 +4,7 @@ node_modules/
 /src/artifacts/report/
 /src/artifacts/screenshots/*/
 /src/artifacts/screenshots/.last-run.json
+/src/report.zip
 /playwright/.cache/
 .idea
 .env

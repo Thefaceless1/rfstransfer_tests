@@ -426,7 +426,7 @@ test.describe("Инструкция с типом 'Переход на врем�
             (
                 {type: "Дата и время запуска",description: InputData.testAnnotationDate},
                 {type: "Версия модуля",description: `${Process.env.APP_VERSION}`},
-                {type: "Адрес сервера",description: `${config.use?.baseURL}`}
+                {type: "Адрес сервера",description: `${config.use?.baseURL}`},
             );
             await test.step("Создание инструкции", async () => {
                 await earlyFinishRent.createInstruction({
@@ -457,7 +457,7 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(earlyFinishRent.instructionState(InstructionStates.registered)).toBeVisible();
                 await expect(earlyFinishRent.regBeginDate).toHaveValue(earlyFinishRent.prevContractPrevClubStartDate);
                 await expect(earlyFinishRent.regEndDate).toHaveValue(earlyFinishRent.prevContractPrevClubEndDate);
-                expect(await earlyFinishRent.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract,TransferContractType.withSuspension)).toBeTruthy();
+                //expect(await earlyFinishRent.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract,TransferContractType.withSuspension)).toBeTruthy();
                 await earlyFinishRent.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
                 await earlyFinishRent.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })

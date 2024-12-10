@@ -8,6 +8,7 @@ import {expect} from "@playwright/test";
 import {IntTransferSubTypes} from "../helpers/enums/IntTransferSubTypes";
 import {PlayerStates} from "../helpers/enums/PlayerStates";
 import {InstructionStates} from "../helpers/enums/InstructionStates";
+import {TransferContractType} from "../helpers/enums/TransferContractType";
 
 test.describe("Инструкция с типом 'Международный переход'",async () => {
     test(`Взять футболиста(Любитель). Версия модуля: ${Process.env.APP_VERSION}`,
@@ -62,7 +63,7 @@ test.describe("Инструкция с типом 'Международный п
                 await expect(intTransfer.numberValueByName(intTransfer.additionalAgreementWithoutChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного соглашения",async () => {
-                await intTransfer.addRandomTransferContract();
+                await intTransfer.addTransferAgreement({transferContractType: TransferContractType.withTermination});
                 await expect(intTransfer.numberValueByName(intTransfer.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление МТС",async () => {
@@ -121,7 +122,7 @@ test.describe("Инструкция с типом 'Международный п
                 await expect(intTransfer.instructionTypeTitle(InstructionTypes.internationalTransfer)).toBeVisible();
             })
             await test.step("Добавление трансферного соглашения",async () => {
-                await intTransfer.addRandomTransferContract();
+                await intTransfer.addTransferAgreement({transferContractType: TransferContractType.withTermination});
                 await expect(intTransfer.numberValueByName(intTransfer.createdTransferAgreementNumber)).toBeVisible();
             })
             await test.step("Добавление МТС",async () => {

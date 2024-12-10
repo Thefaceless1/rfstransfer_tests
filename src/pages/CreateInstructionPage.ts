@@ -8,7 +8,6 @@ import {TransferAgreementRentSubTypes} from "../helpers/enums/TransferAgreementR
 import {IntTransferSubTypes} from "../helpers/enums/IntTransferSubTypes";
 import {PlayerStates} from "../helpers/enums/PlayerStates";
 import {RegistrationTypes} from "../helpers/enums/RegistrationTypes";
-import {randomInt} from "crypto";
 
 export class CreateInstructionPage extends MainPage {
     private readonly person: string = (process.env.BRANCH == "preprod") ? "Техническая учетная запись ручная ОРСТ" : "Автотест Трансфер"
@@ -176,15 +175,6 @@ export class CreateInstructionPage extends MainPage {
             this.page.locator("//span[text()='Постоянная']//preceding-sibling::input[@name='isTemporaryOption']");
     }
     /**
-     * Выбор случайного типа регистрации для трансферного контракта
-     */
-    private async setRandomRegistrationType(): Promise<void> {
-        const randomNumber: number = randomInt(0,2);
-        (randomNumber == 0) ?
-            await this.registrationType(RegistrationTypes.temporary).click() :
-            await this.registrationType(RegistrationTypes.permanent).click();
-    }
-    /**
      * Создание инструкции с указанным типом
      */
     public async createInstruction(createOptions: CreateInstructionOptionsType): Promise<void> {
@@ -207,7 +197,7 @@ export class CreateInstructionPage extends MainPage {
                 case IntTransferSubTypes.acceptProfessionalPlayer:
                     await this.acceptPlayerRadio.click();
                     await this.newClubPlayerStateRadio(PlayerStates.professional).click();
-                    await this.setRandomRegistrationType();
+                    await this.registrationType(RegistrationTypes.temporary).click();
                     await this.previousAssociation.click();
                     await this.previousAssociationValues.first().click();
                     await Elements.waitForVisible(this.newAssociationWithRfsValue);
@@ -222,7 +212,7 @@ export class CreateInstructionPage extends MainPage {
                 case IntTransferSubTypes.giveAwayProfessionalPlayer:
                     await this.giveAwayPlayerRadio.click();
                     await this.newClubPlayerStateRadio(PlayerStates.professional).click();
-                    await this.setRandomRegistrationType();
+                    await this.registrationType(RegistrationTypes.temporary).click();
                     await this.newAssociation.click();
                     await this.newAssociationValues.first().click();
                     await Elements.waitForVisible(this.prevAssociationWithRfsValue);

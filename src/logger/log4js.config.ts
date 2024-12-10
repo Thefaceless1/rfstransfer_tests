@@ -1,22 +1,17 @@
 import log4js from "log4js";
-import path from "path";
+import {logService} from "./LogService.js";
 
-export const logsFileName: string = "rfstransfer.log";
-export const logsFilePath: string = path.resolve("src","artifacts","logs",logsFileName);
 export const config: log4js.Configuration = {
     appenders: {
         file: {
             type: "file",
-            filename: logsFilePath,
+            filename: logService.logsFilePath,
             flags: "w"
-        },
-        console: {
-            type: 'console'
         }
     },
     categories: {
         default: {
-            appenders: ["console", "file"],
+            appenders: ["file"],
             level: "info"
         }
     }

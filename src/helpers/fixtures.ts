@@ -4,6 +4,7 @@ import {dbHelper} from "../db/DbHelper";
 import {InstructionTypes} from "./enums/InstructionTypes";
 import {TransferAgreementRentSubTypes} from "./enums/TransferAgreementRentSubTypes";
 import {TransferContractType} from "./enums/TransferContractType";
+import {logService} from "../logger/LogService";
 
 type Fixtures = {
     employmentContract: InstructionPage,
@@ -17,7 +18,8 @@ type Fixtures = {
 }
 
 export const test = base.extend<Fixtures>({
-    employmentContract: async ({page},use) => {
+    employmentContract: async ({page},use,testInfo) => {
+        await logService.clearLogFile();
         const employmentContract = new InstructionPage(page);
         await dbHelper.deleteFifaSending(employmentContract.personId);
         await dbHelper.deleteInstructions(employmentContract.personId);
@@ -25,8 +27,10 @@ export const test = base.extend<Fixtures>({
         await use(employmentContract);
         await dbHelper.deleteFifaSending(employmentContract.personId);
         await dbHelper.deleteInstructions(employmentContract.personId);
+        await testInfo.attach('Log File', {path: logService.logsFilePath});
     },
-    additionalAgreement: async ({page},use) => {
+    additionalAgreement: async ({page},use,testInfo) => {
+        await logService.clearLogFile();
         const additionalAgreement = new InstructionPage(page);
         await dbHelper.deleteFifaSending(additionalAgreement.personId);
         await dbHelper.deleteInstructions(additionalAgreement.personId);
@@ -38,8 +42,10 @@ export const test = base.extend<Fixtures>({
         await use(additionalAgreement);
         await dbHelper.deleteFifaSending(additionalAgreement.personId);
         await dbHelper.deleteInstructions(additionalAgreement.personId);
+        await testInfo.attach('Log File', {path: logService.logsFilePath});
     },
-    transfer: async ({page},use) => {
+    transfer: async ({page},use,testInfo) => {
+        await logService.clearLogFile();
         const transfer = new InstructionPage(page);
         await dbHelper.deleteFifaSending(transfer.personId);
         await dbHelper.deleteInstructions(transfer.personId);
@@ -51,8 +57,10 @@ export const test = base.extend<Fixtures>({
         await use(transfer);
         await dbHelper.deleteFifaSending(transfer.personId);
         await dbHelper.deleteInstructions(transfer.personId);
+        await testInfo.attach('Log File', {path: logService.logsFilePath});
     },
-    leaseBuyout: async ({page},use) => {
+    leaseBuyout: async ({page},use,testInfo) => {
+        await logService.clearLogFile();
         const leaseBuyout = new InstructionPage(page);
         await dbHelper.deleteFifaSending(leaseBuyout.personId);
         await dbHelper.deleteInstructions(leaseBuyout.personId);
@@ -72,8 +80,10 @@ export const test = base.extend<Fixtures>({
         await use(leaseBuyout);
         await dbHelper.deleteFifaSending(leaseBuyout.personId);
         await dbHelper.deleteInstructions(leaseBuyout.personId);
+        await testInfo.attach('Log File', {path: logService.logsFilePath});
     },
-    transferRent: async ({page},use) => {
+    transferRent: async ({page},use,testInfo) => {
+        await logService.clearLogFile();
         const transferRent = new InstructionPage(page);
         await dbHelper.deleteFifaSending(transferRent.personId);
         await dbHelper.deleteInstructions(transferRent.personId);
@@ -85,8 +95,10 @@ export const test = base.extend<Fixtures>({
         await use(transferRent);
         await dbHelper.deleteFifaSending(transferRent.personId);
         await dbHelper.deleteInstructions(transferRent.personId);
+        await testInfo.attach('Log File', {path: logService.logsFilePath});
     },
-    rentProlongation: async ({page},use)=> {
+    rentProlongation: async ({page},use,testInfo)=> {
+        await logService.clearLogFile();
         const rentProlongation = new InstructionPage(page);
         await dbHelper.deleteFifaSending(rentProlongation.personId);
         await dbHelper.deleteInstructions(rentProlongation.personId);
@@ -106,13 +118,14 @@ export const test = base.extend<Fixtures>({
         await use(rentProlongation);
         await dbHelper.deleteFifaSending(rentProlongation.personId);
         await dbHelper.deleteInstructions(rentProlongation.personId);
+        await testInfo.attach('Log File', {path: logService.logsFilePath});
     },
     earlyFinishRent: async ({page},use,testInfo)=> {
+        await logService.clearLogFile();
         const transferRentEarlyFinish = new InstructionPage(page);
         await dbHelper.deleteFifaSending(transferRentEarlyFinish.personId);
         await dbHelper.deleteInstructions(transferRentEarlyFinish.personId);
         await transferRentEarlyFinish.authorization();
-        const earlyFinishChangeTdTestId: string = "405e690b3f4edc939e5f-4fc4d1d194cd58b7fbab";
         await transferRentEarlyFinish.addTestInstruction({
             type: InstructionTypes.newEmploymentContract,
             clubId: transferRentEarlyFinish.clubId,
@@ -125,15 +138,17 @@ export const test = base.extend<Fixtures>({
             clubId: transferRentEarlyFinish.srcClubId,
             isInstructionForEarlyFinish: true
             },
-            (testInfo.testId == earlyFinishChangeTdTestId) ?
+            (testInfo.title.includes("изменение ТД")) ?
                 TransferContractType.withSuspension:
                 TransferContractType.withTermination
         );
         await use(transferRentEarlyFinish);
         await dbHelper.deleteFifaSending(transferRentEarlyFinish.personId);
         await dbHelper.deleteInstructions(transferRentEarlyFinish.personId);
+        await testInfo.attach('Log File', {path: logService.logsFilePath});
     },
-    intTransfer: async ({page},use) => {
+    intTransfer: async ({page},use,testInfo) => {
+        await logService.clearLogFile();
         const intTransfer = new InstructionPage(page);
         await dbHelper.deleteFifaSending(intTransfer.personId);
         await dbHelper.deleteInstructions(intTransfer.personId);
@@ -141,6 +156,7 @@ export const test = base.extend<Fixtures>({
         await use(intTransfer);
         await dbHelper.deleteFifaSending(intTransfer.personId);
         await dbHelper.deleteInstructions(intTransfer.personId);
+        await testInfo.attach('Log File', {path: logService.logsFilePath});
     }
 })
 

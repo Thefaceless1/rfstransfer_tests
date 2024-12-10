@@ -5,16 +5,18 @@
   "main": "index.js",
   "scripts": {
     "report:open": "npx playwright show-report src/artifacts/report",
-    "report:send": "npx ts-node src/mailer/sendmail.ts"
+    "report:send": "npx ts-node src/mailer/MailService.ts"
   },
   "author": "Shelekh Mikhail",
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@types/archiver": "^6.0.3",
     "@types/log4js": "^2.3.5",
     "@types/node": "^20.8.4",
     "@types/nodemailer": "^6.4.11",
     "@types/pg": "^8.10.5",
+    "archiver": "^7.0.1",
     "dotenv": "^16.3.1",
     "log4js": "^6.9.1",
     "node": "^19.2.0",
