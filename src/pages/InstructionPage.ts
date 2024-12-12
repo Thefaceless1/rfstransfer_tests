@@ -569,7 +569,7 @@ export class InstructionPage extends CreateInstructionPage {
             await this.isOtherMemberAssociationRadio(false).click();
         await this.skipHistoryChangeCheckBox.click();
         await this.registerButton.click();
-        if (Process.env.BRANCH == "preprod") {
+        if (Process.env.BRANCH == "preprod" ?? !await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible()) {
             await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.missingPlayerFifaId)));
             await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.restrictRegisterPlayers)));
             //if (await this.collisions().count() != 2) throw new Error("Количество коллизий превышает ожидаемое");
@@ -795,9 +795,10 @@ export class InstructionPage extends CreateInstructionPage {
         let prevContractPrevClubEndDate: string = '';
         let prevContractPrevClubRestartDate: string = '';
         if (prevContractPrevClub.length > 0) {
-            prevContractPrevClubStopDate = prevContractPrevClub[0]["stop_date"].toLocaleDateString();
-            prevContractPrevClubEndDate = prevContractPrevClub[0]["actual_end_date"].toLocaleDateString();
-            if (prevContractPrevClub[0]["restart_date"]) prevContractPrevClubRestartDate = prevContractPrevClub[0]["restart_date"].toLocaleDateString();
+            prevContractPrevClubStopDate = prevContractPrevClub[0]["stop_date"].toLocaleDateString('ru-RU');
+            prevContractPrevClubEndDate = prevContractPrevClub[0]["actual_end_date"].toLocaleDateString('ru-RU');
+            console.log(prevContractPrevClubStopDate, prevContractPrevClubStopDate)
+            if (prevContractPrevClub[0]["restart_date"]) prevContractPrevClubRestartDate = prevContractPrevClub[0]["restart_date"].toLocaleDateString('ru-RU');
         }
         const prevContractNewClub: any[] = (transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithNewContract ||
                                             transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract) ?
@@ -806,8 +807,8 @@ export class InstructionPage extends CreateInstructionPage {
         let prevContractNewClubRestartDate: string = '';
         let prevContractNewClubEndDate: string = '';
         if (prevContractNewClub.length > 0) {
-            prevContractNewClubEndDate = prevContractNewClub[0]["actual_end_date"].toLocaleDateString();
-            if (prevContractNewClub[0]["restart_date"]) prevContractNewClubRestartDate = prevContractNewClub[0]["restart_date"].toLocaleDateString();
+            prevContractNewClubEndDate = prevContractNewClub[0]["actual_end_date"].toLocaleDateString('ru-RU');
+            if (prevContractNewClub[0]["restart_date"]) prevContractNewClubRestartDate = prevContractNewClub[0]["restart_date"].toLocaleDateString('ru-RU');
         }
         if (transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithNewContract) {
             logger.info(`
