@@ -569,7 +569,7 @@ export class InstructionPage extends CreateInstructionPage {
             await this.isOtherMemberAssociationRadio(false).click();
         await this.skipHistoryChangeCheckBox.click();
         await this.registerButton.click();
-        if (Process.env.BRANCH == "preprod" ?? !await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible()) {
+        if (Process.env.BRANCH == "preprod" && !await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible()) {
             await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.missingPlayerFifaId)));
             await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.restrictRegisterPlayers)));
             //if (await this.collisions().count() != 2) throw new Error("Количество коллизий превышает ожидаемое");
