@@ -797,7 +797,6 @@ export class InstructionPage extends CreateInstructionPage {
         if (prevContractPrevClub.length > 0) {
             prevContractPrevClubStopDate = prevContractPrevClub[0]["stop_date"].toLocaleDateString('ru-RU');
             prevContractPrevClubEndDate = prevContractPrevClub[0]["actual_end_date"].toLocaleDateString('ru-RU');
-            console.log(prevContractPrevClubStopDate, prevContractPrevClubStopDate)
             if (prevContractPrevClub[0]["restart_date"]) prevContractPrevClubRestartDate = prevContractPrevClub[0]["restart_date"].toLocaleDateString('ru-RU');
         }
         const prevContractNewClub: any[] = (transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithNewContract ||
