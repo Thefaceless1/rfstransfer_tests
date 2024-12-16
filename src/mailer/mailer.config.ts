@@ -18,7 +18,7 @@ export const transporter = nodemailer.createTransport({
 export const mailOptions: SendMailOptions = {
     from: Process.env.MAIL_FROM,
     to: Process.env.MAIL_TO!.split(",").map(address => address.trim()),
-    subject: `Отчет по автотестам для модуля 'Трансфер' версии ${Process.env.APP_VERSION} от ${new Date().toLocaleDateString('ru-RU')}`,
+    subject: `Отчет по автотестам для модуля Управления контрактами версии ${Process.env.APP_VERSION} от ${new Date().toLocaleDateString('ru-RU')}`,
     text: 'Распакуйте архив и откройте файл index.html для просмотра отчета',
     attachments: [
         {

@@ -59,5 +59,9 @@ test.describe("Инструкция с типом 'Трудовой догово
             await employmentContract.cancelPayment();
             await expect(employmentContract.paymentState(PaymentTypes.ransomPayment, PaymentStates.cancelled)).toBeVisible();
         })
+        await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+            const [actualReportName, expectedReportName] = await employmentContract.printInstructionReport();
+            expect(actualReportName).toBe(expectedReportName);
+        })
     })
 })

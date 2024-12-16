@@ -5,8 +5,7 @@ export const config: log4js.Configuration = {
     appenders: {
         file: {
             type: "file",
-            filename: logService.logsFilePath,
-            flags: "w"
+            filename: logService.logsFilePath
         }
     },
     categories: {

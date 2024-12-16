@@ -70,6 +70,10 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await transfer.cancelPayment();
                 await expect(transfer.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await transfer.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
+            })
         })
     test(`Выкуп из аренды с расторжением. Версия модуля: ${Process.env.APP_VERSION}`,
         async ({leaseBuyout}) => {
@@ -130,6 +134,10 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await leaseBuyout.cancelPayment();
                 await expect(leaseBuyout.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await leaseBuyout.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
+            })
         })
     test(`Выкуп из аренды без расторжения. Версия модуля: ${Process.env.APP_VERSION}`,
         async ({leaseBuyout}) => {
@@ -188,6 +196,10 @@ test.describe("Инструкция с типом 'Переход на пост�
             await test.step("Отмена выплаты",async () => {
                 await leaseBuyout.cancelPayment();
                 await expect(leaseBuyout.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
+            })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await leaseBuyout.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
             })
         })
 })

@@ -40,5 +40,9 @@ test.describe("Инструкция с типом 'Изменение трудо
                 await expect(additionalAgreement.registerCommentValue).toBeVisible();
                 await additionalAgreement.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await additionalAgreement.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
+            })
         })
 })

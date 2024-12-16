@@ -142,6 +142,10 @@ export class InstructionPage extends CreateInstructionPage {
      */
     private readonly yesButton: Locator = this.page.locator("//button[text()='Да']")
     /**
+     * Кнопка формирования печатной формы инструкции
+     */
+    private readonly printInstructionButton: Locator = this.page.locator("//span[contains(@class,'IconPrinterStroked')]")
+    /**
      * Заголовок поля "Комментарий к регистрации"
      */
     private readonly commentForRegistrationTitle: Locator = this.page.locator("//*[text()='Комментарий к регистрации']")
@@ -882,5 +886,20 @@ export class InstructionPage extends CreateInstructionPage {
                     prevContractNewClubRestartDate == prevContractPrevClubEndDatePlusOneDay)
         }
         else throw new Error("Неверно указаны параметры метода");
+    }
+    /**
+     * Формирование и загрузка файла с печатной формой инструкции
+     */
+    public async printInstructionReport(): Promise<[string, string]> {
+        const downloadPromise = this.page.waitForEvent('download');
+        await this.printInstructionButton.click();
+        const download = await downloadPromise;
+        let expectedReportFile: string = "Отчет_по_инструкции_";
+        const regExpData: RegExpMatchArray | null  = this.page.url().match(/\d+/);
+        if (!regExpData) throw new Error("Отсутствует значение после применение рег. выражения к url");
+        const instructionId: number = Number(regExpData[0]);
+        expectedReportFile+=String(instructionId)+".pdf";
+        if (await download.failure()) throw new Error(`Ошибка при загрузке файла: ${await download.failure()}`);
+        return [download.suggestedFilename(),expectedReportFile];
     }
 }

@@ -37,6 +37,10 @@ test.describe("Инструкция с типом 'Международный п
                 await expect(intTransfer.regEndDate).toHaveValue(intTransfer.newContractEndDate);
                 await expect(intTransfer.registerCommentValue).toBeVisible();
             })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await intTransfer.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
+            })
     })
     test(`Взять футболиста(Профессионал). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({intTransfer}) => {
@@ -77,6 +81,10 @@ test.describe("Инструкция с типом 'Международный п
                 await expect(intTransfer.regEndDate).toHaveValue(intTransfer.newContractEndDate);
                 await expect(intTransfer.registerCommentValue).toBeVisible();
             })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await intTransfer.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
+            })
         })
     test(`Отдать футболиста(Любитель). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({intTransfer}) => {
@@ -103,6 +111,10 @@ test.describe("Инструкция с типом 'Международный п
                 await expect(intTransfer.instructionState(InstructionStates.registered)).toBeVisible();
                 await expect(intTransfer.prevContractStopDate).toHaveValue(intTransfer.prevContractNewClubStartDate);
                 await expect(intTransfer.registerCommentValue).toBeVisible();
+            })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await intTransfer.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
             })
         })
     test(`Отдать футболиста(Профессионал). Версия модуля: ${Process.env.APP_VERSION}`,
@@ -134,6 +146,10 @@ test.describe("Инструкция с типом 'Международный п
                 await expect(intTransfer.instructionState(InstructionStates.registered)).toBeVisible();
                 await expect(intTransfer.prevContractStopDate).toHaveValue(intTransfer.prevContractNewClubStartDate);
                 await expect(intTransfer.registerCommentValue).toBeVisible();
+            })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await intTransfer.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
             })
         })
 })

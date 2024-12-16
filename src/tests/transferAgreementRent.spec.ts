@@ -67,6 +67,10 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await transferRent.cancelPayment();
                 await expect(transferRent.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await transferRent.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
+            })
         })
     test(`Взять в аренду(ТК с приостановкой). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({transferRent}) => {
@@ -123,6 +127,10 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await transferRent.cancelPayment();
                 await expect(transferRent.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await transferRent.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
+            })
         })
     test(`Продление аренды(новый ТД, новый ТК). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({rentProlongation}) => {
@@ -178,6 +186,10 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Отмена выплаты",async () => {
                 await rentProlongation.cancelPayment();
                 await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
+            })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await rentProlongation.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
             })
         })
     test(`Продление аренды(новый ТД, ДС к ТК). Версия модуля: ${Process.env.APP_VERSION}`,
@@ -238,6 +250,10 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await rentProlongation.cancelPayment();
                 await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await rentProlongation.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
+            })
         })
     test(`Продление аренды(ДС к ТД, новый ТК). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({rentProlongation}) => {
@@ -296,6 +312,10 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Отмена выплаты",async () => {
                 await rentProlongation.cancelPayment();
                 await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
+            })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await rentProlongation.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
             })
         })
     test(`Продление аренды(ДС к ТД, ДС к ТК). Версия модуля: ${Process.env.APP_VERSION}`,
@@ -359,6 +379,10 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await rentProlongation.cancelPayment();
                 await expect(rentProlongation.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await rentProlongation.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
+            })
         })
     test(`Досрочное завершение(новый ТД). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({earlyFinishRent}) => {
@@ -419,6 +443,10 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await earlyFinishRent.cancelPayment();
                 await expect(earlyFinishRent.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
             })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await earlyFinishRent.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
+            })
         })
     test(`Досрочное завершение(изменение ТД). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({earlyFinishRent}) => {
@@ -477,6 +505,10 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Отмена выплаты",async () => {
                 await earlyFinishRent.cancelPayment();
                 await expect(earlyFinishRent.paymentState(PaymentTypes.fixedPayment, PaymentStates.cancelled)).toBeVisible();
+            })
+            await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
+                const [actualReportName, expectedReportName] = await earlyFinishRent.printInstructionReport();
+                expect(actualReportName).toBe(expectedReportName);
             })
         })
 })
