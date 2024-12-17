@@ -1,14 +1,14 @@
-import {test} from "../helpers/fixtures";
+import {test} from "../../helpers/fixtures";
 import * as Process from "process";
-import {InputData} from "../helpers/InputData";
-import config from "../../playwright.config";
+import {InputData} from "../../helpers/InputData";
+import config from "../../../playwright.config";
 import 'dotenv/config'
-import {InstructionTypes} from "../helpers/enums/InstructionTypes";
+import {InstructionTypes} from "../../helpers/enums/InstructionTypes";
 import {expect} from "@playwright/test";
-import {IntTransferSubTypes} from "../helpers/enums/IntTransferSubTypes";
-import {PlayerStates} from "../helpers/enums/PlayerStates";
-import {InstructionStates} from "../helpers/enums/InstructionStates";
-import {TransferContractType} from "../helpers/enums/TransferContractType";
+import {IntTransferSubTypes} from "../../helpers/enums/IntTransferSubTypes";
+import {PlayerStates} from "../../helpers/enums/PlayerStates";
+import {InstructionStates} from "../../helpers/enums/InstructionStates";
+import {TransferContractType} from "../../helpers/enums/TransferContractType";
 
 test.describe("Инструкция с типом 'Международный переход'",async () => {
     test(`Взять футболиста(Любитель). Версия модуля: ${Process.env.APP_VERSION}`,

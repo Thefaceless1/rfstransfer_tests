@@ -1,15 +1,15 @@
-import {test} from "../helpers/fixtures";
-import {InputData} from "../helpers/InputData";
+import {test} from "../../helpers/fixtures";
+import {InputData} from "../../helpers/InputData";
 import Process from "process";
-import config from "../../playwright.config";
-import {InstructionTypes} from "../helpers/enums/InstructionTypes";
+import config from "../../../playwright.config";
+import {InstructionTypes} from "../../helpers/enums/InstructionTypes";
 import {expect} from "@playwright/test";
-import {TransferAgreementRentSubTypes} from "../helpers/enums/TransferAgreementRentSubTypes";
-import {TransferContractType} from "../helpers/enums/TransferContractType";
-import {PaymentTypes} from "../helpers/enums/PaymentTypes";
-import {InstructionStates} from "../helpers/enums/InstructionStates";
-import {PaymentStates} from "../helpers/enums/PaymentStates";
-import {FifaSendingActionTypes} from "../helpers/enums/FifaSendingActionTypes";
+import {TransferAgreementRentSubTypes} from "../../helpers/enums/TransferAgreementRentSubTypes";
+import {TransferContractType} from "../../helpers/enums/TransferContractType";
+import {PaymentTypes} from "../../helpers/enums/PaymentTypes";
+import {InstructionStates} from "../../helpers/enums/InstructionStates";
+import {PaymentStates} from "../../helpers/enums/PaymentStates";
+import {FifaSendingActionTypes} from "../../helpers/enums/FifaSendingActionTypes";
 
 test.describe("Инструкция с типом 'Переход на временной основе (аренда)'",() => {
     test(`Взять в аренду(ТК с разрывом). Версия модуля: ${Process.env.APP_VERSION}`,

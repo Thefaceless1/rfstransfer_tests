@@ -5,6 +5,7 @@ import {InstructionTypes} from "./enums/InstructionTypes";
 import {TransferAgreementRentSubTypes} from "./enums/TransferAgreementRentSubTypes";
 import {TransferContractType} from "./enums/TransferContractType";
 import {logService} from "../logger/LogService";
+import {RegistriesPage} from "../pages/RegistriesPage";
 
 type Fixtures = {
     employmentContract: InstructionPage,
@@ -14,7 +15,8 @@ type Fixtures = {
     transferRent: InstructionPage,
     rentProlongation: InstructionPage,
     earlyFinishRent: InstructionPage,
-    intTransfer: InstructionPage
+    intTransfer: InstructionPage,
+    registry: RegistriesPage
 }
 
 export const test = base.extend<Fixtures>({
@@ -156,6 +158,13 @@ export const test = base.extend<Fixtures>({
         await use(intTransfer);
         await dbHelper.deleteFifaSending(intTransfer.personId);
         await dbHelper.deleteInstructions(intTransfer.personId);
+        await testInfo.attach('Log File', {path: logService.logsFilePath});
+    },
+    registry: async ({page},use,testInfo) => {
+        await logService.clearLogFile();
+        const registry = new RegistriesPage(page);
+        await registry.authorization();
+        await use(registry);
         await testInfo.attach('Log File', {path: logService.logsFilePath});
     }
 })

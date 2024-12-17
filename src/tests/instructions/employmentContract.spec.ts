@@ -1,14 +1,14 @@
-import {test} from "../helpers/fixtures";
-import {InstructionTypes} from "../helpers/enums/InstructionTypes";
+import {test} from "../../helpers/fixtures";
+import {InstructionTypes} from "../../helpers/enums/InstructionTypes";
 import * as Process from "process";
-import {InputData} from "../helpers/InputData";
-import config from "../../playwright.config";
+import {InputData} from "../../helpers/InputData";
+import config from "../../../playwright.config";
 import {expect} from "@playwright/test";
 import 'dotenv/config'
-import {InstructionStates} from "../helpers/enums/InstructionStates";
-import {PaymentTypes} from "../helpers/enums/PaymentTypes";
-import {PaymentStates} from "../helpers/enums/PaymentStates";
-import {FifaSendingActionTypes} from "../helpers/enums/FifaSendingActionTypes";
+import {InstructionStates} from "../../helpers/enums/InstructionStates";
+import {PaymentTypes} from "../../helpers/enums/PaymentTypes";
+import {PaymentStates} from "../../helpers/enums/PaymentStates";
+import {FifaSendingActionTypes} from "../../helpers/enums/FifaSendingActionTypes";
 
 test.describe("Инструкция с типом 'Трудовой договор'",() => {
     test(`Версия модуля: ${Process.env.APP_VERSION}`,

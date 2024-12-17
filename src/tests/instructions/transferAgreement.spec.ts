@@ -1,14 +1,14 @@
-import {test} from "../helpers/fixtures";
-import {InputData} from "../helpers/InputData";
+import {test} from "../../helpers/fixtures";
+import {InputData} from "../../helpers/InputData";
 import Process from "process";
-import config from "../../playwright.config";
-import {InstructionTypes} from "../helpers/enums/InstructionTypes";
+import config from "../../../playwright.config";
+import {InstructionTypes} from "../../helpers/enums/InstructionTypes";
 import {expect} from "@playwright/test";
-import {TransferAgreementSubTypes} from "../helpers/enums/TransferAgreementSubTypes";
-import {PaymentTypes} from "../helpers/enums/PaymentTypes";
-import {InstructionStates} from "../helpers/enums/InstructionStates";
-import {PaymentStates} from "../helpers/enums/PaymentStates";
-import {FifaSendingActionTypes} from "../helpers/enums/FifaSendingActionTypes";
+import {TransferAgreementSubTypes} from "../../helpers/enums/TransferAgreementSubTypes";
+import {PaymentTypes} from "../../helpers/enums/PaymentTypes";
+import {InstructionStates} from "../../helpers/enums/InstructionStates";
+import {PaymentStates} from "../../helpers/enums/PaymentStates";
+import {FifaSendingActionTypes} from "../../helpers/enums/FifaSendingActionTypes";
 
 test.describe("Инструкция с типом 'Переход на постоянной основе'",() => {
     test(`Без выкупа из аренды. Версия модуля: ${Process.env.APP_VERSION}`,
