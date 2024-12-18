@@ -22,6 +22,38 @@ export class RegistriesPage extends MainPage {
      */
     private readonly acceptButton: Locator = this.page.locator("//button[text()='Применить']")
     /**
+     * Иконка лоадера
+     */
+    private readonly loader: Locator = this.page.locator("//*[@class='ProgressSpin-Circle']")
+    /**
+     * Кнопка "Назначить на себя"
+     */
+    private readonly nominateYourselfButton: Locator = this.page.locator("//button[text()='Назначить на себя']")
+    /**
+     * Кнопка "Назначить"
+     */
+    private readonly nominateButton: Locator = this.page.locator("//button[text()='Назначить' and not(@disabled)]")
+    /**
+     * Поле с ФИО текущего пользователя
+     */
+    private readonly currentUserData: Locator = this.page.locator("(//div[contains(@class,'UserInfo')]//p)[1]")
+    /**
+     * Поле "Выберите ответственного сотрудника"
+     */
+    private readonly selectResponsiblePerson: Locator = this.page.locator("//div[contains(@class,'designatedEmployee__indicators')]")
+    /**
+     * Поле "Выберите ответственного сотрудника"
+     */
+    private readonly responsiblePersonDropdownValues: Locator = this.page.locator("//div[contains(@class,'designatedEmployee__option')]//div//div[1]")
+    /**
+     * Значения столбца "Ответственный" реестра "Список инструкций"
+     */
+    private readonly responsiblePersonValues: Locator = this.page.locator("//span[contains(@id,'cell-designatedEmployee')]")
+    /**
+     * Чекбокс в столбце "Назначение" реестра "Список инструкций"
+     */
+    private readonly nominationCheckbox: Locator = this.page.locator("//div[@ref='eCheckbox']//input[@ref='eInput']")
+    /**
      * Количество отображаемых, а также общее количество записей в таблице реестра
      */
     private readonly paginationRecordsInfo: Locator = this.page.locator("//li[contains(@class,'ant-pagination-total-text')]//div")
@@ -97,5 +129,36 @@ export class RegistriesPage extends MainPage {
         const regExpData: RegExpMatchArray | null = regExp.exec(locatorText);
         if (!regExpData) throw new Error("Отсутствует значение общего кол-ва записей реестра после применения рег. выражения");
         return Number(regExpData[0]);
+    }
+    /**
+     * Назначение ответственного на инструкцию
+     */
+    public async nominateResponsiblePerson(isMyself: boolean): Promise<void> {
+        if (isMyself) await this.nominationCheckbox.first().click();
+        let expectedUserSurname: string;
+        if (isMyself) {
+            expectedUserSurname = await this.getPersonSurname(this.currentUserData);
+            await this.nominateYourselfButton.click();
+        }
+        else {
+            await this.selectResponsiblePerson.click();
+            expectedUserSurname = await this.getPersonSurname(this.responsiblePersonDropdownValues.first());
+            await this.responsiblePersonDropdownValues.first().click();
+            await this.nominateButton.click();
+        }
+        await Elements.waitForVisible(this.loader);
+        await Elements.waitForHidden(this.loader);
+        const nominatedUserSurname: string = await this.getPersonSurname(this.responsiblePersonValues.first());
+        expect(nominatedUserSurname).toBe(expectedUserSurname);
+    }
+    /**
+     * Получение фамилии сотрудника из его ФИО
+     */
+    private async getPersonSurname(locator: Locator): Promise<string> {
+        const personValue: string = await locator.innerText();
+        const regExp: RegExp = /[А-Яа-я\w]+(?=\s)/;
+        const regExpData = regExp.exec(personValue);
+        if (!regExpData) throw new Error("Отсутствует значение после применения рег. выражения к значению пользователя");
+        return regExpData[0];
     }
 }

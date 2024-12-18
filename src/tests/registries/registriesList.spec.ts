@@ -16,6 +16,12 @@ test.describe("Реестры",() => {
             await test.step("Выгрузка списка инструкций в excel", async () => {
                 await registry.exportRegistryToExcel(RegistriesValues.instructionList);
             })
+            await test.step("Назначение себя ответственным на инструкцию", async () => {
+                await registry.nominateResponsiblePerson(true);
+            })
+            await test.step("Назначение ответственного из списка на инструкцию", async () => {
+                await registry.nominateResponsiblePerson(false);
+            })
         })
     test(`Реестр трудовых договоров. Версия модуля: ${Process.env.APP_VERSION}`,
         async ({registry}) => {
