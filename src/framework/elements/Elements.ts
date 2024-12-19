@@ -12,7 +12,9 @@ export class Elements {
     /**
      * Ожидание скрытия элемента
      */
-    public static async waitForHidden(element: Locator) {
-        await element.waitFor({state: "hidden"});
+    public static async waitForHidden(element: Locator, timeout?: number) {
+        (timeout) ?
+            await element.waitFor({state: "hidden",timeout: timeout}):
+            await element.waitFor({state: "hidden"});
     }
 }

@@ -6,6 +6,7 @@ import path from "path";
 import xlsx from 'xlsx';
 
 export class RegistriesPage extends MainPage {
+    private readonly maxServerResponseTime: number = 61000
     constructor(page: Page) {
         super(page);
     }
@@ -108,7 +109,7 @@ export class RegistriesPage extends MainPage {
         await this.page.keyboard.press('Escape');
         await this.acceptFilters.click();
         await Elements.waitForVisible(this.loader);
-        await Elements.waitForHidden(this.loader);
+        await Elements.waitForHidden(this.loader,this.maxServerResponseTime);
     }
     /**
      * Проставление видимости для всех имеющихся столбцов таблиц
@@ -127,8 +128,7 @@ export class RegistriesPage extends MainPage {
      * Сохранение файла.Метод возвращает путь к сохраненному файлу
      */
     private async saveFile(): Promise<string> {
-        const maxServerResponseTime: number = 61000;
-        const downloadPromise: Promise<Download> = this.page.waitForEvent('download',{timeout: maxServerResponseTime});
+        const downloadPromise: Promise<Download> = this.page.waitForEvent('download',{timeout: this.maxServerResponseTime});
         await this.downloadButton.click();
         const download: Download = await downloadPromise;
         let fileSavePath: string = await download.path();
