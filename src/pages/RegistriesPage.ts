@@ -34,6 +34,18 @@ export class RegistriesPage extends MainPage {
      */
     private readonly nominateButton: Locator = this.page.locator("//button[text()='Назначить' and not(@disabled)]")
     /**
+     * Кнопка "Применить фильтры"
+     */
+    private readonly acceptFilters: Locator = this.page.locator("//button[text()='Применить фильтры' and not(@disabled)]")
+    /**
+     * Поле "Гражданство"
+     */
+    private readonly citizenship: Locator = this.page.locator("//div[contains(@class,'citizenshipCountry__dropdown-indicator')]")
+    /**
+     * Поле "Показать фильтры"
+     */
+    private readonly showFilters: Locator = this.page.locator("//div[text()='Показать фильтры']")
+    /**
      * Поле с ФИО текущего пользователя
      */
     private readonly currentUserData: Locator = this.page.locator("(//div[contains(@class,'UserInfo')]//p)[1]")
@@ -66,10 +78,17 @@ export class RegistriesPage extends MainPage {
      */
     private readonly columnValues: Locator = this.page.locator("//div[@col-id='columnId']//span[@class='ag-cell-value']//div[not(text()='Назначение' or text()='Выбор')]")
     /**
+     * Значения выпадающего списка поля "Гражданство" по их наименованию
+     */
+    private citizenshipDropdownValues(text: string): Locator {
+        return this.page.locator(`//div[contains(@class,'citizenshipCountry__option')]//div[text()='${text}']`);
+    }
+    /**
      * Выгрузка выбранного реестра в excel
      */
     public async exportRegistryToExcel(registry: RegistriesValues): Promise<void> {
         await this.registriesTabValue(registry).click();
+        if (registry == RegistriesValues.contractsRegistry) await this.setGlobalFilters();
         await this.showColumns();
         const systemColumns: string[] = await this.columnValues.allInnerTexts();
         const totalRecordsCount: number = await this.totalRecordsCount();
@@ -77,6 +96,19 @@ export class RegistriesPage extends MainPage {
         const [excelColumns, excelRecordsCount] = await this.excelData();
         expect(excelRecordsCount).toBe(totalRecordsCount);
         expect(excelColumns).toEqual(systemColumns);
+    }
+    /**
+     * Установка глобального фильтра в реестре ТД
+     */
+    private async setGlobalFilters(): Promise<void> {
+        await this.showFilters.click();
+        await this.citizenship.click();
+        const selectedFilterValue: string = "Все, кроме РФ";
+        await this.citizenshipDropdownValues(selectedFilterValue).click();
+        await this.page.keyboard.press('Escape');
+        await this.acceptFilters.click();
+        await Elements.waitForVisible(this.loader);
+        await Elements.waitForHidden(this.loader);
     }
     /**
      * Проставление видимости для всех имеющихся столбцов таблиц
