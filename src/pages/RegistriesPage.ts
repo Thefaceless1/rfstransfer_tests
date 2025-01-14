@@ -49,7 +49,7 @@ export class RegistriesPage extends MainPage {
     /**
      * Поле с ФИО текущего пользователя
      */
-    private readonly currentUserData: Locator = this.page.locator("(//div[contains(@class,'UserInfo')]//p)[1]")
+    private readonly currentUserData: Locator = this.page.locator("//div[contains(@class,'items-center')]//p[1]")
     /**
      * Поле "Выберите ответственного сотрудника"
      */
