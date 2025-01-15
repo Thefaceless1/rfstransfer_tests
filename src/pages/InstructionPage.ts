@@ -240,7 +240,7 @@ export class InstructionPage extends CreateInstructionPage {
     /**
      * Поле "% от будущей выплаты"
      */
-    private readonly resalePercent: Locator = this.page.locator("//input[@name='Resale.0.percent']")
+    private readonly resalePercent: Locator = this.page.locator("//textarea[@name='Resale.0.percent']")
     /**
      * Чекбокс "Футбольный агент(ы), представляющий клуб и/или футболиста в связи с подписанием трудового договора?"
      */
@@ -353,9 +353,9 @@ export class InstructionPage extends CreateInstructionPage {
      */
     private totalAmount(paymentType: PaymentTypes): Locator {
         switch (paymentType) {
-            case PaymentTypes.fixedPayment: return this.page.locator("//input[@name='Fix.0.summa']");
-            case PaymentTypes.conditionalPayment: return this.page.locator("//input[@name='Conditional.0.summa']");
-            case PaymentTypes.ransomPayment: return this.page.locator("//input[@name='Buyout.0.summa']");
+            case PaymentTypes.fixedPayment: return this.page.locator("//textarea[@name='Fix.0.summa']");
+            case PaymentTypes.conditionalPayment: return this.page.locator("//textarea[@name='Conditional.0.summa']");
+            case PaymentTypes.ransomPayment: return this.page.locator("//textarea[@name='Buyout.0.summa']");
             default: throw new Error("Поле 'Общая сумма' не существует для указанного типа платежа'");
         }
     }
@@ -576,24 +576,13 @@ export class InstructionPage extends CreateInstructionPage {
         if (Process.env.BRANCH == "preprod" && !await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible()) {
             await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.missingPlayerFifaId)));
             await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.restrictRegisterPlayers)));
-            //if (await this.collisions().count() != 2) throw new Error("Количество коллизий превышает ожидаемое");
+            if (await this.collisions().count() != 2) throw new Error("Количество коллизий превышает ожидаемое");
             if (await this.isOtherMemberAssociationRadio(false).isVisible())
                 await this.isOtherMemberAssociationRadio(false).click();
             if (await this.isInstructionWithPayments(false).isVisible()) await this.isInstructionWithPayments(false).click();
             await this.addRegistrationCommentAndDocs();
             await this.registerButton.click();
             await this.submitWindowRegisterButton.click();
-        }
-        else {
-            await this.page.waitForTimeout(1000);
-            if (await this.collisions(await dbHelper.getCollisionDescription(10)).isVisible()) {
-                if (await this.isOtherMemberAssociationRadio(false).isVisible())
-                    await this.isOtherMemberAssociationRadio(false).click();
-                if (await this.isInstructionWithPayments(false).isVisible()) await this.isInstructionWithPayments(false).click();
-                await this.addRegistrationCommentAndDocs();
-                await this.registerButton.click();
-                await this.submitWindowRegisterButton.click();
-            }
         }
     }
     /**
