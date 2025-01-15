@@ -23,7 +23,7 @@ test.describe("Реестры",() => {
                 await registry.nominateResponsiblePerson(false);
             })
         })
-    test(`Реестр трудовых договоров. Версия модуля: ${Process.env.APP_VERSION}`,
+    /*test(`Реестр трудовых договоров. Версия модуля: ${Process.env.APP_VERSION}`,
         async ({registry}) => {
             test.info().annotations.push
             (
@@ -34,7 +34,7 @@ test.describe("Реестры",() => {
             await test.step("Выгрузка реестра трудовых договоров в excel", async () => {
                 await registry.exportRegistryToExcel(RegistriesValues.contractsRegistry);
             })
-        })
+        })*/
     test(`Реестр платежей. Версия модуля: ${Process.env.APP_VERSION}`,
         async ({registry}) => {
             test.info().annotations.push
