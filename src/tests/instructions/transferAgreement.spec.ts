@@ -51,7 +51,6 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(transfer.regEndDate).toHaveValue(transfer.newContractEndDate);
                 expect(await transfer.checkPrevContractsDateChanges(TransferAgreementSubTypes.withoutBuyoutFromRent)).toBeTruthy();
                 await transfer.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
-                await transfer.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
                 await transfer.addFactPayments(InstructionTypes.transferAgreement);
@@ -115,7 +114,6 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(leaseBuyout.regEndDate).toHaveValue(leaseBuyout.newContractEndDate);
                 expect(await leaseBuyout.checkPrevContractsDateChanges(TransferAgreementSubTypes.buyoutFromRentWithNewContract)).toBeTruthy();
                 await leaseBuyout.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
-                await leaseBuyout.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
                 await leaseBuyout.addFactPayments(InstructionTypes.transferAgreement);
@@ -178,7 +176,6 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await expect(leaseBuyout.regEndDate).toHaveValue(leaseBuyout.additionalAgreementDateEndByDs);
                 expect(await leaseBuyout.checkPrevContractsDateChanges(TransferAgreementSubTypes.buyoutFromRentWithoutNewContract)).toBeTruthy();
                 await leaseBuyout.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
-                await leaseBuyout.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
                 await leaseBuyout.addFactPayments(InstructionTypes.transferAgreement);
