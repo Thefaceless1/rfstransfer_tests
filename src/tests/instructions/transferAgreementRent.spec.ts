@@ -478,7 +478,7 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await expect(earlyFinishRent.instructionState(InstructionStates.registered)).toBeVisible();
                 await expect(earlyFinishRent.regBeginDate).toHaveValue(earlyFinishRent.prevContractPrevClubStartDate);
                 await expect(earlyFinishRent.regEndDate).toHaveValue(earlyFinishRent.prevContractPrevClubEndDate);
-                //expect(await earlyFinishRent.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract,TransferContractType.withSuspension)).toBeTruthy();
+                expect(await earlyFinishRent.checkPrevContractsDateChanges(TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract,TransferContractType.withSuspension)).toBeTruthy();
                 await earlyFinishRent.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {

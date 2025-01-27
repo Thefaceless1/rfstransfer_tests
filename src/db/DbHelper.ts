@@ -8,10 +8,23 @@ class DbHelper {
      * Удаление инструкций для выбранного пользователя
      */
     public async deleteInstructions(personId: number): Promise<void> {
+        await this.deleteContractsUndo(personId);
         const client: pkg.Client = new Client(dbConfig);
         await client.connect();
         const queryText: string = `DELETE FROM rfstran.instructions 
                                    WHERE ext_personid=$1`;
+        const values: string[] = [`${personId}`];
+        await client.query(queryText,values);
+        await client.end();
+    }
+    /**
+     * Удаление записей из таблицы 'contracts_undo' для выбранного пользователя
+     */
+    private async deleteContractsUndo(personId: number): Promise<void> {
+        const client: pkg.Client = new Client(dbConfig);
+        await client.connect();
+        const queryText: string = `DELETE FROM rfstran.contracts_undo 
+                                   WHERE person_id=$1`;
         const values: string[] = [`${personId}`];
         await client.query(queryText,values);
         await client.end();
