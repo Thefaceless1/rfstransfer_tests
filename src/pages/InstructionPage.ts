@@ -576,7 +576,8 @@ export class InstructionPage extends CreateInstructionPage {
         if (Process.env.BRANCH == "preprod" && !await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible()) {
             await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.missingPlayerFifaId)));
             await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.restrictRegisterPlayers)));
-            if (await this.collisions().count() != 2) throw new Error("Количество коллизий превышает ожидаемое");
+            const expectedCollisionCount: number = 2;
+            if (await this.collisions().count() != expectedCollisionCount) throw new Error("Количество коллизий превышает ожидаемое");
             if (await this.isOtherMemberAssociationRadio(false).isVisible())
                 await this.isOtherMemberAssociationRadio(false).click();
             if (await this.isInstructionWithPayments(false).isVisible()) await this.isInstructionWithPayments(false).click();
@@ -793,7 +794,8 @@ export class InstructionPage extends CreateInstructionPage {
             if (prevContractPrevClub[0]["restart_date"]) prevContractPrevClubRestartDate = prevContractPrevClub[0]["restart_date"].toLocaleDateString('ru-RU');
         }
         const prevContractNewClub: any[] = (transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithNewContract ||
-                                            transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract) ?
+                                            transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract ||
+                                            transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithoutNewContract) ?
             await dbHelper.getPreviousContract(this.personId,this.clubId,false):
             await dbHelper.getPreviousContract(this.personId,this.clubId,true);
         let prevContractNewClubRestartDate: string = '';
@@ -804,9 +806,9 @@ export class InstructionPage extends CreateInstructionPage {
         }
         if (transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithNewContract) {
             logger.info(`
-                 Пред. договор с пред. клубом: stop_date: факт: ${prevContractPrevClubStopDate}, указано: ${this.prevContractStopDateValue}
-                 Пред. договор с пред. клубом: actual_end_date: факт: ${prevContractPrevClubEndDate}, указано: ${this.prevContractStopDateValue}
-                 Пред. договор с нов. клубом: actual_end_date: факт: ${prevContractNewClubEndDate}, указано: ${this.newContractStartDate}
+                 Пред. договор с пред. клубом: stop_date: факт: ${prevContractPrevClubStopDate}, ожидание: ${this.prevContractStopDateValue}
+                 Пред. договор с пред. клубом: actual_end_date: факт: ${prevContractPrevClubEndDate}, ожидание: ${this.prevContractStopDateValue}
+                 Пред. договор с нов. клубом: actual_end_date: факт: ${prevContractNewClubEndDate}, ожидание: ${this.newContractStartDate}
                 `);
             return (prevContractPrevClubStopDate == this.prevContractStopDateValue &&
                     prevContractPrevClubEndDate == this.prevContractStopDateValue &&
@@ -814,9 +816,9 @@ export class InstructionPage extends CreateInstructionPage {
         }
         else if (transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithoutNewContract) {
             logger.info(`
-                 Пред. договор с пред. клубом: stop_date: факт: ${prevContractPrevClubStopDate}, указано: ${this.prevContractStopDateValue}
-                 Пред. договор с пред. клубом: actual_end_date: факт: ${prevContractPrevClubEndDate}, указано: ${this.prevContractStopDateValue}
-                 Пред. договор с нов. клубом: actual_end_date: факт: ${prevContractNewClubEndDate}, указано: ${this.additionalAgreementDateEndByDs}
+                 Пред. договор с пред. клубом: stop_date: факт: ${prevContractPrevClubStopDate}, ожидание: ${this.prevContractStopDateValue}
+                 Пред. договор с пред. клубом: actual_end_date: факт: ${prevContractPrevClubEndDate}, ожидание: ${this.prevContractStopDateValue}
+                 Пред. договор с нов. клубом: actual_end_date: факт: ${prevContractNewClubEndDate}, ожидание: ${this.additionalAgreementDateEndByDs}
                 `);
             return (prevContractPrevClubStopDate == this.prevContractStopDateValue &&
                     prevContractPrevClubEndDate == this.prevContractStopDateValue &&
