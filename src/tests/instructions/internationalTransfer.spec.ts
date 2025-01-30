@@ -41,6 +41,10 @@ test.describe("Инструкция с типом 'Международный п
                 const [actualReportName, expectedReportName] = await intTransfer.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
             })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await intTransfer.cancelRegistration();
+                await intTransfer.checkCancelRegistrationRequirements(intTransfer.instructionId);
+            })
     })
     test(`Взять футболиста(Профессионал). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({intTransfer}) => {
@@ -85,6 +89,10 @@ test.describe("Инструкция с типом 'Международный п
                 const [actualReportName, expectedReportName] = await intTransfer.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
             })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await intTransfer.cancelRegistration();
+                await intTransfer.checkCancelRegistrationRequirements(intTransfer.instructionId);
+            })
         })
     test(`Отдать футболиста(Любитель). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({intTransfer}) => {
@@ -115,6 +123,10 @@ test.describe("Инструкция с типом 'Международный п
             await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
                 const [actualReportName, expectedReportName] = await intTransfer.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
+            })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await intTransfer.cancelRegistration();
+                await intTransfer.checkCancelRegistrationRequirements(intTransfer.instructionId);
             })
         })
     test(`Отдать футболиста(Профессионал). Версия модуля: ${Process.env.APP_VERSION}`,
@@ -150,6 +162,10 @@ test.describe("Инструкция с типом 'Международный п
             await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
                 const [actualReportName, expectedReportName] = await intTransfer.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
+            })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await intTransfer.cancelRegistration();
+                await intTransfer.checkCancelRegistrationRequirements(intTransfer.instructionId);
             })
         })
 })

@@ -44,5 +44,9 @@ test.describe("Инструкция с типом 'Изменение трудо
                 const [actualReportName, expectedReportName] = await additionalAgreement.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
             })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await additionalAgreement.cancelRegistration();
+                await additionalAgreement.checkCancelRegistrationRequirements(additionalAgreement.instructionId);
+            })
         })
 })

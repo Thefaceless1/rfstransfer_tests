@@ -1,5 +1,5 @@
 import {CreateInstructionPage} from "./CreateInstructionPage";
-import {Locator, Page} from "@playwright/test";
+import {expect, Locator, Page} from "@playwright/test";
 import {Mediators} from "../helpers/enums/Mediators";
 import {Elements} from "../framework/elements/Elements";
 import {InputData} from "../helpers/InputData";
@@ -22,6 +22,7 @@ import {PaymentStates} from "../helpers/enums/PaymentStates";
 import Process from "process";
 import {CollisionIds} from "../helpers/enums/CollisionIds";
 import {FifaSendingActionTypes} from "../helpers/enums/FifaSendingActionTypes";
+import {ContractStates} from "../helpers/enums/ContractStates";
 
 export class InstructionPage extends CreateInstructionPage {
     public prevContractStopDateValue: string = ''
@@ -33,6 +34,7 @@ export class InstructionPage extends CreateInstructionPage {
     public readonly additionalAgreementForTk: string = InputData.randomWord
     public readonly createdTransferAgreementNumber: string = InputData.randomWord
     private readonly registerComment: string = InputData.randomWord
+    private readonly cancelRegistrationComment: string = InputData.randomWord
     public readonly contractDurationDays: number = 365
     public readonly extendContractCountDays: number = 5
     public readonly daysCountBetweenContracts: number = 30
@@ -78,6 +80,14 @@ export class InstructionPage extends CreateInstructionPage {
      */
     public readonly registerCommentValue: Locator = this.page.locator(`//*[text()='${this.registerComment}']`)
     /**
+     * Поле "Причина отмены регистрации"
+     */
+    public readonly cancelRegistrationReason: Locator = this.page.locator(`//input[@name='comment']`)
+    /**
+     * Поле "Причина отмены регистрации" с заполненным значением после отмены регистрации
+     */
+    public readonly cancelRegistrationReasonValue: Locator = this.page.locator(`//div[text()='Причина отмены регистрации']//following-sibling::div//div[text()='${this.cancelRegistrationComment}']`)
+    /**
      * Значение поля "Дата возобновления ТД с предыдущим клубом"
      */
     private readonly prevContractRestartDate: Locator = this.page.locator("//input[@name='prevContractRestartDate']")
@@ -122,6 +132,10 @@ export class InstructionPage extends CreateInstructionPage {
      */
     private readonly mediator: Locator = this.page.locator("//div[contains(@class,'mediators.0.person__indicators')]")
     /**
+     * Кнопка "Отменить регистрацию"
+     */
+    private readonly cancelRegistrationButton: Locator = this.page.locator("//button[text()='Отменить регистрацию']")
+    /**
      * Значения выпадающего списка поля "Посредники"
      */
     private readonly mediatorValues: Locator = this.page.locator("//div[contains(@class,'mediators.0.person__option')]")
@@ -162,6 +176,10 @@ export class InstructionPage extends CreateInstructionPage {
      */
     private readonly reasonValues: Locator = this.page.locator("//*[contains(@class,'reason__option')]")
     /**
+     * Кнопка "Отправить"
+     */
+    private readonly sendButton: Locator = this.page.locator("//button[not(@disabled)]//span[text()='Отправить']")
+    /**
      * Поле "Причина отмены"
      */
     private readonly cancelReason: Locator = this.page.locator("//div[@class='flex justify-between'][.//div[text()='Причина отмены']]//following-sibling::div//input")
@@ -185,6 +203,10 @@ export class InstructionPage extends CreateInstructionPage {
      * Поле "Дисциплина"
      */
     private readonly discipline: Locator = this.page.locator("//*[contains(@class,'discipline__dropdown')]")
+    /**
+     * Всплывающее окно уведомления при отмене регистрации, когда договор текущей инструкций менялся в рамках последующих инструкций
+     */
+    private readonly hasContractDependenciesAlert: Locator = this.page.locator("//div[@role='alert']//div[text()='Инструкция не может быть отменена т.к. существуют зависимости на базе других инструкций']")
     /**
      * Кнопка "Отменить выплату"
      */
@@ -586,6 +608,11 @@ export class InstructionPage extends CreateInstructionPage {
             await this.submitWindowRegisterButton.click();
         }
     }
+    public async cancelRegistration(): Promise<void> {
+        await this.cancelRegistrationButton.click();
+        await this.cancelRegistrationReason.fill(this.cancelRegistrationComment);
+        await this.sendButton.click();
+    }
     /**
      * Добавление комментария, документов и выполнение выбранного решения по инструкции
      */
@@ -712,10 +739,7 @@ export class InstructionPage extends CreateInstructionPage {
         if (await dbHelper.getFifaSendingFlagState() == "false") logger.info("Отправка сведений в ФИФА отключена");
         else if (Process.env.BRANCH != "preprod" && actionType == FifaSendingActionTypes.firstProRegistration) return;
         else {
-            const regExpData: RegExpMatchArray | null  = this.page.url().match(/\d+/);
-            if (!regExpData) throw new Error("Отсутствует значение после применение рег. выражения к url");
-            const instructionId: number = Number(regExpData[0]);
-            let result: any[] = await dbHelper.getFifaSendingData(instructionId,actionType);
+            let result: any[] = await dbHelper.getFifaSendingData(this.instructionId,actionType);
             /**
              * Проверяем до 30 секунд дал ли ФИФА сервис ответ на запрос и появилась ли запись в БД модуля
              */
@@ -724,7 +748,7 @@ export class InstructionPage extends CreateInstructionPage {
                 const checkIntervalTime: number = 1000;
                 for (let i = 0; i < maxWaitingTime; i+=checkIntervalTime) {
                     await this.page.waitForTimeout(checkIntervalTime);
-                    const fifaSendingData: any[] = await dbHelper.getFifaSendingData(instructionId,actionType);
+                    const fifaSendingData: any[] = await dbHelper.getFifaSendingData(this.instructionId,actionType);
                     if (fifaSendingData.length != 0) {
                         result = fifaSendingData;
                         break;
@@ -886,11 +910,41 @@ export class InstructionPage extends CreateInstructionPage {
         await this.printInstructionButton.click();
         const download = await downloadPromise;
         let expectedReportFile: string = "Отчет_по_инструкции_";
-        const regExpData: RegExpMatchArray | null  = this.page.url().match(/\d+/);
-        if (!regExpData) throw new Error("Отсутствует значение после применение рег. выражения к url");
-        const instructionId: number = Number(regExpData[0]);
-        expectedReportFile+=String(instructionId)+".pdf";
+        expectedReportFile+=String(this.instructionId)+".pdf";
         if (await download.failure()) throw new Error(`Ошибка при загрузке файла: ${await download.failure()}`);
         return [download.suggestedFilename(),expectedReportFile];
+    }
+    /**
+     * Получение id текущей инструкции
+     */
+    public get instructionId(): number {
+        const regExpData: RegExpMatchArray | null  = this.page.url().match(/\d+/);
+        if (!regExpData) throw new Error("Отсутствует значение после применение рег. выражения к url");
+        return Number(regExpData[0]);
+    }
+    /**
+     * Проверка действий, которые должны произойти при отмене регистрации инструкции
+     */
+    public async checkCancelRegistrationRequirements(instructionId: number): Promise<void> {
+        if (await dbHelper.isContractChangedByAnotherInstruction(this.instructionId)) {
+            await expect(this.hasContractDependenciesAlert).toBeVisible();
+        }
+        else {
+            await expect(this.instructionState(InstructionStates.registerCancelled)).toBeVisible();
+            await expect(this.cancelRegistrationReasonValue).toBeVisible();
+            const instructionContracts: any[] = await dbHelper.getInstructionContracts(instructionId);
+            if (instructionContracts.length > 0) {
+                const isAllInstructionContractsDrafts: boolean = instructionContracts.every(contract => contract["state_id"] == ContractStates.draft);
+                if (!isAllInstructionContractsDrafts) throw new Error("Контракты текущей инструкции не перешли в статус 'Черновик'");
+            }
+            const previousContractsIds: number[] = await dbHelper.getUserContractsUndo(this.personId);
+            if (previousContractsIds.length > 0) {
+                for (const contractId of previousContractsIds) {
+                    const contractUndoRecordId: number = await dbHelper.getLastContractUndoRecordId(contractId);
+                    const isContractInPreviousState: boolean = await dbHelper.isContractInPreviousState(contractUndoRecordId);
+                    if (!isContractInPreviousState) throw new Error(`Контракт ${contractId} не находится в предыдущем состоянии`);
+                }
+            }
+        }
     }
 }

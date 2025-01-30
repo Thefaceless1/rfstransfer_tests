@@ -73,6 +73,10 @@ test.describe("Инструкция с типом 'Переход на пост�
                 const [actualReportName, expectedReportName] = await transfer.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
             })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await transfer.cancelRegistration();
+                await transfer.checkCancelRegistrationRequirements(transfer.instructionId);
+            })
         })
     test(`Выкуп из аренды с расторжением. Версия модуля: ${Process.env.APP_VERSION}`,
         async ({leaseBuyout}) => {
@@ -136,6 +140,10 @@ test.describe("Инструкция с типом 'Переход на пост�
                 const [actualReportName, expectedReportName] = await leaseBuyout.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
             })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await leaseBuyout.cancelRegistration();
+                await leaseBuyout.checkCancelRegistrationRequirements(leaseBuyout.instructionId);
+            })
         })
     test(`Выкуп из аренды без расторжения. Версия модуля: ${Process.env.APP_VERSION}`,
         async ({leaseBuyout}) => {
@@ -197,6 +205,10 @@ test.describe("Инструкция с типом 'Переход на пост�
             await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
                 const [actualReportName, expectedReportName] = await leaseBuyout.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
+            })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await leaseBuyout.cancelRegistration();
+                await leaseBuyout.checkCancelRegistrationRequirements(leaseBuyout.instructionId);
             })
         })
 })

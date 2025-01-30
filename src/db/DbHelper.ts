@@ -99,5 +99,86 @@ class DbHelper {
         const result = await client.query(queryText,values);
         return result.rows;
     }
+    /**
+     * Получение списка контрактов по id инструкции
+     */
+    public async getInstructionContracts(instructionId: number): Promise<any[]> {
+        const client: pkg.Client = new Client(dbConfig);
+        await client.connect();
+        const queryText: string = `SELECT * from rfstran.contracts 
+                                   WHERE instruction_id = $1`;
+        const values: string[] = [`${instructionId}`];
+        const result = await client.query(queryText,values);
+        return result.rows;
+    }
+    /**
+     * Проверка менялся ли ТД текущей инструкции в других инструкциях
+     */
+    public async isContractChangedByAnotherInstruction(instructionId: number): Promise<boolean> {
+        const contracts: any[] = await this.getInstructionContracts(instructionId);
+        if (contracts.length == 0) return false;
+        const mainContract = contracts.find(contract => contract["labour_contract_id"] == null);
+        if (!mainContract) return false;
+        const client: pkg.Client = new Client(dbConfig);
+        await client.connect();
+        const queryText: string = `SELECT exists 
+                                   (SELECT 1 from rfstran.contracts_undo 
+                                    WHERE contract_id = $1 
+                                    AND id > (SELECT id FROM rfstran.contracts_undo 
+                                              WHERE contract_id = $1 
+                                              AND instruction_id = $2
+                                              AND instruction_id = last_change_instruction_id))`;
+        const values: string[] = [`${mainContract["id"]}`,`${instructionId}`];
+        const result = await client.query(queryText,values);
+        return result.rows[0].exists;
+    }
+    /**
+     * Получение уникальных id контрактов для пользователя из таблицы изменений контрактов
+     */
+    public async getUserContractsUndo(personId: number): Promise<number[]>  {
+        const client: pkg.Client = new Client(dbConfig);
+        await client.connect();
+        const queryText: string = `SELECT distinct(contract_id) 
+                                                        FROM rfstran.contracts_undo 
+                                                        WHERE person_id = $1 
+                                                        AND actual_end_date is not null`;
+        const values: string[] = [`${personId}`];
+        const result = await client.query(queryText,values);
+        return result.rows.map(contract => Number(contract["contract_id"]));
+    }
+    /**
+     * Получение id записи с последним состоянием контракта из таблицы contracts_undo
+     */
+    public async getLastContractUndoRecordId(contractId: number): Promise<number> {
+        const client: pkg.Client = new Client(dbConfig);
+        await client.connect();
+        const queryText: string = `SELECT id FROM rfstran.contracts_undo 
+                                   WHERE contract_id = $1 
+                                   ORDER BY id DESC
+                                   LIMIT 1`;
+        const values: string[] = [`${contractId}`];
+        const result = await client.query(queryText,values);
+        return Number(result.rows[0]["id"]);
+    }
+    /**
+     * Проверка находится ли контракт в предыдущем состоянии
+     */
+    public async isContractInPreviousState(contractUndoRecordId: number): Promise<boolean> {
+        const client: pkg.Client = new Client(dbConfig);
+        await client.connect();
+        const queryText: string = `SELECT exists (SELECT * FROM rfstran.contracts_undo cu
+                                                  INNER JOIN rfstran.contracts c
+                                                  ON cu.contract_id = c.id
+                                                  AND cu.state_id = c.state_id
+                                                  AND cu.is_temporary = c.is_temporary  
+                                                  AND cu.duration_end_date IS NOT DISTINCT FROM c.duration_end_date
+                                                  AND cu.actual_end_date IS NOT DISTINCT FROM c.actual_end_date
+                                                  AND cu.stop_date IS NOT DISTINCT FROM c.stop_date
+                                                  AND cu.restart_date IS NOT DISTINCT FROM c.restart_date
+                                                  WHERE cu.id = $1)`;
+        const values: string[] = [`${contractUndoRecordId}`];
+        const result = await client.query(queryText,values);
+        return result.rows[0].exists;
+    }
 }
 export const dbHelper = new DbHelper();

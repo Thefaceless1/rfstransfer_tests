@@ -70,6 +70,10 @@ test.describe("Инструкция с типом 'Переход на врем�
                 const [actualReportName, expectedReportName] = await transferRent.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
             })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await transferRent.cancelRegistration();
+                await transferRent.checkCancelRegistrationRequirements(transferRent.instructionId);
+            })
         })
     test(`Взять в аренду(ТК с приостановкой). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({transferRent}) => {
@@ -129,6 +133,10 @@ test.describe("Инструкция с типом 'Переход на врем�
                 const [actualReportName, expectedReportName] = await transferRent.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
             })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await transferRent.cancelRegistration();
+                await transferRent.checkCancelRegistrationRequirements(transferRent.instructionId);
+            })
         })
     test(`Продление аренды(новый ТД, новый ТК). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({rentProlongation}) => {
@@ -187,6 +195,10 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
                 const [actualReportName, expectedReportName] = await rentProlongation.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
+            })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await rentProlongation.cancelRegistration();
+                await rentProlongation.checkCancelRegistrationRequirements(rentProlongation.instructionId);
             })
         })
     test(`Продление аренды(новый ТД, ДС к ТК). Версия модуля: ${Process.env.APP_VERSION}`,
@@ -250,6 +262,10 @@ test.describe("Инструкция с типом 'Переход на врем�
                 const [actualReportName, expectedReportName] = await rentProlongation.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
             })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await rentProlongation.cancelRegistration();
+                await rentProlongation.checkCancelRegistrationRequirements(rentProlongation.instructionId);
+            })
         })
     test(`Продление аренды(ДС к ТД, новый ТК). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({rentProlongation}) => {
@@ -311,6 +327,10 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
                 const [actualReportName, expectedReportName] = await rentProlongation.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
+            })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await rentProlongation.cancelRegistration();
+                await rentProlongation.checkCancelRegistrationRequirements(rentProlongation.instructionId);
             })
         })
     test(`Продление аренды(ДС к ТД, ДС к ТК). Версия модуля: ${Process.env.APP_VERSION}`,
@@ -377,6 +397,10 @@ test.describe("Инструкция с типом 'Переход на врем�
                 const [actualReportName, expectedReportName] = await rentProlongation.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
             })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await rentProlongation.cancelRegistration();
+                await rentProlongation.checkCancelRegistrationRequirements(rentProlongation.instructionId);
+            })
         })
     test(`Досрочное завершение(новый ТД). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({earlyFinishRent}) => {
@@ -440,6 +464,10 @@ test.describe("Инструкция с типом 'Переход на врем�
                 const [actualReportName, expectedReportName] = await earlyFinishRent.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
             })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await earlyFinishRent.cancelRegistration();
+                await earlyFinishRent.checkCancelRegistrationRequirements(earlyFinishRent.instructionId);
+            })
         })
     test(`Досрочное завершение(изменение ТД). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({earlyFinishRent}) => {
@@ -501,6 +529,10 @@ test.describe("Инструкция с типом 'Переход на врем�
             await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
                 const [actualReportName, expectedReportName] = await earlyFinishRent.printInstructionReport();
                 expect(actualReportName).toBe(expectedReportName);
+            })
+            await test.step("Отмена регистрации инструкции",async () => {
+                await earlyFinishRent.cancelRegistration();
+                await earlyFinishRent.checkCancelRegistrationRequirements(earlyFinishRent.instructionId);
             })
         })
 })

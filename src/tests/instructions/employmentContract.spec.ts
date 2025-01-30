@@ -63,5 +63,9 @@ test.describe("Инструкция с типом 'Трудовой догово
             const [actualReportName, expectedReportName] = await employmentContract.printInstructionReport();
             expect(actualReportName).toBe(expectedReportName);
         })
+        await test.step("Отмена регистрации инструкции",async () => {
+            await employmentContract.cancelRegistration();
+            await employmentContract.checkCancelRegistrationRequirements(employmentContract.instructionId);
+        })
     })
 })
