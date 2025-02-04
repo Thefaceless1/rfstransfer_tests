@@ -294,6 +294,14 @@ export class InstructionPage extends CreateInstructionPage {
         return this.page.locator("//span[contains(@id,'cell-number')]",{hasText: text});
     }
     /**
+     * Получение подтипа международного перехода
+     */
+    private intTransferSubType(subType: IntTransferSubTypes): Locator {
+        return (subType == IntTransferSubTypes.acceptProfessionalPlayer || subType == IntTransferSubTypes.acceptAmateurPlayer) ?
+            this.page.locator("//div[text()='Международный переход']//following-sibling::div[text()='Взять футболиста']"):
+            this.page.locator("//div[text()='Международный переход']//following-sibling::div[text()='Отдать футболиста']");
+    }
+    /**
      * Если не указано наименование коллизии, то возвращет все коллизии в инструкции, если указан - то коллизию с указанным наименованием
      */
     private collisions(collisionName?: string): Locator {
@@ -596,12 +604,12 @@ export class InstructionPage extends CreateInstructionPage {
         await this.skipHistoryChangeCheckBox.click();
         await this.registerButton.click();
         if (Process.env.BRANCH == "preprod") {
-            if (!await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible()) {
-                await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.missingPlayerFifaId)));
+            const isIntTransferGiveAway: boolean = await this.intTransferSubType(IntTransferSubTypes.giveAwayAmateurPlayer).isVisible();
+            await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.missingPlayerFifaId)));
+            if (!isIntTransferGiveAway)
                 await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.restrictRegisterPlayers)));
-                const expectedCollisionCount: number = 2;
-                if (await this.collisions().count() != expectedCollisionCount) throw new Error("Количество коллизий превышает ожидаемое");
-            }
+            const expectedCollisionCount: number = (isIntTransferGiveAway) ? 1 : 2;
+            if (await this.collisions().count() != expectedCollisionCount) throw new Error("Количество коллизий превышает ожидаемое");
             if (await this.isOtherMemberAssociationRadio(false).isVisible())
                 await this.isOtherMemberAssociationRadio(false).click();
             if (await this.isInstructionWithPayments(false).isVisible()) await this.isInstructionWithPayments(false).click();
