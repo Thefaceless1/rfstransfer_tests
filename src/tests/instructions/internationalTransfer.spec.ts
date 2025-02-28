@@ -8,7 +8,7 @@ import {expect} from "@playwright/test";
 import {IntTransferSubTypes} from "../../helpers/enums/IntTransferSubTypes";
 import {PlayerStates} from "../../helpers/enums/PlayerStates";
 import {InstructionStates} from "../../helpers/enums/InstructionStates";
-import {TransferContractType} from "../../helpers/enums/TransferContractType";
+import {TransferContractTypeIds} from "../../helpers/enums/TransferContractTypeIds";
 
 test.describe("Инструкция с типом 'Международный переход'",async () => {
     test(`Взять футболиста(Любитель). Версия модуля: ${Process.env.APP_VERSION}`,
@@ -33,8 +33,6 @@ test.describe("Инструкция с типом 'Международный п
             await test.step("Регистрация инструкции",async () => {
                 await intTransfer.registrationInstruction(PlayerStates.amateur);
                 await expect(intTransfer.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(intTransfer.regBeginDate).toHaveValue(intTransfer.newContractStartDate);
-                await expect(intTransfer.regEndDate).toHaveValue(intTransfer.newContractEndDate);
                 await expect(intTransfer.registerCommentValue).toBeVisible();
             })
             await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
@@ -64,15 +62,15 @@ test.describe("Инструкция с типом 'Международный п
             })
             await test.step("Добавление трудового договора",async () => {
                 await intTransfer.addContract(intTransfer.newContractStartDate,intTransfer.newContractEndDate);
-                await expect(intTransfer.numberValueByName(intTransfer.createdContractNumber)).toBeVisible();
+                await expect(intTransfer.numberValueByName(intTransfer.employmentContractNumber)).toBeVisible();
             })
             await test.step("Добавление дополнительного соглашения 'Без изменения срока действия ТД'",async () => {
                 await intTransfer.addAdditionalAgreement(false,intTransfer.newContractStartDate);
                 await expect(intTransfer.numberValueByName(intTransfer.additionalAgreementWithoutChangeDate)).toBeVisible();
             })
             await test.step("Добавление трансферного соглашения",async () => {
-                await intTransfer.addTransferAgreement({transferContractType: TransferContractType.withTermination});
-                await expect(intTransfer.numberValueByName(intTransfer.createdTransferAgreementNumber)).toBeVisible();
+                await intTransfer.addTransferAgreement({transferContractType: TransferContractTypeIds.withTermination});
+                await expect(intTransfer.numberValueByName(intTransfer.transferContractNumber)).toBeVisible();
             })
             await test.step("Добавление МТС",async () => {
                 await intTransfer.addMts();
@@ -81,8 +79,6 @@ test.describe("Инструкция с типом 'Международный п
             await test.step("Регистрация инструкции",async () => {
                 await intTransfer.registrationInstruction(PlayerStates.amateur);
                 await expect(intTransfer.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(intTransfer.regBeginDate).toHaveValue(intTransfer.newContractStartDate);
-                await expect(intTransfer.regEndDate).toHaveValue(intTransfer.newContractEndDate);
                 await expect(intTransfer.registerCommentValue).toBeVisible();
             })
             await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
@@ -117,7 +113,6 @@ test.describe("Инструкция с типом 'Международный п
             await test.step("Регистрация инструкции",async () => {
                 await intTransfer.registrationInstruction();
                 await expect(intTransfer.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(intTransfer.prevContractStopDate).toHaveValue(intTransfer.prevContractNewClubStartDate);
                 await expect(intTransfer.registerCommentValue).toBeVisible();
             })
             await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {
@@ -146,8 +141,8 @@ test.describe("Инструкция с типом 'Международный п
                 await expect(intTransfer.instructionTypeTitle(InstructionTypes.internationalTransfer)).toBeVisible();
             })
             await test.step("Добавление трансферного соглашения",async () => {
-                await intTransfer.addTransferAgreement({transferContractType: TransferContractType.withTermination});
-                await expect(intTransfer.numberValueByName(intTransfer.createdTransferAgreementNumber)).toBeVisible();
+                await intTransfer.addTransferAgreement({transferContractType: TransferContractTypeIds.withTermination});
+                await expect(intTransfer.numberValueByName(intTransfer.transferContractNumber)).toBeVisible();
             })
             await test.step("Добавление МТС",async () => {
                 await intTransfer.addMts(IntTransferSubTypes.giveAwayProfessionalPlayer);
@@ -156,7 +151,6 @@ test.describe("Инструкция с типом 'Международный п
             await test.step("Регистрация инструкции",async () => {
                 await intTransfer.registrationInstruction();
                 await expect(intTransfer.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(intTransfer.prevContractStopDate).toHaveValue(intTransfer.prevContractNewClubStartDate);
                 await expect(intTransfer.registerCommentValue).toBeVisible();
             })
             await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {

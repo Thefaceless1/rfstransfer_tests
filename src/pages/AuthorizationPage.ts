@@ -5,7 +5,6 @@ import {logger} from "../logger/logger";
 import twoFactor from "node-2fa";
 
 export class AuthorizationPage extends BasePage {
-    public readonly personId: number = (process.env.BRANCH == "preprod") ? 17600913 : 17611861
     private loginAttempts: number = 3
     constructor(page: Page) {
         super(page);
@@ -84,7 +83,6 @@ export class AuthorizationPage extends BasePage {
      */
     private get get2FaToken(): string {
         const secret: string = "BWNZJHQR5LUNH55NW64DN43UO66KT526";
-        //ZSIT225P7VWEA6TIHIBMM25JQ7VR3C74
         const token = twoFactor.generateToken(secret);
         return (token && !twoFactor.verifyToken(secret,token?.token)?.delta) ?
             token.token:

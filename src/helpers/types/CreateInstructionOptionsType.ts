@@ -1,11 +1,11 @@
 import {InstructionTypes} from "../enums/InstructionTypes";
-import {TransferAgreementSubTypes} from "../enums/TransferAgreementSubTypes";
-import {TransferAgreementRentSubTypes} from "../enums/TransferAgreementRentSubTypes";
+import {TransferSubTypeIds} from "../enums/transferSubTypeIds";
+import {TransferRentSubTypeIds} from "../enums/transferRentSubTypeIds";
 import {IntTransferSubTypes} from "../enums/IntTransferSubTypes";
 
 export type CreateInstructionOptionsType = {
     type: InstructionTypes
     clubId?: number,
-    subType?: TransferAgreementSubTypes | TransferAgreementRentSubTypes | IntTransferSubTypes,
+    subType?: TransferSubTypeIds | TransferRentSubTypeIds | IntTransferSubTypes,
     isInstructionForEarlyFinish?: boolean
 }

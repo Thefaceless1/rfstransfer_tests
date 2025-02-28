@@ -20,13 +20,25 @@ export class InputData {
      */
     public static futureDate(plusDaysCount: number, fromDate?: string): string {
         const msInOneDay: number = 86400000;
-        const day: number = Number(fromDate?.slice(0,2));
-        const month: number = Number(fromDate?.slice(3,5))-1;
-        const year: number = Number(fromDate?.slice(6));
         const msCountForFutureDate: number = (fromDate) ?
-            new Date(year,month,day).getTime() + (Math.round(plusDaysCount) * msInOneDay) :
+            this.parseDateFromString(fromDate).getTime() + (Math.round(plusDaysCount) * msInOneDay) :
             Date.now() + (Math.round(plusDaysCount) * msInOneDay);
         return new Date(msCountForFutureDate).toLocaleDateString('ru-RU');
+    }
+    /**
+     * Получение класса даты из строки с датой (LocaleDateString)
+     */
+    public static parseDateFromString(dateString: string): Date {
+        const day: number = Number(dateString.slice(0,2));
+        const month: number = Number(dateString.slice(3,5))-1;
+        const year: number = Number(dateString.slice(6));
+        return new Date(year,month,day);
+    }
+    /**
+     * Перевод строки с датой из LocaleDateString в ISOString
+     */
+    public static isoFormatDate(dateString: string): string {
+        return this.parseDateFromString(dateString).toISOString().split('T')[0];
     }
     /**
      * Случайный набор букв
@@ -43,21 +55,21 @@ export class InputData {
      * Получение тестовых файлов из репозитория
      */
     public static getTestFiles(selectedFiles: SelectedFilesType): string[] | string {
-        const __filename = fileURLToPath(import.meta.url);
-        const __dirname = path.dirname(__filename);
+        const __filename: string = fileURLToPath(import.meta.url);
+        const __dirname: string = path.dirname(__filename);
         const testFilesPath: string = path.resolve(__dirname, "testfiles");
         const fileNames: string[] = fs.readdirSync(testFilesPath);
-        const files = fileNames.map(fileName => {
+        const files: string[] = fileNames.map(fileName => {
             const obj = {
                 dir: testFilesPath,
                 base: fileName
             }
             return path.format(obj);
         });
-        if(selectedFiles == "all") return files;
+        if (selectedFiles == "all") return files;
         else {
            const selectedFormatFile: string | undefined = files.find(file => file.toLowerCase().includes(selectedFiles));
-           if(!selectedFormatFile) throw new Error(`Отсутствует файл формата ${selectedFiles}`);
+           if (!selectedFormatFile) throw new Error(`Отсутствует файл формата ${selectedFiles}`);
            return selectedFormatFile;
         }
     }

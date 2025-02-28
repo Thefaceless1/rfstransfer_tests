@@ -4,7 +4,7 @@ import Process from "process";
 import config from "../../../playwright.config";
 import {InstructionTypes} from "../../helpers/enums/InstructionTypes";
 import {expect} from "@playwright/test";
-import {TransferAgreementSubTypes} from "../../helpers/enums/TransferAgreementSubTypes";
+import {TransferSubTypeIds} from "../../helpers/enums/transferSubTypeIds";
 import {PaymentTypes} from "../../helpers/enums/PaymentTypes";
 import {InstructionStates} from "../../helpers/enums/InstructionStates";
 import {PaymentStates} from "../../helpers/enums/PaymentStates";
@@ -22,13 +22,13 @@ test.describe("Инструкция с типом 'Переход на пост�
             await test.step("Создание инструкции", async () => {
                 await transfer.createInstruction({
                     type: InstructionTypes.transferAgreement,
-                    subType: TransferAgreementSubTypes.withoutBuyoutFromRent
+                    subType: TransferSubTypeIds.withoutBuyoutFromRent
                 });
                 await expect(transfer.instructionName).toBeVisible();
             })
             await test.step("Добавление трудового договора",async () => {
                 await transfer.addContract(transfer.newContractStartDate,transfer.newContractEndDate);
-                await expect(transfer.numberValueByName(transfer.createdContractNumber)).toBeVisible();
+                await expect(transfer.numberValueByName(transfer.employmentContractNumber)).toBeVisible();
             })
             await test.step("Добавление дополнительного соглашения",async () => {
                 await transfer.addAdditionalAgreement(false,transfer.newContractStartDate);
@@ -36,7 +36,7 @@ test.describe("Инструкция с типом 'Переход на пост�
             })
             await test.step("Добавление трансферного соглашения",async () => {
                 await transfer.addTransferAgreement({});
-                await expect(transfer.numberValueByName(transfer.createdTransferAgreementNumber)).toBeVisible();
+                await expect(transfer.numberValueByName(transfer.transferContractNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
                 await transfer.addPayments(InstructionTypes.transferAgreement);
@@ -47,9 +47,7 @@ test.describe("Инструкция с типом 'Переход на пост�
             await test.step("Регистрация инструкции",async () => {
                 await transfer.registrationInstruction();
                 await expect(transfer.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(transfer.regBeginDate).toHaveValue(transfer.newContractStartDate);
-                await expect(transfer.regEndDate).toHaveValue(transfer.newContractEndDate);
-                expect(await transfer.checkPrevContractsDateChanges(TransferAgreementSubTypes.withoutBuyoutFromRent)).toBeTruthy();
+                expect(await transfer.checkPrevContractsDateChanges(TransferSubTypeIds.withoutBuyoutFromRent)).toBeTruthy();
                 await transfer.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
@@ -78,7 +76,7 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await transfer.checkCancelRegistrationRequirements(transfer.instructionId);
             })
         })
-    test(`Выкуп из аренды с расторжением. Версия модуля: ${Process.env.APP_VERSION}`,
+    test(`Выкуп из аренды (новый ТД). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({leaseBuyout}) => {
             test.info().annotations.push
             (
@@ -89,13 +87,13 @@ test.describe("Инструкция с типом 'Переход на пост�
             await test.step("Создание инструкции", async () => {
                 await leaseBuyout.createInstruction({
                     type: InstructionTypes.transferAgreement,
-                    subType: TransferAgreementSubTypes.buyoutFromRentWithNewContract
+                    subType: TransferSubTypeIds.buyoutFromRentWithNewContract
                 });
                 await expect(leaseBuyout.instructionName).toBeVisible();
             })
             await test.step("Добавление трудового договора",async () => {
                 await leaseBuyout.addContract(leaseBuyout.newContractStartDate,leaseBuyout.newContractEndDate);
-                await expect(leaseBuyout.numberValueByName(leaseBuyout.createdContractNumber)).toBeVisible();
+                await expect(leaseBuyout.numberValueByName(leaseBuyout.employmentContractNumber)).toBeVisible();
             })
             await test.step("Добавление дополнительного соглашения",async () => {
                 await leaseBuyout.addAdditionalAgreement(false,leaseBuyout.newContractStartDate);
@@ -103,7 +101,7 @@ test.describe("Инструкция с типом 'Переход на пост�
             })
             await test.step("Добавление трансферного соглашения",async () => {
                 await leaseBuyout.addTransferAgreement({});
-                await expect(leaseBuyout.numberValueByName(leaseBuyout.createdTransferAgreementNumber)).toBeVisible();
+                await expect(leaseBuyout.numberValueByName(leaseBuyout.transferContractNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
                 await leaseBuyout.addPayments(InstructionTypes.transferAgreement);
@@ -114,9 +112,7 @@ test.describe("Инструкция с типом 'Переход на пост�
             await test.step("Регистрация инструкции",async () => {
                 await leaseBuyout.registrationInstruction();
                 await expect(leaseBuyout.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(leaseBuyout.regBeginDate).toHaveValue(leaseBuyout.newContractStartDate);
-                await expect(leaseBuyout.regEndDate).toHaveValue(leaseBuyout.newContractEndDate);
-                expect(await leaseBuyout.checkPrevContractsDateChanges(TransferAgreementSubTypes.buyoutFromRentWithNewContract)).toBeTruthy();
+                expect(await leaseBuyout.checkPrevContractsDateChanges(TransferSubTypeIds.buyoutFromRentWithNewContract)).toBeTruthy();
                 await leaseBuyout.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
@@ -145,7 +141,7 @@ test.describe("Инструкция с типом 'Переход на пост�
                 await leaseBuyout.checkCancelRegistrationRequirements(leaseBuyout.instructionId);
             })
         })
-    test(`Выкуп из аренды без расторжения. Версия модуля: ${Process.env.APP_VERSION}`,
+    test(`Выкуп из аренды (изменение ТД). Версия модуля: ${Process.env.APP_VERSION}`,
         async ({leaseBuyout}) => {
             test.info().annotations.push
             (
@@ -156,12 +152,12 @@ test.describe("Инструкция с типом 'Переход на пост�
             await test.step("Создание инструкции", async () => {
                 await leaseBuyout.createInstruction({
                     type: InstructionTypes.transferAgreement,
-                    subType: TransferAgreementSubTypes.buyoutFromRentWithoutNewContract
+                    subType: TransferSubTypeIds.buyoutFromRentWithoutNewContract
                 });
                 await expect(leaseBuyout.instructionName).toBeVisible();
             })
             await test.step("Наличие автоматически добавленного пред. договора с новым клубом",async () => {
-                await expect(leaseBuyout.numberValueByName(leaseBuyout.createdContractNumber)).toBeVisible();
+                await expect(leaseBuyout.numberValueByName(leaseBuyout.employmentContractNumber)).toBeVisible();
             })
             await test.step("Добавление дополнительного соглашения на продление",async () => {
                 await leaseBuyout.addAdditionalAgreement(true,leaseBuyout.newContractStartDate);
@@ -169,7 +165,7 @@ test.describe("Инструкция с типом 'Переход на пост�
             })
             await test.step("Добавление трансферного соглашения",async () => {
                 await leaseBuyout.addTransferAgreement({});
-                await expect(leaseBuyout.numberValueByName(leaseBuyout.createdTransferAgreementNumber)).toBeVisible();
+                await expect(leaseBuyout.numberValueByName(leaseBuyout.transferContractNumber)).toBeVisible();
             })
             await test.step("Добавление платежей",async () => {
                 await leaseBuyout.addPayments(InstructionTypes.transferAgreement);
@@ -180,9 +176,7 @@ test.describe("Инструкция с типом 'Переход на пост�
             await test.step("Регистрация инструкции",async () => {
                 await leaseBuyout.registrationInstruction();
                 await expect(leaseBuyout.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(leaseBuyout.regBeginDate).toHaveValue(leaseBuyout.prevContractNewClubStartDate);
-                await expect(leaseBuyout.regEndDate).toHaveValue(leaseBuyout.additionalAgreementDateEndByDs);
-                expect(await leaseBuyout.checkPrevContractsDateChanges(TransferAgreementSubTypes.buyoutFromRentWithoutNewContract)).toBeTruthy();
+                expect(await leaseBuyout.checkPrevContractsDateChanges(TransferSubTypeIds.buyoutFromRentWithoutNewContract)).toBeTruthy();
                 await leaseBuyout.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {

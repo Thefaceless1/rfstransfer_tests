@@ -7,12 +7,11 @@ import {DateInput} from "../framework/elements/DateInput";
 import {InstructionStates} from "../helpers/enums/InstructionStates";
 import {logger} from "../logger/logger";
 import {PaymentTypes} from "../helpers/enums/PaymentTypes";
-import {CreateInstructionOptionsType} from "../helpers/types/CreateInstructionOptionsType";
 import {randomInt} from "crypto";
-import {dbHelper} from "../db/DbHelper";
-import {TransferAgreementSubTypes} from "../helpers/enums/TransferAgreementSubTypes";
-import {TransferAgreementRentSubTypes} from "../helpers/enums/TransferAgreementRentSubTypes";
-import {TransferContractType} from "../helpers/enums/TransferContractType";
+import {dbHelper} from "../db/DbService";
+import {TransferSubTypeIds} from "../helpers/enums/transferSubTypeIds";
+import {TransferRentSubTypeIds} from "../helpers/enums/transferRentSubTypeIds";
+import {TransferContractTypeIds} from "../helpers/enums/TransferContractTypeIds";
 import {InstructionTypes} from "../helpers/enums/InstructionTypes";
 import {SelectedFilesType} from "../helpers/types/SelectedFilesType";
 import {PlayerStates} from "../helpers/enums/PlayerStates";
@@ -23,16 +22,20 @@ import Process from "process";
 import {CollisionIds} from "../helpers/enums/CollisionIds";
 import {FifaSendingActionTypes} from "../helpers/enums/FifaSendingActionTypes";
 import {ContractStates} from "../helpers/enums/ContractStates";
+import {InstructionTypeIds} from "../helpers/enums/InstructionTypeIds";
+import {ApiService} from "../api/ApiService";
+import {RegPrelimInstructionParamsType} from "../helpers/types/RegPrelimInstructionParamsType";
+import {GetInstructionResponseType} from "../helpers/types/GetInstructionResponseType";
 
 export class InstructionPage extends CreateInstructionPage {
     public prevContractStopDateValue: string = ''
     public prevContractRestartDateValue: string = ''
     public additionalAgreementDateEndByDs: string = ''
-    public readonly createdContractNumber: string = InputData.randomWord
+    public readonly employmentContractNumber: string = InputData.randomWord
     public readonly additionalAgreementWithChangeDate: string = InputData.randomWord
     public readonly additionalAgreementWithoutChangeDate: string = InputData.randomWord
     public readonly additionalAgreementForTk: string = InputData.randomWord
-    public readonly createdTransferAgreementNumber: string = InputData.randomWord
+    public readonly transferContractNumber: string = InputData.randomWord
     private readonly registerComment: string = InputData.randomWord
     private readonly cancelRegistrationComment: string = InputData.randomWord
     public readonly contractDurationDays: number = 365
@@ -465,7 +468,7 @@ export class InstructionPage extends CreateInstructionPage {
     public async addContract(startDate: string, endDate: string): Promise<void> {
         if (await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible())
             await this.addButton.first().click();
-        await this.contractNumber.fill(this.createdContractNumber)
+        await this.contractNumber.fill(this.employmentContractNumber)
         await DateInput.fillDateInput(this.contractStartDate,startDate);
         await DateInput.fillDateInput(this.contractEndDate,endDate);
         await DateInput.fillDateInput(this.dateConclusion,startDate);
@@ -529,15 +532,15 @@ export class InstructionPage extends CreateInstructionPage {
     public async addTransferAgreement(createTransferOptions: CreateTransferOptionsType): Promise<void> {
         await this.addButton.click();
         switch (createTransferOptions.transferContractType) {
-            case TransferContractType.withTermination:
+            case TransferContractTypeIds.withTermination:
                 await this.withTerminationContractRadio.click();
                 break;
-            case TransferContractType.withSuspension:
+            case TransferContractTypeIds.withSuspension:
                 await this.withSuspensionContractRadio.click();
         }
-        await this.transferNumber.fill(this.createdTransferAgreementNumber);
+        await this.transferNumber.fill(this.transferContractNumber);
         await DateInput.fillDateInput(this.signingDate,InputData.currentDate);
-        if (createTransferOptions.transferContractType == TransferContractType.withSuspension &&
+        if (createTransferOptions.transferContractType == TransferContractTypeIds.withSuspension &&
             !await this.instructionTypeTitle(InstructionTypes.internationalTransfer).isVisible()) {
             const prevContractRestartDateValue: string | null = await this.prevContractRestartDate.last().getAttribute("value");
             if (prevContractRestartDateValue) this.prevContractRestartDateValue = prevContractRestartDateValue;
@@ -547,7 +550,7 @@ export class InstructionPage extends CreateInstructionPage {
             * значением , которое находится в диапазоне дат пред. договора с новым клубом
             * для обхода коллизии "Дата прекращения старого ТД находится не в диапазоне дат возобновляемого ТД аренды"
         */
-        if (createTransferOptions.instructionSubType == TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract)
+        if (createTransferOptions.instructionSubType == TransferRentSubTypeIds.earlyFinishRentWithoutNewContract)
             await DateInput.fillDateInput(this.prevContractStopDate.last(),InputData.futureDate(-1,this.prevContractNewClubEndDate));
         const prevContractStopDateValue: string | null = await this.prevContractStopDate.last().getAttribute("value");
         if (prevContractStopDateValue) this.prevContractStopDateValue = prevContractStopDateValue;
@@ -604,11 +607,11 @@ export class InstructionPage extends CreateInstructionPage {
         await this.skipHistoryChangeCheckBox.click();
         await this.registerButton.click();
         if (Process.env.BRANCH == "preprod") {
-            const isIntTransferGiveAway: boolean = await this.intTransferSubType(IntTransferSubTypes.giveAwayAmateurPlayer).isVisible();
+            const isIntTransferGiveAwayPlayer: boolean = await this.intTransferSubType(IntTransferSubTypes.giveAwayAmateurPlayer).isVisible();
             await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.missingPlayerFifaId)));
-            if (!isIntTransferGiveAway)
+            if (!isIntTransferGiveAwayPlayer)
                 await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.restrictRegisterPlayers)));
-            const expectedCollisionCount: number = (isIntTransferGiveAway) ? 1 : 2;
+            const expectedCollisionCount: number = (isIntTransferGiveAwayPlayer) ? 1 : 2;
             if (await this.collisions().count() != expectedCollisionCount) throw new Error("Количество коллизий превышает ожидаемое");
             if (await this.isOtherMemberAssociationRadio(false).isVisible())
                 await this.isOtherMemberAssociationRadio(false).click();
@@ -709,39 +712,6 @@ export class InstructionPage extends CreateInstructionPage {
         }
     }
     /**
-     * Создание и регистрация тестовой инструкции для сценария проверки инструкций других типов
-     */
-    public async addTestInstruction(createOptions: CreateInstructionOptionsType, transferContractType?: TransferContractType): Promise<void> {
-        await this.createInstruction({
-            type: createOptions.type,
-            subType: createOptions.subType,
-            clubId: createOptions.clubId,
-            isInstructionForEarlyFinish: createOptions.isInstructionForEarlyFinish
-        });
-        if (createOptions.clubId == this.clubId) {
-            (createOptions.isInstructionForEarlyFinish) ?
-                await this.addContract(this.prevContractPrevClubStartDate,this.prevContractPrevClubEndDate) :
-                await this.addContract(this.prevContractNewClubStartDate,this.prevContractNewClubEndDate);
-        }
-        else {
-            (createOptions.isInstructionForEarlyFinish) ?
-                await this.addContract(this.prevContractNewClubStartDate,this.prevContractNewClubEndDate) :
-                await this.addContract(this.prevContractPrevClubStartDate,this.prevContractPrevClubEndDate);
-        }
-        await Elements.waitForVisible(this.numberValueByName(this.createdContractNumber));
-        if (createOptions.type == InstructionTypes.transferAgreementOnRentTerms)
-            switch (transferContractType) {
-                case TransferContractType.withSuspension:
-                    await this.addTransferAgreement({transferContractType: TransferContractType.withSuspension});
-                    break;
-                case TransferContractType.withTermination:
-                    await this.addTransferAgreement({transferContractType: TransferContractType.withTermination});
-            }
-        await this.isInstructionWithPayments(false).click();
-        await this.registrationInstruction();
-        await Elements.waitForVisible(this.instructionState(InstructionStates.registered));
-    }
-    /**
      * Проверка отправки сведений в ФИФА
      */
     public async checkFifaSending(actionType: FifaSendingActionTypes): Promise<void> {
@@ -813,10 +783,10 @@ export class InstructionPage extends CreateInstructionPage {
      * Метод проверки изменения дат для предыдущих договоров с предыдущим и новым клубами
      */
     public async checkPrevContractsDateChanges(
-        transferAgreementSubType: TransferAgreementSubTypes | TransferAgreementRentSubTypes,
-        transferContractType?: TransferContractType): Promise<boolean> {
-        const prevContractPrevClub: any[] = (transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithNewContract ||
-                                             transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract) ?
+        transferAgreementSubType: TransferSubTypeIds | TransferRentSubTypeIds,
+        transferContractType?: TransferContractTypeIds): Promise<boolean> {
+        const prevContractPrevClub: any[] = (transferAgreementSubType == TransferRentSubTypeIds.earlyFinishRentWithNewContract ||
+                                             transferAgreementSubType == TransferRentSubTypeIds.earlyFinishRentWithoutNewContract) ?
             await dbHelper.getPreviousContract(this.personId,this.srcClubId,true) :
             await dbHelper.getPreviousContract(this.personId,this.srcClubId,false);
         let prevContractPrevClubStopDate: string = '';
@@ -827,9 +797,9 @@ export class InstructionPage extends CreateInstructionPage {
             prevContractPrevClubEndDate = prevContractPrevClub[0]["actual_end_date"].toLocaleDateString('ru-RU');
             if (prevContractPrevClub[0]["restart_date"]) prevContractPrevClubRestartDate = prevContractPrevClub[0]["restart_date"].toLocaleDateString('ru-RU');
         }
-        const prevContractNewClub: any[] = (transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithNewContract ||
-                                            transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract ||
-                                            transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithoutNewContract) ?
+        const prevContractNewClub: any[] = (transferAgreementSubType == TransferRentSubTypeIds.earlyFinishRentWithNewContract ||
+                                            transferAgreementSubType == TransferRentSubTypeIds.earlyFinishRentWithoutNewContract ||
+                                            transferAgreementSubType == TransferSubTypeIds.buyoutFromRentWithoutNewContract) ?
             await dbHelper.getPreviousContract(this.personId,this.clubId,false):
             await dbHelper.getPreviousContract(this.personId,this.clubId,true);
         let prevContractNewClubRestartDate: string = '';
@@ -838,7 +808,7 @@ export class InstructionPage extends CreateInstructionPage {
             prevContractNewClubEndDate = prevContractNewClub[0]["actual_end_date"].toLocaleDateString('ru-RU');
             if (prevContractNewClub[0]["restart_date"]) prevContractNewClubRestartDate = prevContractNewClub[0]["restart_date"].toLocaleDateString('ru-RU');
         }
-        if (transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithNewContract) {
+        if (transferAgreementSubType == TransferSubTypeIds.buyoutFromRentWithNewContract) {
             logger.info(`
                  Пред. договор с пред. клубом: stop_date: факт: ${prevContractPrevClubStopDate}, ожидание: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: actual_end_date: факт: ${prevContractPrevClubEndDate}, ожидание: ${this.prevContractStopDateValue}
@@ -848,7 +818,7 @@ export class InstructionPage extends CreateInstructionPage {
                     prevContractPrevClubEndDate == this.prevContractStopDateValue &&
                     prevContractNewClubEndDate == this.newContractStartDate)
         }
-        else if (transferAgreementSubType == TransferAgreementSubTypes.buyoutFromRentWithoutNewContract) {
+        else if (transferAgreementSubType == TransferSubTypeIds.buyoutFromRentWithoutNewContract) {
             logger.info(`
                  Пред. договор с пред. клубом: stop_date: факт: ${prevContractPrevClubStopDate}, ожидание: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: actual_end_date: факт: ${prevContractPrevClubEndDate}, ожидание: ${this.prevContractStopDateValue}
@@ -858,9 +828,9 @@ export class InstructionPage extends CreateInstructionPage {
                     prevContractPrevClubEndDate == this.prevContractStopDateValue &&
                     prevContractNewClubEndDate == this.additionalAgreementDateEndByDs)
         }
-        else if ((transferAgreementSubType == TransferAgreementRentSubTypes.toRent && transferContractType == TransferContractType.withTermination) ||
-                  transferAgreementSubType == TransferAgreementSubTypes.withoutBuyoutFromRent ||
-                  transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithNewContract) {
+        else if ((transferAgreementSubType == TransferRentSubTypeIds.toRent && transferContractType == TransferContractTypeIds.withTermination) ||
+                  transferAgreementSubType == TransferSubTypeIds.withoutBuyoutFromRent ||
+                  transferAgreementSubType == TransferRentSubTypeIds.earlyFinishRentWithNewContract) {
             logger.info(`
                  Пред. договор с пред. клубом: stop_date: факт: ${prevContractPrevClubStopDate}, ожидание: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: end_date: факт: ${prevContractPrevClubEndDate}, ожидание: ${this.prevContractStopDateValue}
@@ -868,7 +838,7 @@ export class InstructionPage extends CreateInstructionPage {
             return (prevContractPrevClubStopDate == this.prevContractStopDateValue &&
                     prevContractPrevClubEndDate == this.prevContractStopDateValue)
         }
-        else if (transferAgreementSubType == TransferAgreementRentSubTypes.toRent && transferContractType == TransferContractType.withSuspension) {
+        else if (transferAgreementSubType == TransferRentSubTypeIds.toRent && transferContractType == TransferContractTypeIds.withSuspension) {
             logger.info(`
                  Пред. договор с пред. клубом: stop_date: факт: ${prevContractPrevClubStopDate}, ожидание: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: restart_date: факт: ${prevContractPrevClubRestartDate}, ожидание: ${this.prevContractRestartDateValue}
@@ -876,9 +846,9 @@ export class InstructionPage extends CreateInstructionPage {
             return (prevContractPrevClubStopDate == this.prevContractStopDateValue &&
                     prevContractPrevClubRestartDate == this.prevContractRestartDateValue)
         }
-        else if ((transferAgreementSubType == TransferAgreementRentSubTypes.prolongationNewContractNewTransfer ||
-                  transferAgreementSubType ==  TransferAgreementRentSubTypes.prolongationNewContract) &&
-                 transferContractType == TransferContractType.withSuspension) {
+        else if ((transferAgreementSubType == TransferRentSubTypeIds.prolongationNewContractNewTransfer ||
+                  transferAgreementSubType ==  TransferRentSubTypeIds.prolongationNewContract) &&
+                 transferContractType == TransferContractTypeIds.withSuspension) {
             logger.info(`
                  Пред. договор с пред. клубом: stop_date: факт: ${prevContractPrevClubStopDate}, ожидание: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: restart_date: факт: ${prevContractPrevClubRestartDate}, ожидание: ${this.prevContractRestartDateValue}
@@ -888,8 +858,8 @@ export class InstructionPage extends CreateInstructionPage {
                     prevContractPrevClubRestartDate == this.prevContractRestartDateValue &&
                     prevContractNewClubEndDate == this.newContractStartDate)
         }
-        else if (transferAgreementSubType == TransferAgreementRentSubTypes.prolongationNewTransfer ||
-                 transferAgreementSubType == TransferAgreementRentSubTypes.prolongationWithoutNewContracts) {
+        else if (transferAgreementSubType == TransferRentSubTypeIds.prolongationNewTransfer ||
+                 transferAgreementSubType == TransferRentSubTypeIds.prolongationWithoutNewContracts) {
             logger.info(`
                  Пред. договор с пред. клубом: stop_date: факт: ${prevContractPrevClubStopDate}, ожидание: ${this.prevContractStopDateValue}
                  Пред. договор с пред. клубом: restart_date: факт: ${prevContractPrevClubRestartDate}, ожидание: ${this.prevContractRestartDateValue}
@@ -899,7 +869,7 @@ export class InstructionPage extends CreateInstructionPage {
                     prevContractPrevClubRestartDate == this.prevContractRestartDateValue &&
                     prevContractNewClubEndDate == this.additionalAgreementDateEndByDs)
         }
-        else if (transferAgreementSubType == TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract) {
+        else if (transferAgreementSubType == TransferRentSubTypeIds.earlyFinishRentWithoutNewContract) {
             const prevContractStopDatePlusOneDay: string = InputData.futureDate(1,this.prevContractStopDateValue);
             logger.info(`
                  Пред. договор с пред. клубом: stop_date: факт: ${prevContractPrevClubStopDate}, ожидание: ${this.prevContractStopDateValue}
@@ -955,6 +925,78 @@ export class InstructionPage extends CreateInstructionPage {
                     if (!isContractInPreviousState) throw new Error(`Контракт ${contractId} не находится в предыдущем состоянии`);
                 }
             }
+        }
+    }
+    /**
+     * Создание и регистрация предварительных инструкций
+     */
+    public async registerPreliminaryInstruction(params: RegPrelimInstructionParamsType): Promise<void> {
+        const xCsrfToken: string = await this.pageCookie("XSRF-TOKEN");
+        const jSessionId: string = await this.pageCookie("JSESSIONID");
+        const apiService = new ApiService(xCsrfToken,jSessionId);
+        let response: GetInstructionResponseType;
+        if (params.typeId == InstructionTypeIds.newEmploymentContract) {
+            response = await apiService.createInstruction({
+                page: this.page,
+                clubId: (params.isForEarlyFinish) ? this.clubId : this.srcClubId,
+                personId: this.personId,
+                srcClubId: null,
+                typeId: params.typeId
+            });
+        }
+        else {
+            response  = await apiService.createInstruction({
+                page: this.page,
+                clubId: (params.isForEarlyFinish) ? this.srcClubId : this.clubId,
+                personId: this.personId,
+                srcClubId: (params.isForEarlyFinish) ? this.clubId : this.srcClubId,
+                typeId: params.typeId,
+                subTypeId: params.subTypeId
+            });
+        }
+        const instructionId: number = response.data.id;
+        switch (params.typeId) {
+            case InstructionTypeIds.newEmploymentContract:
+                await apiService.addContract({
+                    page: this.page,
+                    instructionId: instructionId,
+                    startDate: this.prevContractPrevClubStartDate,
+                    endDate: this.prevContractPrevClubEndDate,
+                    contractNumber: this.employmentContractNumber
+                });
+                await apiService.registerInstruction({
+                    page: this.page,
+                    instructionId: instructionId,
+                    regBeginDate: this.prevContractPrevClubStartDate,
+                    regEndDate: this.prevContractPrevClubEndDate,
+                    prevContractStopDate: null
+                });
+                break;
+            case InstructionTypeIds.transferAgreementOnRentTerms:
+                await apiService.addContract({
+                    page: this.page,
+                    instructionId: instructionId,
+                    startDate: this.prevContractNewClubStartDate,
+                    endDate: this.prevContractNewClubEndDate,
+                    contractNumber: this.employmentContractNumber
+                });
+                const contractStopDate: string = await apiService.addTransfer({
+                    page: this.page,
+                    instructionId: instructionId,
+                    type: (params.isEarlyFinishWithNewContract) ?
+                        TransferContractTypeIds.withTermination :
+                        TransferContractTypeIds.withSuspension,
+                    contractBeginDate: this.prevContractNewClubStartDate,
+                    contractEndDate: this.prevContractNewClubEndDate,
+                    transferNumber: this.transferContractNumber
+                });
+                await apiService.registerInstruction({
+                    page: this.page,
+                    instructionId: instructionId,
+                    regBeginDate: this.prevContractNewClubStartDate,
+                    regEndDate: this.prevContractNewClubEndDate,
+                    prevContractStopDate: contractStopDate
+                });
         }
     }
 }

@@ -3,14 +3,15 @@ import {Locator, Page} from "@playwright/test";
 import {InstructionTypes} from "../helpers/enums/InstructionTypes";
 import {Elements} from "../framework/elements/Elements";
 import {CreateInstructionOptionsType} from "../helpers/types/CreateInstructionOptionsType";
-import {TransferAgreementSubTypes} from "../helpers/enums/TransferAgreementSubTypes";
-import {TransferAgreementRentSubTypes} from "../helpers/enums/TransferAgreementRentSubTypes";
+import {TransferSubTypeIds} from "../helpers/enums/transferSubTypeIds";
+import {TransferRentSubTypeIds} from "../helpers/enums/transferRentSubTypeIds";
 import {IntTransferSubTypes} from "../helpers/enums/IntTransferSubTypes";
 import {PlayerStates} from "../helpers/enums/PlayerStates";
 import {RegistrationTypes} from "../helpers/enums/RegistrationTypes";
 
 export class CreateInstructionPage extends MainPage {
     private readonly person: string = (process.env.BRANCH == "preprod") ? "Техническая учетная запись ручная ОРСТ" : "Автотест Трансфер"
+    public readonly personId: number = (process.env.BRANCH == "preprod") ? 17600913 : 17611861
     public readonly clubId: number = (process.env.BRANCH == "preprod") ? 333890 : 279720
     public readonly srcClubId: number = (process.env.BRANCH == "preprod") ? 330620 : 282970
     constructor(page: Page) {
@@ -242,48 +243,48 @@ export class CreateInstructionPage extends MainPage {
             }
             if (createOptions.type == InstructionTypes.transferAgreement) {
                 switch (createOptions.subType) {
-                    case TransferAgreementSubTypes.withoutBuyoutFromRent:
+                    case TransferSubTypeIds.withoutBuyoutFromRent:
                         await this.isTsWithBuyoutRadio(false).click();
                         break;
-                    case TransferAgreementSubTypes.buyoutFromRentWithNewContract:
+                    case TransferSubTypeIds.buyoutFromRentWithNewContract:
                         await this.isTsWithBuyoutRadio(true).click();
                         await this.isTsWithNewTdRadio(true).click();
                         break;
-                    case TransferAgreementSubTypes.buyoutFromRentWithoutNewContract:
+                    case TransferSubTypeIds.buyoutFromRentWithoutNewContract:
                         await this.isTsWithBuyoutRadio(true).click();
                         await this.isTsWithNewTdRadio(false).click();
                 }
             }
             if (createOptions.type == InstructionTypes.transferAgreementOnRentTerms) {
                 switch (createOptions.subType) {
-                    case TransferAgreementRentSubTypes.toRent:
+                    case TransferRentSubTypeIds.toRent:
                         await this.toRentRadio.click();
                         break;
-                    case TransferAgreementRentSubTypes.prolongationNewContractNewTransfer:
+                    case TransferRentSubTypeIds.prolongationNewContractNewTransfer:
                         await this.prolongationRentRadio.click();
                         await this.isTsWithNewTdForProlongationRentRadio(true).click();
                         await this.isTsWithNewTkForProlongationRentRadio(true).click();
                         break;
-                    case TransferAgreementRentSubTypes.prolongationNewContract:
+                    case TransferRentSubTypeIds.prolongationNewContract:
                         await this.prolongationRentRadio.click();
                         await this.isTsWithNewTdForProlongationRentRadio(true).click();
                         await this.isTsWithNewTkForProlongationRentRadio(false).click();
                         break;
-                    case TransferAgreementRentSubTypes.prolongationNewTransfer:
+                    case TransferRentSubTypeIds.prolongationNewTransfer:
                         await this.prolongationRentRadio.click();
                         await this.isTsWithNewTdForProlongationRentRadio(false).click();
                         await this.isTsWithNewTkForProlongationRentRadio(true).click();
                         break;
-                    case TransferAgreementRentSubTypes.prolongationWithoutNewContracts:
+                    case TransferRentSubTypeIds.prolongationWithoutNewContracts:
                         await this.prolongationRentRadio.click();
                         await this.isTsWithNewTdForProlongationRentRadio(false).click();
                         await this.isTsWithNewTkForProlongationRentRadio(false).click();
                         break;
-                    case TransferAgreementRentSubTypes.earlyFinishRentWithNewContract:
+                    case TransferRentSubTypeIds.earlyFinishRentWithNewContract:
                         await this.earlyFinishRentRadio.click();
                         await this.isTsRentFinishWithNewTdRadio(true).click();
                         break;
-                    case TransferAgreementRentSubTypes.earlyFinishRentWithoutNewContract:
+                    case TransferRentSubTypeIds.earlyFinishRentWithoutNewContract:
                         await this.earlyFinishRentRadio.click();
                         await this.isTsRentFinishWithNewTdRadio(false).click();
                 }

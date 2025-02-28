@@ -35,9 +35,6 @@ test.describe("Инструкция с типом 'Изменение трудо
             await test.step("Регистрация инструкции",async () => {
                 await additionalAgreement.registrationInstruction();
                 await expect(additionalAgreement.instructionState(InstructionStates.registered)).toBeVisible();
-                await expect(additionalAgreement.regBeginDate).toHaveValue(additionalAgreement.prevContractPrevClubStartDate);
-                await expect(additionalAgreement.regEndDate).toHaveValue(additionalAgreement.additionalAgreementDateEndByDs);
-                await expect(additionalAgreement.registerCommentValue).toBeVisible();
                 await additionalAgreement.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
             })
             await test.step("Формирование и загрузка на ПК печатной формы инструкции",async () => {

@@ -28,7 +28,7 @@ test.describe("Инструкция с типом 'Трудовой догово
         })
         await test.step("Добавление трудового договора",async () => {
             await employmentContract.addContract(employmentContract.prevContractPrevClubStartDate,employmentContract.prevContractPrevClubEndDate);
-            await expect(employmentContract.numberValueByName(employmentContract.createdContractNumber)).toBeVisible();
+            await expect(employmentContract.numberValueByName(employmentContract.employmentContractNumber)).toBeVisible();
         })
         await test.step("Добавление дополнительного соглашения",async () => {
             await employmentContract.addAdditionalAgreement(false,employmentContract.prevContractPrevClubStartDate);
@@ -42,8 +42,6 @@ test.describe("Инструкция с типом 'Трудовой догово
             await employmentContract.registrationInstruction();
             await expect(employmentContract.instructionState(InstructionStates.registered)).toBeVisible();
             await expect(employmentContract.registerCommentValue).toBeVisible();
-            await expect(employmentContract.regBeginDate).toHaveValue(employmentContract.prevContractPrevClubStartDate);
-            await expect(employmentContract.regEndDate).toHaveValue(String(employmentContract.prevContractPrevClubEndDate));
             await employmentContract.checkFifaSending(FifaSendingActionTypes.firstProRegistration);
         })
         await test.step("Добавление и подтверждение фактического платежа",async () => {

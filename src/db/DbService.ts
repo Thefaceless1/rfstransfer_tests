@@ -1,7 +1,7 @@
 import pkg from 'pg';
 const { Client } = pkg;
 import {dbConfig} from "./db.config.js";
-class DbHelper {
+class DbService {
     constructor() {
     }
     /**
@@ -181,4 +181,4 @@ class DbHelper {
         return result.rows[0].exists;
     }
 }
-export const dbHelper = new DbHelper();
+export const dbHelper = new DbService();

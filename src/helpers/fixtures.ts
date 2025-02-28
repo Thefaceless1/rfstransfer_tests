@@ -1,11 +1,10 @@
 import {test as base} from '@playwright/test';
 import {InstructionPage} from "../pages/InstructionPage";
-import {dbHelper} from "../db/DbHelper";
-import {InstructionTypes} from "./enums/InstructionTypes";
-import {TransferAgreementRentSubTypes} from "./enums/TransferAgreementRentSubTypes";
-import {TransferContractType} from "./enums/TransferContractType";
+import {dbHelper} from "../db/DbService";
+import {TransferRentSubTypeIds} from "./enums/transferRentSubTypeIds";
 import {logService} from "../logger/LogService";
 import {RegistriesPage} from "../pages/RegistriesPage";
+import {InstructionTypeIds} from "./enums/InstructionTypeIds";
 
 type Fixtures = {
     employmentContract: InstructionPage,
@@ -37,10 +36,7 @@ export const test = base.extend<Fixtures>({
         await dbHelper.deleteFifaSending(additionalAgreement.personId);
         await dbHelper.deleteInstructions(additionalAgreement.personId);
         await additionalAgreement.authorization();
-        await additionalAgreement.addTestInstruction({
-            type: InstructionTypes.newEmploymentContract,
-            clubId: additionalAgreement.srcClubId
-        });
+        await additionalAgreement.registerPreliminaryInstruction({typeId: InstructionTypeIds.newEmploymentContract});
         await use(additionalAgreement);
         await dbHelper.deleteFifaSending(additionalAgreement.personId);
         await dbHelper.deleteInstructions(additionalAgreement.personId);
@@ -52,10 +48,7 @@ export const test = base.extend<Fixtures>({
         await dbHelper.deleteFifaSending(transfer.personId);
         await dbHelper.deleteInstructions(transfer.personId);
         await transfer.authorization();
-        await transfer.addTestInstruction({
-            type: InstructionTypes.newEmploymentContract,
-            clubId: transfer.srcClubId
-        });
+        await transfer.registerPreliminaryInstruction({typeId: InstructionTypeIds.newEmploymentContract});
         await use(transfer);
         await dbHelper.deleteFifaSending(transfer.personId);
         await dbHelper.deleteInstructions(transfer.personId);
@@ -67,18 +60,11 @@ export const test = base.extend<Fixtures>({
         await dbHelper.deleteFifaSending(leaseBuyout.personId);
         await dbHelper.deleteInstructions(leaseBuyout.personId);
         await leaseBuyout.authorization();
-        await leaseBuyout.addTestInstruction({
-            type: InstructionTypes.newEmploymentContract,
-            clubId: leaseBuyout.srcClubId
+        await leaseBuyout.registerPreliminaryInstruction({typeId: InstructionTypeIds.newEmploymentContract});
+        await leaseBuyout.registerPreliminaryInstruction({
+            typeId: InstructionTypeIds.transferAgreementOnRentTerms,
+            subTypeId: TransferRentSubTypeIds.toRent
         });
-        await leaseBuyout.addTestInstruction(
-            {
-            type: InstructionTypes.transferAgreementOnRentTerms,
-            subType: TransferAgreementRentSubTypes.toRent,
-            clubId: leaseBuyout.clubId
-            },
-            TransferContractType.withSuspension
-        );
         await use(leaseBuyout);
         await dbHelper.deleteFifaSending(leaseBuyout.personId);
         await dbHelper.deleteInstructions(leaseBuyout.personId);
@@ -90,10 +76,7 @@ export const test = base.extend<Fixtures>({
         await dbHelper.deleteFifaSending(transferRent.personId);
         await dbHelper.deleteInstructions(transferRent.personId);
         await transferRent.authorization();
-        await transferRent.addTestInstruction({
-            type: InstructionTypes.newEmploymentContract,
-            clubId: transferRent.srcClubId
-        });
+        await transferRent.registerPreliminaryInstruction({typeId: InstructionTypeIds.newEmploymentContract});
         await use(transferRent);
         await dbHelper.deleteFifaSending(transferRent.personId);
         await dbHelper.deleteInstructions(transferRent.personId);
@@ -105,18 +88,11 @@ export const test = base.extend<Fixtures>({
         await dbHelper.deleteFifaSending(rentProlongation.personId);
         await dbHelper.deleteInstructions(rentProlongation.personId);
         await rentProlongation.authorization();
-        await rentProlongation.addTestInstruction({
-            type: InstructionTypes.newEmploymentContract,
-            clubId: rentProlongation.srcClubId
+        await rentProlongation.registerPreliminaryInstruction({typeId: InstructionTypeIds.newEmploymentContract});
+        await rentProlongation.registerPreliminaryInstruction({
+            typeId: InstructionTypeIds.transferAgreementOnRentTerms,
+            subTypeId: TransferRentSubTypeIds.toRent
         });
-        await rentProlongation.addTestInstruction(
-            {
-            type: InstructionTypes.transferAgreementOnRentTerms,
-            subType: TransferAgreementRentSubTypes.toRent,
-            clubId: rentProlongation.clubId
-            },
-            TransferContractType.withSuspension
-        );
         await use(rentProlongation);
         await dbHelper.deleteFifaSending(rentProlongation.personId);
         await dbHelper.deleteInstructions(rentProlongation.personId);
@@ -125,25 +101,20 @@ export const test = base.extend<Fixtures>({
     earlyFinishRent: async ({page},use,testInfo)=> {
         await logService.clearLogFile();
         const transferRentEarlyFinish = new InstructionPage(page);
+        const isEarlyFinishWithNewContract: boolean = testInfo.title.includes("новый ТД");
         await dbHelper.deleteFifaSending(transferRentEarlyFinish.personId);
         await dbHelper.deleteInstructions(transferRentEarlyFinish.personId);
         await transferRentEarlyFinish.authorization();
-        await transferRentEarlyFinish.addTestInstruction({
-            type: InstructionTypes.newEmploymentContract,
-            clubId: transferRentEarlyFinish.clubId,
-            isInstructionForEarlyFinish: true
+        await transferRentEarlyFinish.registerPreliminaryInstruction({
+            typeId: InstructionTypeIds.newEmploymentContract,
+            isForEarlyFinish: true
         });
-        await transferRentEarlyFinish.addTestInstruction(
-            {
-            type: InstructionTypes.transferAgreementOnRentTerms,
-            subType: TransferAgreementRentSubTypes.toRent,
-            clubId: transferRentEarlyFinish.srcClubId,
-            isInstructionForEarlyFinish: true
-            },
-            (testInfo.title.includes("изменение ТД")) ?
-                TransferContractType.withSuspension:
-                TransferContractType.withTermination
-        );
+        await transferRentEarlyFinish.registerPreliminaryInstruction({
+            typeId: InstructionTypeIds.transferAgreementOnRentTerms,
+            subTypeId: TransferRentSubTypeIds.toRent,
+            isForEarlyFinish: true,
+            isEarlyFinishWithNewContract: isEarlyFinishWithNewContract
+        });
         await use(transferRentEarlyFinish);
         await dbHelper.deleteFifaSending(transferRentEarlyFinish.personId);
         await dbHelper.deleteInstructions(transferRentEarlyFinish.personId);

@@ -1,10 +1,10 @@
-import {TransferContractType} from "../enums/TransferContractType";
-import {TransferAgreementSubTypes} from "../enums/TransferAgreementSubTypes";
-import {TransferAgreementRentSubTypes} from "../enums/TransferAgreementRentSubTypes";
+import {TransferContractTypeIds} from "../enums/TransferContractTypeIds";
+import {TransferSubTypeIds} from "../enums/transferSubTypeIds";
+import {TransferRentSubTypeIds} from "../enums/transferRentSubTypeIds";
 import {IntTransferSubTypes} from "../enums/IntTransferSubTypes";
 
 export type CreateTransferOptionsType = {
-    transferContractType?: TransferContractType,
+    transferContractType?: TransferContractTypeIds,
     isTransferForEarlyFinish?: boolean,
-    instructionSubType?: TransferAgreementSubTypes | TransferAgreementRentSubTypes | IntTransferSubTypes
+    instructionSubType?: TransferSubTypeIds | TransferRentSubTypeIds | IntTransferSubTypes
 }
