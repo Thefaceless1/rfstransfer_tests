@@ -30,6 +30,18 @@ class DbService {
         await client.end();
     }
     /**
+     * Удаление записей из таблицы 'employee_contracts' для выбранного пользователя
+     */
+    public async deleteEmployeeContracts(personId: number): Promise<void> {
+        const client: pkg.Client = new Client(dbConfig);
+        await client.connect();
+        const queryText: string = `DELETE FROM rfstran.employee_contracts 
+                                   WHERE person_id=$1`;
+        const values: string[] = [`${personId}`];
+        await client.query(queryText,values);
+        await client.end();
+    }
+    /**
      * Удаление записей отправки сведений в ФИФА для выбранного пользователя
      */
     public async deleteFifaSending(personId: number): Promise<void> {
@@ -181,4 +193,4 @@ class DbService {
         return result.rows[0].exists;
     }
 }
-export const dbHelper = new DbService();
+export const dbService = new DbService();

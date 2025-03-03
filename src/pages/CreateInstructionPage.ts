@@ -10,9 +10,6 @@ import {PlayerStates} from "../helpers/enums/PlayerStates";
 import {RegistrationTypes} from "../helpers/enums/RegistrationTypes";
 
 export class CreateInstructionPage extends MainPage {
-    private readonly person: string = (process.env.BRANCH == "preprod") ? "Техническая учетная запись ручная ОРСТ" : "Автотест Трансфер"
-    public readonly personId: number = (process.env.BRANCH == "preprod") ? 17600913 : 17611861
-    public readonly clubId: number = (process.env.BRANCH == "preprod") ? 333890 : 279720
     public readonly srcClubId: number = (process.env.BRANCH == "preprod") ? 330620 : 282970
     constructor(page: Page) {
         super(page);

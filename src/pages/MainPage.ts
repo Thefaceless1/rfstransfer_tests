@@ -11,6 +11,14 @@ export class MainPage extends AuthorizationPage {
      */
     protected readonly internationalTransfersButton: Locator = this.page.locator("//a[text()='Международные переходы']")
     /**
+     * Кнопка "Регистрация сотрудника"
+     */
+    protected readonly registerEmployeeButton: Locator = this.page.locator("//p[text()='Регистрация сотрудника']")
+    /**
+     * Кнопка "Внутренние переходы"
+     */
+    protected readonly internalTransfersButton: Locator = this.page.locator("//a[text()='Внутренние переходы']")
+    /**
      * Выбранное значение таба "Реестры"
      */
     protected registriesTabValue(tabValue: RegistriesValues): Locator {

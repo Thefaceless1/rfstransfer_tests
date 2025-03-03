@@ -69,6 +69,7 @@ export class AuthorizationPage extends BasePage {
             }
         }
         else {
+            await this.page.waitForTimeout(1000)
             await this.authorizationButton.click();
             await this.selectUser.click();
             await this.page.waitForTimeout(1000)
@@ -76,7 +77,7 @@ export class AuthorizationPage extends BasePage {
             await this.userValues.first().click();
             await this.saveButton.click();
         }
-        await Elements.waitForVisible(this.internalTransfersButton,60000);
+        await Elements.waitForVisible(this.contractManagementTitle,this.maxServerResponseTime);
     }
     /**
      * Get 2FA code

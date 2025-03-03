@@ -427,14 +427,14 @@ test.describe("Инструкция с типом 'Переход на врем�
                 await earlyFinishRent.registrationInstruction();
                 await expect(earlyFinishRent.instructionState(InstructionStates.registered)).toBeVisible();
                 expect(await earlyFinishRent.checkPrevContractsDateChanges(TransferRentSubTypeIds.earlyFinishRentWithNewContract,TransferContractTypeIds.withSuspension)).toBeTruthy();
-                //await earlyFinishRent.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
+                await earlyFinishRent.checkFifaSending(FifaSendingActionTypes.transferDeclaration);
             })
             await test.step("Добавление и подтверждение фактических платежей",async () => {
                 await earlyFinishRent.addFactPayments(InstructionTypes.transferAgreement);
                 await expect(earlyFinishRent.paymentState(PaymentTypes.fixedPayment, PaymentStates.completed)).toBeVisible();
                 await expect(earlyFinishRent.paymentState(PaymentTypes.conditionalPayment, PaymentStates.completed)).toBeVisible();
                 await expect(earlyFinishRent.paymentState(PaymentTypes.resalePayment, PaymentStates.completed)).toBeVisible();
-                //await earlyFinishRent.checkFifaSending(FifaSendingActionTypes.proofOfPayment);
+                await earlyFinishRent.checkFifaSending(FifaSendingActionTypes.proofOfPayment);
             })
             await test.step("Возврат выплат в предыдущий статус",async () => {
                 await earlyFinishRent.returnPaymentToPrevState();

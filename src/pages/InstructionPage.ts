@@ -8,12 +8,10 @@ import {InstructionStates} from "../helpers/enums/InstructionStates";
 import {logger} from "../logger/logger";
 import {PaymentTypes} from "../helpers/enums/PaymentTypes";
 import {randomInt} from "crypto";
-import {dbHelper} from "../db/DbService";
 import {TransferSubTypeIds} from "../helpers/enums/transferSubTypeIds";
 import {TransferRentSubTypeIds} from "../helpers/enums/transferRentSubTypeIds";
 import {TransferContractTypeIds} from "../helpers/enums/TransferContractTypeIds";
 import {InstructionTypes} from "../helpers/enums/InstructionTypes";
-import {SelectedFilesType} from "../helpers/types/SelectedFilesType";
 import {PlayerStates} from "../helpers/enums/PlayerStates";
 import {IntTransferSubTypes} from "../helpers/enums/IntTransferSubTypes";
 import {CreateTransferOptionsType} from "../helpers/types/CreateTransferOptionsType";
@@ -26,6 +24,7 @@ import {InstructionTypeIds} from "../helpers/enums/InstructionTypeIds";
 import {ApiService} from "../api/ApiService";
 import {RegPrelimInstructionParamsType} from "../helpers/types/RegPrelimInstructionParamsType";
 import {GetInstructionResponseType} from "../helpers/types/GetInstructionResponseType";
+import {dbService} from "../db/DbService";
 
 export class InstructionPage extends CreateInstructionPage {
     public prevContractStopDateValue: string = ''
@@ -103,10 +102,6 @@ export class InstructionPage extends CreateInstructionPage {
      */
     private readonly contractEndDate: Locator = this.page.locator("//input[@name='dateValidityTo']")
     /**
-     * Поле "Примечание"
-     */
-    private readonly note: Locator = this.page.locator("//textarea[@name='note']")
-    /**
      * Заголовок поля "Примечание"
      */
     private readonly noteTitle: Locator = this.page.locator("//*[text()='Примечание']")
@@ -122,10 +117,6 @@ export class InstructionPage extends CreateInstructionPage {
      * Поле "Комментарий к регистрации"
      */
     private readonly commentForRegister: Locator = this.page.locator("//textarea[@name='regNote']")
-    /**
-     * Поле "Документы"
-     */
-    private readonly documents: Locator = this.page.locator("//input[@type='file' and not(@disabled)]")
     /**
      * Поле "Сторона"
      */
@@ -341,13 +332,6 @@ export class InstructionPage extends CreateInstructionPage {
         return this.page.locator("//*[contains(@class,'Badge_status')]",{hasText: stateText});
     }
     /**
-     * Иконка файла выбранного формата
-     */
-    public fileIcon(format: SelectedFilesType): Locator {
-        const formatWithRegister: string = format[0].toUpperCase()+format.slice(1).toLowerCase();
-        return this.page.locator(`//*[contains(@class,'FileIcon${formatWithRegister}')]//..//..//..//following-sibling::button`);
-    }
-    /**
      * Радиобаттон "Проходил ли футболист спортивную подготовку в другой НА?"
      */
     private isOtherMemberAssociationRadio(isOtherMemberAssociation: boolean): Locator {
@@ -474,7 +458,7 @@ export class InstructionPage extends CreateInstructionPage {
         await DateInput.fillDateInput(this.dateConclusion,startDate);
         await this.noteTitle.click();
         await this.note.fill(InputData.randomWord);
-        await this.addContractDocuments();
+        await this.addContractDocuments(false);
         await this.addMediators();
         await this.onwardButton.click();
     }
@@ -505,7 +489,7 @@ export class InstructionPage extends CreateInstructionPage {
         await DateInput.fillDateInput(this.dateConclusion,conclusionDate);
         await this.noteTitle.click();
         await this.note.fill(InputData.randomWord);
-        await this.addContractDocuments();
+        await this.addContractDocuments(false);
         await this.addMediators();
         await this.onwardButton.click();
     }
@@ -522,7 +506,7 @@ export class InstructionPage extends CreateInstructionPage {
         if (prevContractStopDateValue) this.prevContractStopDateValue = prevContractStopDateValue;
         await this.noteTitle.click();
         await this.note.fill(InputData.randomWord);
-        await this.addContractDocuments();
+        await this.addContractDocuments(false);
         await this.addMediators();
         await this.onwardButton.click();
     }
@@ -554,7 +538,7 @@ export class InstructionPage extends CreateInstructionPage {
             await DateInput.fillDateInput(this.prevContractStopDate.last(),InputData.futureDate(-1,this.prevContractNewClubEndDate));
         const prevContractStopDateValue: string | null = await this.prevContractStopDate.last().getAttribute("value");
         if (prevContractStopDateValue) this.prevContractStopDateValue = prevContractStopDateValue;
-        await this.addContractDocuments();
+        await this.addContractDocuments(false);
         await this.addMediators();
         await this.onwardButton.click();
     }
@@ -573,26 +557,6 @@ export class InstructionPage extends CreateInstructionPage {
         await this.mediatorValues.first().click();
     }
     /**
-     * Добавление документов для контрактов, доп. соглашений, трансферных соглашений и МТС
-     */
-    private async addContractDocuments(): Promise<void> {
-        const documentFields = await this.documents.all();
-        for (const documentField of documentFields) {
-            const index = documentFields.indexOf(documentField);
-            if (index == 0) continue
-            else if (index == 1) {
-                await documentField.setInputFiles(InputData.getTestFiles("pdf"));
-                await Elements.waitForVisible(this.fileIcon("pdf"));
-            }
-            else {
-                await documentField.setInputFiles(InputData.getTestFiles("png"));
-                await Elements.waitForVisible(this.fileIcon("png"));
-                await documentField.setInputFiles(InputData.getTestFiles("jpg"));
-                await Elements.waitForVisible(this.fileIcon("jpg"));
-            }
-        }
-    }
-    /**
      * Регистрация инструкции
      */
     public async registrationInstruction(playerState?: PlayerStates): Promise<void> {
@@ -608,9 +572,9 @@ export class InstructionPage extends CreateInstructionPage {
         await this.registerButton.click();
         if (Process.env.BRANCH == "preprod") {
             const isIntTransferGiveAwayPlayer: boolean = await this.intTransferSubType(IntTransferSubTypes.giveAwayAmateurPlayer).isVisible();
-            await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.missingPlayerFifaId)));
+            await Elements.waitForVisible(this.collisions(await dbService.getCollisionDescription(CollisionIds.missingPlayerFifaId)));
             if (!isIntTransferGiveAwayPlayer)
-                await Elements.waitForVisible(this.collisions(await dbHelper.getCollisionDescription(CollisionIds.restrictRegisterPlayers)));
+                await Elements.waitForVisible(this.collisions(await dbService.getCollisionDescription(CollisionIds.restrictRegisterPlayers)));
             const expectedCollisionCount: number = (isIntTransferGiveAwayPlayer) ? 1 : 2;
             if (await this.collisions().count() != expectedCollisionCount) throw new Error("Количество коллизий превышает ожидаемое");
             if (await this.isOtherMemberAssociationRadio(false).isVisible())
@@ -715,11 +679,11 @@ export class InstructionPage extends CreateInstructionPage {
      * Проверка отправки сведений в ФИФА
      */
     public async checkFifaSending(actionType: FifaSendingActionTypes): Promise<void> {
-        await dbHelper.getFifaSendingFlagState();
-        if (await dbHelper.getFifaSendingFlagState() == "false") logger.info("Отправка сведений в ФИФА отключена");
+        await dbService.getFifaSendingFlagState();
+        if (await dbService.getFifaSendingFlagState() == "false") logger.info("Отправка сведений в ФИФА отключена");
         else if (Process.env.BRANCH != "preprod" && actionType == FifaSendingActionTypes.firstProRegistration) return;
         else {
-            let result: any[] = await dbHelper.getFifaSendingData(this.instructionId,actionType);
+            let result: any[] = await dbService.getFifaSendingData(this.instructionId,actionType);
             /**
              * Проверяем до 30 секунд дал ли ФИФА сервис ответ на запрос и появилась ли запись в БД модуля
              */
@@ -728,7 +692,7 @@ export class InstructionPage extends CreateInstructionPage {
                 const checkIntervalTime: number = 1000;
                 for (let i = 0; i < maxWaitingTime; i+=checkIntervalTime) {
                     await this.page.waitForTimeout(checkIntervalTime);
-                    const fifaSendingData: any[] = await dbHelper.getFifaSendingData(this.instructionId,actionType);
+                    const fifaSendingData: any[] = await dbService.getFifaSendingData(this.instructionId,actionType);
                     if (fifaSendingData.length != 0) {
                         result = fifaSendingData;
                         break;
@@ -765,7 +729,7 @@ export class InstructionPage extends CreateInstructionPage {
         if (intTransferSubType == IntTransferSubTypes.giveAwayAmateurPlayer ||
            intTransferSubType == IntTransferSubTypes.giveAwayProfessionalPlayer) await this.isFormMts(true).click();
         await this.sportSanctionCheckbox.click();
-        await this.addContractDocuments();
+        await this.addContractDocuments(false);
         await this.transitionId.fill(InputData.randomWord);
         await this.discipline.click();
         await this.disciplineValues.first().click();
@@ -787,8 +751,8 @@ export class InstructionPage extends CreateInstructionPage {
         transferContractType?: TransferContractTypeIds): Promise<boolean> {
         const prevContractPrevClub: any[] = (transferAgreementSubType == TransferRentSubTypeIds.earlyFinishRentWithNewContract ||
                                              transferAgreementSubType == TransferRentSubTypeIds.earlyFinishRentWithoutNewContract) ?
-            await dbHelper.getPreviousContract(this.personId,this.srcClubId,true) :
-            await dbHelper.getPreviousContract(this.personId,this.srcClubId,false);
+            await dbService.getPreviousContract(this.personId,this.srcClubId,true) :
+            await dbService.getPreviousContract(this.personId,this.srcClubId,false);
         let prevContractPrevClubStopDate: string = '';
         let prevContractPrevClubEndDate: string = '';
         let prevContractPrevClubRestartDate: string = '';
@@ -800,8 +764,8 @@ export class InstructionPage extends CreateInstructionPage {
         const prevContractNewClub: any[] = (transferAgreementSubType == TransferRentSubTypeIds.earlyFinishRentWithNewContract ||
                                             transferAgreementSubType == TransferRentSubTypeIds.earlyFinishRentWithoutNewContract ||
                                             transferAgreementSubType == TransferSubTypeIds.buyoutFromRentWithoutNewContract) ?
-            await dbHelper.getPreviousContract(this.personId,this.clubId,false):
-            await dbHelper.getPreviousContract(this.personId,this.clubId,true);
+            await dbService.getPreviousContract(this.personId,this.clubId,false):
+            await dbService.getPreviousContract(this.personId,this.clubId,true);
         let prevContractNewClubRestartDate: string = '';
         let prevContractNewClubEndDate: string = '';
         if (prevContractNewClub.length > 0) {
@@ -906,22 +870,22 @@ export class InstructionPage extends CreateInstructionPage {
      * Проверка действий, которые должны произойти при отмене регистрации инструкции
      */
     public async checkCancelRegistrationRequirements(instructionId: number): Promise<void> {
-        if (await dbHelper.isContractChangedByAnotherInstruction(this.instructionId)) {
+        if (await dbService.isContractChangedByAnotherInstruction(this.instructionId)) {
             await expect(this.hasContractDependenciesAlert).toBeVisible();
         }
         else {
             await expect(this.instructionState(InstructionStates.registerCancelled)).toBeVisible();
             await expect(this.cancelRegistrationReasonValue).toBeVisible();
-            const instructionContracts: any[] = await dbHelper.getInstructionContracts(instructionId);
+            const instructionContracts: any[] = await dbService.getInstructionContracts(instructionId);
             if (instructionContracts.length > 0) {
                 const isAllInstructionContractsDrafts: boolean = instructionContracts.every(contract => contract["state_id"] == ContractStates.draft);
                 if (!isAllInstructionContractsDrafts) throw new Error("Контракты текущей инструкции не перешли в статус 'Черновик'");
             }
-            const previousContractsIds: number[] = await dbHelper.getUserContractsUndo(this.personId);
+            const previousContractsIds: number[] = await dbService.getUserContractsUndo(this.personId);
             if (previousContractsIds.length > 0) {
                 for (const contractId of previousContractsIds) {
-                    const contractUndoRecordId: number = await dbHelper.getLastContractUndoRecordId(contractId);
-                    const isContractInPreviousState: boolean = await dbHelper.isContractInPreviousState(contractUndoRecordId);
+                    const contractUndoRecordId: number = await dbService.getLastContractUndoRecordId(contractId);
+                    const isContractInPreviousState: boolean = await dbService.isContractInPreviousState(contractUndoRecordId);
                     if (!isContractInPreviousState) throw new Error(`Контракт ${contractId} не находится в предыдущем состоянии`);
                 }
             }

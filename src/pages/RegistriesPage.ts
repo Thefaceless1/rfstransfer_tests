@@ -6,7 +6,6 @@ import path from "path";
 import xlsx from 'xlsx';
 
 export class RegistriesPage extends MainPage {
-    private readonly maxServerResponseTime: number = 61000
     constructor(page: Page) {
         super(page);
     }
