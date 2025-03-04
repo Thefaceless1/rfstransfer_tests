@@ -27,10 +27,6 @@ export class WorkActivityPage extends CreateWorkActivityPage {
      */
     private readonly position: Locator = this.page.locator("//div[contains(@class,'position__dropdown-indicator')]")
     /**
-     * Чекбокс "Подтверждаю, что вышеуказанная информация является достоверной и правильной"
-     */
-    private readonly isApprovedCheckBox: Locator = this.page.locator("//input[@name='isApproved']")
-    /**
      * кнопка "Зарегистрировать без верификации"
      */
     private readonly registerWithoutVerifyButton: Locator = this.page.locator("//button[text()='Зарегистрировать без верификации' and not(@disabled)]")
@@ -60,7 +56,6 @@ export class WorkActivityPage extends CreateWorkActivityPage {
         await this.positionDropDownValues.first().click();
         await this.addContractDocuments(true);
         await this.note.fill(InputData.randomWord);
-        await this.isApprovedCheckBox.check();
         await this.registerWithoutVerifyButton.click();
     }
     /**
