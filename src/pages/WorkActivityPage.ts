@@ -2,6 +2,7 @@ import {Locator, Page} from "@playwright/test";
 import {CreateWorkActivityPage} from "./CreateWorkActivityPage";
 import {InputData} from "../helpers/InputData";
 import {DateInput} from "../framework/elements/DateInput";
+import {WorkActivityStates} from "../helpers/enums/WorkActivityStates";
 
 export class WorkActivityPage extends CreateWorkActivityPage {
     private readonly regBeginDateValue: string = InputData.currentDate
@@ -41,11 +42,19 @@ export class WorkActivityPage extends CreateWorkActivityPage {
     /**
      * Иконка верифицированная трудовой деятельности
      */
-    public readonly verifiedActivityIcon: Locator = this.page.locator("//div[@data-tooltip-content='Верифицированная запись']")
+    public readonly verifiedIcon: Locator = this.page.locator("//div[@data-tooltip-content='Верифицированная запись']")
+    /**
+     * Иконка трудовой деятельности, требующей повторную верификацию
+     */
+    public readonly reverificationRequiredIcon: Locator = this.page.locator("//div[@data-tooltip-content='Требуется повторная верификация записи']")
     /**
      * Сообщение "Запись о трудовой деятельности зарегистрирована"
      */
     public readonly workActivityRegisteredMessage: Locator = this.page.locator("//div[text()='Запись о трудовой деятельности зарегистрирована']")
+    /**
+     * Сообщение "Данные о регистрации сохранены"
+     */
+    public readonly workActivitySavedMessage: Locator = this.page.locator("//div[text()='Данные о регистрации сохранены']")
     /**
      * Регистрация трудовой деятельности
      */
@@ -63,6 +72,21 @@ export class WorkActivityPage extends CreateWorkActivityPage {
      */
     public async verifyWorkActivity(): Promise<void> {
         await this.registerWithVerificationCheckBox.check();
+        await this.saveButton.click();
+    }
+    /**
+     * Редактирование трудовой деятельности
+     */
+    public async editWorkActivity(state: WorkActivityStates): Promise<void> {
+        switch (state) {
+            case WorkActivityStates.registered:
+                await this.position.click();
+                await this.positionDropDownValues.last().click();
+                break;
+            case WorkActivityStates.verified:
+                const newRegEndDateValue: string = InputData.futureDate(1,this.regEndDateValue);
+                await DateInput.fillDateInput(this.regEndDate,newRegEndDateValue);
+        }
         await this.saveButton.click();
     }
 }

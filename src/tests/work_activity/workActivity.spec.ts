@@ -4,8 +4,9 @@ import {InputData} from "../../helpers/InputData";
 import config from "../../../playwright.config";
 import {expect} from "@playwright/test";
 import 'dotenv/config'
+import {WorkActivityStates} from "../../helpers/enums/WorkActivityStates";
 
-test.describe("Трудовая деятельность сотрудников",() => {
+test.describe.only("Трудовая деятельность сотрудников",() => {
     test(`Версия модуля: ${Process.env.APP_VERSION}`,
         async ({workActivity}) => {
             test.info().annotations.push
@@ -22,9 +23,17 @@ test.describe("Трудовая деятельность сотрудников"
                 await workActivity.registerWorkActivity();
                 await expect(workActivity.workActivityRegisteredMessage).toBeVisible();
             })
+            await test.step("Редактирование зарегистрированной записи о трудовой деятельности",async () => {
+                await workActivity.editWorkActivity(WorkActivityStates.registered);
+                await expect(workActivity.workActivitySavedMessage).toBeVisible();
+            })
             await test.step("Верификация записи о трудовой деятельности",async () => {
                 await workActivity.verifyWorkActivity();
-                await expect(workActivity.verifiedActivityIcon).toBeVisible();
+                await expect(workActivity.verifiedIcon).toBeVisible();
+            })
+            await test.step("Редактирование верифицированной записи о трудовой деятельности",async () => {
+                await workActivity.editWorkActivity(WorkActivityStates.verified);
+                await expect(workActivity.reverificationRequiredIcon).toBeVisible();
             })
         })
 })
