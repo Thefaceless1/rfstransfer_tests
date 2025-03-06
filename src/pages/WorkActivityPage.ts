@@ -27,17 +27,17 @@ export class WorkActivityPage extends CreateWorkActivityPage {
      */
     private readonly position: Locator = this.page.locator("//div[contains(@class,'position__dropdown-indicator')]")
     /**
-     * кнопка "Зарегистрировать без верификации"
+     * Кнопка "Зарегистрировать"
      */
-    private readonly registerWithoutVerifyButton: Locator = this.page.locator("//button[text()='Зарегистрировать без верификации' and not(@disabled)]")
+    private readonly registerButton: Locator = this.page.locator("//button[text()='Зарегистрировать' and not(@disabled)]")
+    /**
+     * Чекбокс "Зарегистрировать с верификацией"
+     */
+    private readonly registerWithVerificationCheckBox: Locator = this.page.locator("//input[@name='isVerifyMode']")
     /**
      * Значения выпадающего списка поля "Должность"
      */
     private readonly positionDropDownValues: Locator = this.page.locator("//div[contains(@class,'position__option')]")
-    /**
-     * Кнопка "Верифицировать"
-     */
-    private readonly verifyButton: Locator = this.page.locator("//button[text()='Верифицировать']")
     /**
      * Иконка верифицированная трудовой деятельности
      */
@@ -56,12 +56,13 @@ export class WorkActivityPage extends CreateWorkActivityPage {
         await this.positionDropDownValues.first().click();
         await this.addContractDocuments(true);
         await this.note.fill(InputData.randomWord);
-        await this.registerWithoutVerifyButton.click();
+        await this.registerButton.click();
     }
     /**
      * Верификация трудовой деятельности
      */
     public async verifyWorkActivity(): Promise<void> {
-        await this.verifyButton.click();
+        await this.registerWithVerificationCheckBox.check();
+        await this.saveButton.click();
     }
 }
