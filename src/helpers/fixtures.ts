@@ -90,7 +90,7 @@ export const test = base.extend<Fixtures>({
     earlyFinishRent: async ({page},use,testInfo)=> {
         await logService.clearLogFile();
         const transferRentEarlyFinish = new InstructionPage(page);
-        const isEarlyFinishWithNewContract: boolean = testInfo.title.includes("новый ТД");
+        const isEarlyFinishWithNewContract: boolean = Boolean(testInfo.tags.find(tag => tag == '@earlyFinishWithNewContract'));
         await transferRentEarlyFinish.deleteTestUserData();
         await transferRentEarlyFinish.authorization();
         await transferRentEarlyFinish.registerPreliminaryInstruction({
@@ -119,8 +119,10 @@ export const test = base.extend<Fixtures>({
     registry: async ({page},use,testInfo) => {
         await logService.clearLogFile();
         const registry = new RegistriesPage(page);
+        const isEmployeeRegistry: boolean = Boolean(testInfo.tags.find(tag => tag == '@employeeRegistry'));
         await registry.deleteTestUserData();
         await registry.authorization();
+        if (isEmployeeRegistry) await registry.registerPreliminaryWorkActivity();
         await use(registry);
         await registry.deleteTestUserData();
         await testInfo.attach('Log File', {path: logService.logsFilePath});

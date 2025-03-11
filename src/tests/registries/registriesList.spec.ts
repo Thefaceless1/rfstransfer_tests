@@ -3,6 +3,7 @@ import Process from "process";
 import {InputData} from "../../helpers/InputData";
 import config from "../../../playwright.config";
 import {RegistriesValues} from "../../helpers/enums/RegistriesValues";
+import {expect} from "@playwright/test";
 
 test.describe("Реестры",() => {
     test(`Список инструкций. Версия модуля: ${Process.env.APP_VERSION}`,
@@ -69,6 +70,27 @@ test.describe("Реестры",() => {
             );
             await test.step("Выгрузка реестра отправки сведений в ФИФА в excel", async () => {
                 await registry.exportRegistryToExcel(RegistriesValues.fifaSendingRegistry);
+            })
+        })
+    test(`Реестр сотрудников. Версия модуля: ${Process.env.APP_VERSION}`,
+        {tag: "@employeeRegistry"},
+        async ({registry}) => {
+            test.info().annotations.push
+            (
+                {type: "Дата и время запуска",description: InputData.testAnnotationDate},
+                {type: "Версия модуля",description: `${Process.env.APP_VERSION}`},
+                {type: "Адрес сервера",description: `${config.use?.baseURL}`}
+            );
+            await test.step("Выгрузка реестра сотрудников в excel", async () => {
+                await registry.exportRegistryToExcel(RegistriesValues.employeeRegistry);
+            })
+            await test.step("Массовая верификация трудовой деятельности", async () => {
+                await registry.massVerifyWorkActivity();
+                await expect(registry.verifiedRecord).toBeVisible();
+            })
+            await test.step("Массовое завершение трудовой деятельности", async () => {
+                await registry.massEndWorkActivity();
+                await expect(registry.completedRecord).toBeVisible();
             })
         })
 })

@@ -170,10 +170,6 @@ export class InstructionPage extends CreateInstructionPage {
      */
     private readonly reasonValues: Locator = this.page.locator("//*[contains(@class,'reason__option')]")
     /**
-     * Кнопка "Отправить"
-     */
-    private readonly sendButton: Locator = this.page.locator("//button[not(@disabled)]//span[text()='Отправить']")
-    /**
      * Поле "Причина отмены"
      */
     private readonly cancelReason: Locator = this.page.locator("//div[@class='flex justify-between'][.//div[text()='Причина отмены']]//following-sibling::div//input")

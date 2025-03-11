@@ -27,9 +27,21 @@ export class BasePage extends PlaywrightDevPage {
      */
     protected readonly submitButton: Locator = this.page.locator("//button[text()='Подтвердить']")
     /**
+     * Поле "Дата окончания регистрации"
+     */
+    protected readonly regEndDate: Locator = this.page.locator("//input[@name='endDate']")
+    /**
+     * Кнопка "Отправить"
+     */
+    protected readonly sendButton: Locator = this.page.locator("//button[not(@disabled)]//span[text()='Отправить']")
+    /**
      * Кнопка "Отменить"
      */
-    protected readonly cancelButton: Locator = this.page.locator("//span[text()='Отменить']")
+    protected readonly cancelButton: Locator = this.page.locator("//*[text()='Отменить']")
+    /**
+     * Кнопка "Удалить"
+     */
+    protected readonly deleteButton: Locator = this.page.locator("//button[text()='Удалить']")
     /**
      * Заголовок "Управление контрактами"
      */

@@ -3,7 +3,7 @@ import config from "../../playwright.config";
 import {CreateInstructionPayloadType} from "../helpers/types/CreateInstructionPayloadType";
 import {InputData} from "../helpers/InputData";
 import * as fs from "fs";
-import {UploadFileResponseType} from "../helpers/types/UploadFileResponseType";
+import {ServerResponseType} from "../helpers/types/ServerResponseType";
 import {AddContractPayloadType} from "../helpers/types/AddContractPayloadType";
 import {ChangeStatePayloadType} from "../helpers/types/ChangeStatePayloadType";
 import {InstructionStateIds} from "../helpers/enums/InstructionStateIds";
@@ -14,6 +14,11 @@ import {CreateInstructionParamsType} from "../helpers/types/CreateInstructionPar
 import {AddContractParamsType} from "../helpers/types/AddContractParamsType";
 import {RegInstructionParamsType} from "../helpers/types/RegInstructionParamsType";
 import {GetInstructionResponseType} from "../helpers/types/GetInstructionResponseType";
+import {AddWorkActivityParamsType} from "../helpers/types/AddWorkActivityParamsType";
+import {AddWorkActivityPayloadType} from "../helpers/types/AddWorkActivityPayloadType";
+import {RegWorkActivityParamsType} from "../helpers/types/RegWorkActivityParamsType";
+import {RegWorkActivityPayloadType} from "../helpers/types/RegWorkActivityPayloadType";
+import {PositionDataType} from "../helpers/types/PositionDataType";
 
 export class ApiService {
     private readonly xCsrfToken: string
@@ -31,6 +36,14 @@ export class ApiService {
      */
     private readonly upLoadFileApi: string = "api/rest/uploadFile"
     /**
+     * Api добавления трудовой деятельности
+     */
+    private addEmployeeContract: string = "api/rest/employees/contracts"
+    /**
+     * Api получения должностей
+     */
+    private getPositionsApi: string = "api/rest/positions"
+    /**
      * Api добавления ТД,ДС
      */
     private addContractApi = (instructionId: number): string => `/api/rest/instructions/${instructionId}/contracts`
@@ -42,6 +55,10 @@ export class ApiService {
      * Api добавления ТК
      */
     private addTransferApi = (instructionId: number): string => `/api/rest/instructions/${instructionId}/transfers`
+    /**
+     * Api регистрации трудовой деятельности
+     */
+    private registerEmployeeContractApi = (contractId: number): string => `/api/rest/employees/contracts/${contractId}`
     /**
      * Запись данных в хедеры
      */
@@ -96,13 +113,13 @@ export class ApiService {
             {
                 headers: this.headers(this.xCsrfToken, this.jSessionId),
                 data: payload
-            })
+            });
         if (!response.ok()) throw new Error(`Ошибка при api добавлении ТД: ${await response.text()}`);
     }
     /**
      * Загрузка файла
      */
-    private async uploadFile(page: Page): Promise<UploadFileResponseType> {
+    private async uploadFile(page: Page): Promise<ServerResponseType> {
         const url: string = config.use?.baseURL + this.upLoadFileApi;
         const pdfFilePath: string = String(InputData.getTestFiles("pdf"));
         const fileBuffer: Buffer = await fs.promises.readFile(pdfFilePath);
@@ -116,7 +133,7 @@ export class ApiService {
                     buffer: fileBuffer,
                 }
             }
-        })
+        });
         if (!response.ok()) throw new Error(`Ошибка при api загрузке файла: ${await response.text()}`);
         return response.json();
     }
@@ -144,9 +161,12 @@ export class ApiService {
                 headers: this.headers(this.xCsrfToken, this.jSessionId),
                 data: payload
             }
-        )
+        );
         if (!response.ok()) throw new Error(`Ошибка при api регистрации инструкции: ${await response.text()}`);
     }
+    /**
+     * Добавление трансфера
+     */
     public async addTransfer(params: AddTransferParamsType): Promise<string> {
         const url: string = config.use?.baseURL + this.addTransferApi(params.instructionId);
         const storageId: string = await this.uploadFile(params.page).then(response => response.data);
@@ -175,8 +195,71 @@ export class ApiService {
                 headers: this.headers(this.xCsrfToken, this.jSessionId),
                 data: payload
             }
-        )
+        );
         if (!response.ok()) throw new Error(`Ошибка при api добавлении ТК: ${await response.text()}`);
         return contractStopDate;
+    }
+    /**
+     * Добавление трудовой деятельности
+     */
+    public async addWorkActivity(params: AddWorkActivityParamsType): Promise<ServerResponseType> {
+        const url: string = config.use?.baseURL + this.addEmployeeContract;
+        const payload: AddWorkActivityPayloadType = {
+            orgId: params.orgId,
+            personId: params.personId
+        }
+        const response: APIResponse = await params.page.request.post(
+            url,
+            {
+                headers: this.headers(this.xCsrfToken, this.jSessionId),
+                data: payload
+            }
+        );
+        if (!response.ok()) throw new Error(`Ошибка при api добавлении трудовой деятельности: ${await response.text()}`);
+        return response.json();
+    }
+    /**
+     * Регистрация трудовой деятельности
+     */
+    public async registerWorkActivity(params: RegWorkActivityParamsType): Promise<void> {
+        const positionsData: PositionDataType[] = await this.getPositions(params.page);
+        const url: string = config.use?.baseURL + this.registerEmployeeContractApi(params.workActivityId);
+        const beginDate: string = InputData.isoFormatDate(InputData.futureDate(-30,InputData.currentDate));
+        const endDate: string = InputData.isoFormatDate(InputData.futureDate(30,InputData.currentDate));
+        const payload: RegWorkActivityPayloadType = {
+            beginDate: beginDate,
+            endDate: endDate,
+            files: [],
+            note: "",
+            positionId: positionsData[0].id
+        }
+        const response: APIResponse = await params.page.request.put(
+            url,
+            {
+                headers: this.headers(this.xCsrfToken, this.jSessionId),
+                data: payload
+            }
+        );
+        if (!response.ok()) throw new Error(`Ошибка при api регистрации трудовой деятельности: ${await response.text()}`);
+    }
+    /**
+     * Получение должностей
+     */
+    private async getPositions(page: Page): Promise<PositionDataType[]> {
+        const url: string = config.use?.baseURL + this.getPositionsApi;
+        const params: { [key: string]: string | number | boolean; } | URLSearchParams | string = {
+            'searchText': '',
+            'withSoccerPlayer': true
+        }
+        const response: APIResponse = await page.request.get(
+            url,
+            {
+                headers: this.headers(this.xCsrfToken, this.jSessionId),
+                params: params
+            }
+        );
+        if (!response.ok()) throw new Error(`Ошибка при api получении должностей: ${await response.text()}`);
+        const responseData = await response.json();
+        return responseData.data;
     }
 }

@@ -6,7 +6,7 @@ import {expect} from "@playwright/test";
 import 'dotenv/config'
 import {WorkActivityStates} from "../../helpers/enums/WorkActivityStates";
 
-test.describe.only("Трудовая деятельность сотрудников",() => {
+test.describe("Трудовая деятельность сотрудников",() => {
     test(`Версия модуля: ${Process.env.APP_VERSION}`,
         async ({workActivity}) => {
             test.info().annotations.push
@@ -34,6 +34,10 @@ test.describe.only("Трудовая деятельность сотрудник
             await test.step("Редактирование верифицированной записи о трудовой деятельности",async () => {
                 await workActivity.editWorkActivity(WorkActivityStates.verified);
                 await expect(workActivity.reverificationRequiredIcon).toBeVisible();
+            })
+            await test.step("Удаление записи о трудовой деятельности",async () => {
+                await workActivity.deleteWorkActivity();
+                await expect(workActivity.workActivityDeletedMessage).toBeVisible({timeout: 10000});
             })
         })
 })

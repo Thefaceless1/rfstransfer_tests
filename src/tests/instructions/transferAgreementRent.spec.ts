@@ -391,6 +391,7 @@ test.describe("Инструкция с типом 'Переход на врем�
             })
         })
     test(`Досрочное завершение(новый ТД). Версия модуля: ${Process.env.APP_VERSION}`,
+        {tag: "@earlyFinishWithNewContract"},
         async ({earlyFinishRent}) => {
             test.info().annotations.push
             (

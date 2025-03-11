@@ -4,6 +4,10 @@ import {RegistriesValues} from "../helpers/enums/RegistriesValues";
 import {Elements} from "../framework/elements/Elements";
 import path from "path";
 import xlsx from 'xlsx';
+import {ApiService} from "../api/ApiService";
+import {ServerResponseType} from "../helpers/types/ServerResponseType";
+import {InputData} from "../helpers/InputData";
+import {DateInput} from "../framework/elements/DateInput";
 
 export class RegistriesPage extends MainPage {
     constructor(page: Page) {
@@ -29,6 +33,10 @@ export class RegistriesPage extends MainPage {
      * Кнопка "Назначить на себя"
      */
     private readonly nominateYourselfButton: Locator = this.page.locator("//button[text()='Назначить на себя']")
+    /**
+     * Кнопка "Завершить регистрацию"
+     */
+    private readonly endRegisterButton: Locator = this.page.locator("//button[text()='Завершить регистрацию']")
     /**
      * Кнопка "Назначить"
      */
@@ -66,9 +74,41 @@ export class RegistriesPage extends MainPage {
      */
     private readonly nominationCheckbox: Locator = this.page.locator("//div[@ref='eCheckbox']//input[@ref='eInput']")
     /**
+     * Чекбокс для записи таблицы
+     */
+    private readonly tableRecordCheckbox: Locator = this.page.locator("//div[@ref='eCheckbox']//input[@ref='eInput']")
+    /**
+     * Кнопка "Верифицировать"
+     */
+    private readonly verifyButton: Locator = this.page.locator("//button[text()='Верифицировать']")
+    /**
+     * Кнопка "Завершить"
+     */
+    private readonly endButton: Locator = this.page.locator("//button[text()='Завершить']")
+    /**
+     * Значение "Верифицирована" столбца "Верификация" в строке таблицы
+     */
+    public readonly verifiedRecord: Locator = this.page.locator("//span[@class='ag-cell-value' and text()='Верифицированная']")
+    /**
+     * Значение "Завершенная" столбца "Статус регистрации" в строке таблицы
+     */
+    public readonly completedRecord: Locator = this.page.locator("//span[@class='ag-cell-value']//div[text()='Завершенная']")
+    /**
+     * Поле для поиска значений в фильтре
+     */
+    private readonly filterSearchField: Locator = this.page.locator("//input[@class='selection__input']")
+    /**
+     * Чекбокс найденных значений в фильтре
+     */
+    private readonly filterValuesCheckbox: Locator = this.page.locator("//input[contains(@class,'Checkbox-Input')]")
+    /**
      * Количество отображаемых, а также общее количество записей в таблице реестра
      */
     private readonly paginationRecordsInfo: Locator = this.page.locator("//li[contains(@class,'ant-pagination-total-text')]//div")
+    /**
+     * Кнопка фильтра в поле "Физическое лицо"
+     */
+    private readonly personFilterButton: Locator = this.page.locator("//span[text()='Физическое лицо']//..//preceding-sibling::*//span[contains(@class,'IconFunnel')]")
     /**
      * Кнопка выгрузки таблицы в excel
      */
@@ -191,5 +231,54 @@ export class RegistriesPage extends MainPage {
         const regExpData = regExp.exec(personValue);
         if (!regExpData) throw new Error("Отсутствует значение после применения рег. выражения к значению пользователя");
         return regExpData[0];
+    }
+    /**
+     * Создание и регистрация трудовой деятельности через вызов api
+     */
+    public async registerPreliminaryWorkActivity(): Promise<void> {
+        const xCsrfToken: string = await this.pageCookie("XSRF-TOKEN");
+        const jSessionId: string = await this.pageCookie("JSESSIONID");
+        const apiService = new ApiService(xCsrfToken,jSessionId);
+        const response: ServerResponseType = await apiService.addWorkActivity({
+            page: this.page,
+            orgId: this.clubId,
+            personId: this.personId
+        });
+        const workActivityId: number = Number(response.data);
+        await apiService.registerWorkActivity({
+            page: this.page,
+            workActivityId: workActivityId
+        });
+    }
+    /**
+     * Массовая верификация трудовой деятельности
+     */
+    public async massVerifyWorkActivity(): Promise<void> {
+        await this.setPersonFilter();
+        await this.tableRecordCheckbox.click();
+        await this.verifyButton.click();
+        await Elements.waitForVisible(this.cancelButton);
+        await this.verifyButton.last().click();
+    }
+    /**
+     * Массовое завершение трудовой деятельности
+     */
+    public async massEndWorkActivity(): Promise<void> {
+        await this.endRegisterButton.click();
+        const endDate: string = InputData.futureDate(-1,InputData.currentDate);
+        await DateInput.fillDateInput(this.regEndDate,endDate);
+        await this.sendButton.click();
+        await this.endButton.click();
+    }
+    /**
+     * Установка фильтра в поле "Физическое лицо"
+     */
+    private async setPersonFilter(): Promise<void> {
+        await this.personFilterButton.click();
+        await this.filterSearchField.fill(this.person);
+        await this.filterValuesCheckbox.click();
+        await this.acceptButton.click();
+        const expectedFilteredRecords: number = 1;
+        await expect(this.tableRecordCheckbox).toHaveCount(expectedFilteredRecords);
     }
 }

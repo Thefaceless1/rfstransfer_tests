@@ -3,5 +3,6 @@ export enum RegistriesValues {
     contractsRegistry = "Реестр трудовых договоров",
     paymentsRegistry = "Реестр платежей",
     transferRegistry = "Реестр трансферов",
-    fifaSendingRegistry = "Реестр отправки сведений в FIFA"
+    fifaSendingRegistry = "Реестр отправки сведений в FIFA",
+    employeeRegistry = "Реестр сотрудников"
 }

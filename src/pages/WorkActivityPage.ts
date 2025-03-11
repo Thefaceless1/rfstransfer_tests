@@ -3,6 +3,7 @@ import {CreateWorkActivityPage} from "./CreateWorkActivityPage";
 import {InputData} from "../helpers/InputData";
 import {DateInput} from "../framework/elements/DateInput";
 import {WorkActivityStates} from "../helpers/enums/WorkActivityStates";
+import {Elements} from "../framework/elements/Elements";
 
 export class WorkActivityPage extends CreateWorkActivityPage {
     private readonly regBeginDateValue: string = InputData.currentDate
@@ -19,10 +20,6 @@ export class WorkActivityPage extends CreateWorkActivityPage {
      * Поле "Дата начала регистрации"
      */
     private readonly regBeginDate: Locator = this.page.locator("//input[@name='beginDate']")
-    /**
-     * Поле "Дата окончания регистрации"
-     */
-    private readonly regEndDate: Locator = this.page.locator("//input[@name='endDate']")
     /**
      * Поле "Должность"
      */
@@ -51,6 +48,10 @@ export class WorkActivityPage extends CreateWorkActivityPage {
      * Сообщение "Запись о трудовой деятельности зарегистрирована"
      */
     public readonly workActivityRegisteredMessage: Locator = this.page.locator("//div[text()='Запись о трудовой деятельности зарегистрирована']")
+    /**
+     * Сообщение "Запись о трудовой деятельности удалена"
+     */
+    public readonly workActivityDeletedMessage: Locator = this.page.locator("//div[text()='Запись о трудовой деятельности удалена']")
     /**
      * Сообщение "Данные о регистрации сохранены"
      */
@@ -88,5 +89,13 @@ export class WorkActivityPage extends CreateWorkActivityPage {
                 await DateInput.fillDateInput(this.regEndDate,newRegEndDateValue);
         }
         await this.saveButton.click();
+    }
+    /**
+     * Удаление трудовой деятельности
+     */
+    public async deleteWorkActivity(): Promise<void> {
+        await this.deleteButton.click();
+        await Elements.waitForVisible(this.cancelButton);
+        await this.deleteButton.last().click();
     }
 }
